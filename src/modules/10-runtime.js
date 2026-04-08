@@ -18,11 +18,17 @@
     OFFLINE_CATCHUP_MAX: 7200000,
     REVIVE_HP: 30,
     REVIVE_HUNGER: 50,
-    DAILY_FEED_TARGET: 5,
-    DAILY_ONLINE_TARGET_MS: 15 * 60 * 1000,
-    DAILY_REWARD_COINS: 50,
-    DAILY_REWARD_XP: 40,
+    HOURLY_FEED_TARGET: 2,
+    HOURLY_ONLINE_TARGET_MS: 5 * 60 * 1000,
+    HOURLY_PET_TARGET: 20,
+    HOURLY_REWARD_COINS: 20,
+    HOURLY_REWARD_XP: 15,
   };
+
+  runtime.CONFIG.DAILY_FEED_TARGET = runtime.CONFIG.HOURLY_FEED_TARGET;
+  runtime.CONFIG.DAILY_ONLINE_TARGET_MS = runtime.CONFIG.HOURLY_ONLINE_TARGET_MS;
+  runtime.CONFIG.DAILY_REWARD_COINS = runtime.CONFIG.HOURLY_REWARD_COINS;
+  runtime.CONFIG.DAILY_REWARD_XP = runtime.CONFIG.HOURLY_REWARD_XP;
 
   runtime.FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
   runtime.FIREBASE_TIMEOUT = 10000;
@@ -70,30 +76,49 @@
     return `${y}-${m}-${day}`;
   };
 
-  runtime.makeDailyQuest = function makeDailyQuest() {
+  runtime.getHourKey = function getHourKey(ts = Date.now()) {
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    return `${y}-${m}-${day}-${h}`;
+  };
+
+  runtime.makeHourlyQuest = function makeHourlyQuest() {
     return {
-      dayKey: runtime.getDayKey(),
+      hourKey: runtime.getHourKey(),
       feedProgress: 0,
       onlineProgressMs: 0,
+      petProgress: 0,
       claimed: false,
     };
   };
 
+  runtime.makeDailyQuest = function makeDailyQuest() {
+    return runtime.makeHourlyQuest();
+  };
+
   runtime.normalizeDailyQuest = function normalizeDailyQuest(raw) {
-    if (!raw || typeof raw !== 'object') return runtime.makeDailyQuest();
-    if (raw.dayKey !== runtime.getDayKey()) return runtime.makeDailyQuest();
+    if (!raw || typeof raw !== 'object') return runtime.makeHourlyQuest();
+    const hourKey = raw.hourKey || raw.dayKey;
+    if (hourKey !== runtime.getHourKey()) return runtime.makeHourlyQuest();
     return {
-      dayKey: raw.dayKey,
-      feedProgress: runtime.clamp(Number(raw.feedProgress) || 0, 0, runtime.CONFIG.DAILY_FEED_TARGET),
-      onlineProgressMs: runtime.clamp(Number(raw.onlineProgressMs) || 0, 0, runtime.CONFIG.DAILY_ONLINE_TARGET_MS),
+      hourKey,
+      feedProgress: runtime.clamp(Number(raw.feedProgress) || 0, 0, runtime.CONFIG.HOURLY_FEED_TARGET),
+      onlineProgressMs: runtime.clamp(Number(raw.onlineProgressMs) || 0, 0, runtime.CONFIG.HOURLY_ONLINE_TARGET_MS),
+      petProgress: runtime.clamp(Number(raw.petProgress) || 0, 0, runtime.CONFIG.HOURLY_PET_TARGET),
       claimed: Boolean(raw.claimed),
     };
   };
 
+  runtime.normalizeHourlyQuest = runtime.normalizeDailyQuest;
+
   runtime.isDailyQuestCompleted = function isDailyQuestCompleted() {
     if (!runtime.state || !runtime.state.dailyQuest) return false;
-    return runtime.state.dailyQuest.feedProgress >= runtime.CONFIG.DAILY_FEED_TARGET
-      && runtime.state.dailyQuest.onlineProgressMs >= runtime.CONFIG.DAILY_ONLINE_TARGET_MS;
+    return runtime.state.dailyQuest.feedProgress >= runtime.CONFIG.HOURLY_FEED_TARGET
+      && runtime.state.dailyQuest.onlineProgressMs >= runtime.CONFIG.HOURLY_ONLINE_TARGET_MS
+      && runtime.state.dailyQuest.petProgress >= runtime.CONFIG.HOURLY_PET_TARGET;
   };
 
   runtime.formatTime = function formatTime(ms) {

@@ -111,18 +111,18 @@
   R.updateDailyQuestProgress = function updateDailyQuestProgress() {
     if (!R.state || !R.state.dailyQuest) return;
 
-    const todayKey = R.getDayKey();
-    if (R.state.dailyQuest.dayKey !== todayKey) {
+    const hourKey = R.getHourKey();
+    if ((R.state.dailyQuest.hourKey || R.state.dailyQuest.dayKey) !== hourKey) {
       R.state.dailyQuest = R.makeDailyQuest();
       R.state.lastDailyTick = R.now();
-      if (R.showMessage) R.showMessage('📅 Nowa misja dzienna jest już dostępna!', 3500);
+      if (R.showMessage) R.showMessage('🕐 Nowa misja godzinowa jest już dostępna!', 3000);
     }
 
     const tickNow = R.now();
     const delta = Math.max(0, tickNow - R.state.lastDailyTick);
     R.state.lastDailyTick = tickNow;
     R.state.dailyQuest.onlineProgressMs = Math.min(
-      R.CONFIG.DAILY_ONLINE_TARGET_MS,
+      R.CONFIG.HOURLY_ONLINE_TARGET_MS,
       R.state.dailyQuest.onlineProgressMs + delta
     );
   };

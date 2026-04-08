@@ -17,18 +17,18 @@
   R.claimDailyReward = function claimDailyReward() {
     if (!R.state || !R.state.dailyQuest) return;
     if (R.state.dailyQuest.claimed) {
-      R.showMessage('✅ Nagroda dzienna już odebrana');
+      R.showMessage('✅ Nagroda godzinowa już odebrana');
       return;
     }
     if (!R.isDailyQuestCompleted()) {
-      R.showMessage('⏳ Dokończ misję dnia');
+      R.showMessage('⏳ Dokończ misję godzinową');
       return;
     }
 
     R.state.dailyQuest.claimed = true;
-    R.state.coins += R.CONFIG.DAILY_REWARD_COINS;
-    R.gainXP(R.CONFIG.DAILY_REWARD_XP);
-    R.showMessage(`🎁 +${R.CONFIG.DAILY_REWARD_COINS} monet, +${R.CONFIG.DAILY_REWARD_XP} XP`, 4000);
+    R.state.coins += R.CONFIG.HOURLY_REWARD_COINS;
+    R.gainXP(R.CONFIG.HOURLY_REWARD_XP);
+    R.showMessage(`🎁 +${R.CONFIG.HOURLY_REWARD_COINS} monet, +${R.CONFIG.HOURLY_REWARD_XP} XP`, 3500);
     R.persistState();
     R.updateUI();
   };
@@ -87,7 +87,7 @@
 
       R.state.hunger = R.clamp(R.state.hunger + food.hunger, 0, 100);
       R.state.foodCollected += 1;
-      R.state.dailyQuest.feedProgress = Math.min(R.CONFIG.DAILY_FEED_TARGET, R.state.dailyQuest.feedProgress + 1);
+      R.state.dailyQuest.feedProgress = Math.min(R.CONFIG.HOURLY_FEED_TARGET, R.state.dailyQuest.feedProgress + 1);
 
       const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;
       R.gainXP(Math.round(food.xp * xpBoost));
@@ -133,6 +133,7 @@
 
     const claimBtn = document.getElementById('__ts_claim_daily__');
     if (claimBtn) claimBtn.addEventListener('click', R.claimDailyReward);
+    if (R.bindPettingEvents) R.bindPettingEvents();
 
     const tabStatus = document.getElementById('__ts_tab_status__');
     const tabShop = document.getElementById('__ts_tab_shop__');

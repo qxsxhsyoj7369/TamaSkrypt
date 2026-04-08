@@ -50,6 +50,7 @@
       .__ts_xp_bar__ { background: linear-gradient(90deg,#43e97b,#38f9d7); }
       .__ts_daily_feed_bar__ { background: linear-gradient(90deg,#ffd166,#fca311); }
       .__ts_daily_online_bar__ { background: linear-gradient(90deg,#06d6a0,#118ab2); }
+      .__ts_hourly_pet_bar__ { background: linear-gradient(90deg,#ff7eb3,#ff4d6d); }
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
       #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
@@ -85,6 +86,9 @@
     const hpPct = R.clamp(state.hp, 0, 100);
     const dailyFeedPct = Math.round((state.dailyQuest.feedProgress / R.CONFIG.DAILY_FEED_TARGET) * 100);
     const dailyOnlinePct = Math.round((state.dailyQuest.onlineProgressMs / R.CONFIG.DAILY_ONLINE_TARGET_MS) * 100);
+    const hourlyPetPct = Math.round((state.dailyQuest.petProgress / R.CONFIG.HOURLY_PET_TARGET) * 100);
+    const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
+    const onlineTargetMinutes = Math.max(1, Math.round(R.CONFIG.HOURLY_ONLINE_TARGET_MS / 60000));
     const canClaimDaily = R.isDailyQuestCompleted() && !state.dailyQuest.claimed;
     const diagnostics = R.getLauncherDiagnostics();
 
@@ -97,15 +101,16 @@
       </div>
       <div id="__ts_body__">
         <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
-        <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${state.hp}/${R.CONFIG.HP_MAX}</span></div>
+        <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${R.CONFIG.HP_MAX}</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
         <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
         <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
         <div style="margin-top:8px;border:1px dashed #b8a6d9;border-radius:10px;padding:6px;background:#faf8ff;">
-          <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">📅 Misja dnia</div>
+          <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍽️ Karm</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_daily_feed_bar__" style="width:${R.clamp(dailyFeedPct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_daily_feed_val__">${state.dailyQuest.feedProgress}/${R.CONFIG.DAILY_FEED_TARGET}</span></div>
-          <div class="__ts_stat_row__"><span class="__ts_label__">⏱️ Graj</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_daily_online_bar__" style="width:${R.clamp(dailyOnlinePct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_daily_online_val__">${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/15m</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">⏱️ Graj</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_daily_online_bar__" style="width:${R.clamp(dailyOnlinePct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_daily_online_val__">${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/${onlineTargetMinutes}m</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">🤲 Głaszcz</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hourly_pet_bar__" style="width:${R.clamp(hourlyPetPct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_hourly_pet_val__">${state.dailyQuest.petProgress}/${R.CONFIG.HOURLY_PET_TARGET}</span></div>
           <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
         </div>
         <div id="__ts_tabs__">
@@ -177,11 +182,13 @@
     if (svgEl) svgEl.innerHTML = R.buildZelekSVG();
     if (zelekEl) zelekEl.title = mood.label;
 
-    R.updateBar('__ts_hp_bar__', state.hp, R.CONFIG.HP_MAX, `${state.hp}/${R.CONFIG.HP_MAX}`);
+    const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
+    R.updateBar('__ts_hp_bar__', state.hp, R.CONFIG.HP_MAX, `${hpDisplay}/${R.CONFIG.HP_MAX}`);
     R.updateBar('__ts_hunger_bar__', state.hunger, 100, `${state.hunger}/100`);
     R.updateBar('__ts_xp_bar__', state.xp, R.CONFIG.XP_PER_LEVEL, `${state.xp}/${R.CONFIG.XP_PER_LEVEL}`);
-    R.updateBar('__ts_daily_feed_bar__', state.dailyQuest.feedProgress, R.CONFIG.DAILY_FEED_TARGET, `${state.dailyQuest.feedProgress}/${R.CONFIG.DAILY_FEED_TARGET}`);
-    R.updateBar('__ts_daily_online_bar__', state.dailyQuest.onlineProgressMs, R.CONFIG.DAILY_ONLINE_TARGET_MS, `${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/15m`);
+    R.updateBar('__ts_daily_feed_bar__', state.dailyQuest.feedProgress, R.CONFIG.HOURLY_FEED_TARGET, `${state.dailyQuest.feedProgress}/${R.CONFIG.HOURLY_FEED_TARGET}`);
+    R.updateBar('__ts_daily_online_bar__', state.dailyQuest.onlineProgressMs, R.CONFIG.HOURLY_ONLINE_TARGET_MS, `${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/${Math.max(1, Math.round(R.CONFIG.HOURLY_ONLINE_TARGET_MS / 60000))}m`);
+    R.updateBar('__ts_hourly_pet_bar__', state.dailyQuest.petProgress, R.CONFIG.HOURLY_PET_TARGET, `${state.dailyQuest.petProgress}/${R.CONFIG.HOURLY_PET_TARGET}`);
 
     const coinsEl = document.getElementById('__ts_coins__');
     if (coinsEl) coinsEl.textContent = String(state.coins);
