@@ -7,7 +7,8 @@
 // @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @run-at       document-idle
+// @run-at       document-end
+// @noframes
 // ==/UserScript==
 
 (function () {
@@ -141,16 +142,28 @@
   const WIDGET_ID   = '__tamaskrypt_widget__';
   const FOOD_PREFIX = '__tamaskrypt_food_';
 
-  // Usuń widget jeśli już istnieje (np. SPA rerender)
-  const existing = document.getElementById(WIDGET_ID);
-  if (existing) existing.remove();
+  function mountWidget() {
+    // Usuń widget jeśli już istnieje (np. SPA rerender)
+    const existing = document.getElementById(WIDGET_ID);
+    if (existing) existing.remove();
 
-  // Główny kontener widgetu
-  const widget = document.createElement('div');
-  widget.id = WIDGET_ID;
-  widget.innerHTML = buildWidgetHTML();
-  applyWidgetStyles(widget);
-  document.body.appendChild(widget);
+    // Upewnij się że document.body istnieje
+    const target = document.body || document.documentElement;
+    if (!target) {
+      console.error('[TamaSkrypt] Brak document.body – spróbuję ponownie za 500ms');
+      setTimeout(mountWidget, 500);
+      return;
+    }
+
+    // Główny kontener widgetu
+    const widget = document.createElement('div');
+    widget.id = WIDGET_ID;
+    widget.innerHTML = buildWidgetHTML();
+    applyWidgetStyles();
+    target.appendChild(widget);
+
+    init(widget);
+  }
 
   function buildWidgetHTML() {
     const mood    = getMood();
@@ -241,7 +254,8 @@
   // ---------------------------------------------------------------------------
   // Style CSS
   // ---------------------------------------------------------------------------
-  function applyWidgetStyles(el) {
+  function applyWidgetStyles() {
+    if (document.getElementById('__tamaskrypt_styles__')) return; // nie duplikuj
     const style = document.createElement('style');
     style.id = '__tamaskrypt_styles__';
     style.textContent = `
@@ -253,7 +267,6 @@
         font-family: 'Segoe UI', Arial, sans-serif;
         font-size: 12px;
         user-select: none;
-        touch-action: none;
       }
       #__ts_header__ {
         background: linear-gradient(135deg,#667eea,#764ba2);
@@ -266,6 +279,7 @@
         font-weight: bold;
         cursor: grab;
         font-size: 13px;
+        touch-action: none;
       }
       #__ts_toggle__ { cursor: pointer; font-size: 10px; }
       #__ts_body__ {
@@ -383,7 +397,7 @@
         pointer-events: none;
       }
     `;
-    document.head.appendChild(style);
+    (document.head || document.documentElement || document.body).appendChild(style);
   }
 
   // ---------------------------------------------------------------------------
@@ -393,33 +407,35 @@
 
   let dragging = false;
   let dragOX = 0, dragOY = 0;
+  let _widgetEl = null; // ustawiane przez init()
 
   function onDragStart(e) {
+    if (!_widgetEl) return;
     if (e.target.id === '__ts_toggle__') return;
     dragging = true;
     const touch = e.touches ? e.touches[0] : e;
-    const rect = widget.getBoundingClientRect();
+    const rect = _widgetEl.getBoundingClientRect();
     dragOX = touch.clientX - rect.left;
     dragOY = touch.clientY - rect.top;
-    widget.style.cursor = 'grabbing';
+    _widgetEl.style.cursor = 'grabbing';
     e.preventDefault();
   }
   function onDragMove(e) {
-    if (!dragging) return;
+    if (!dragging || !_widgetEl) return;
     const touch = e.touches ? e.touches[0] : e;
     let x = touch.clientX - dragOX;
     let y = touch.clientY - dragOY;
-    x = Math.max(0, Math.min(window.innerWidth  - widget.offsetWidth,  x));
-    y = Math.max(0, Math.min(window.innerHeight - widget.offsetHeight, y));
-    widget.style.right  = 'auto';
-    widget.style.bottom = 'auto';
-    widget.style.left   = x + 'px';
-    widget.style.top    = y + 'px';
+    x = Math.max(0, Math.min(window.innerWidth  - _widgetEl.offsetWidth,  x));
+    y = Math.max(0, Math.min(window.innerHeight - _widgetEl.offsetHeight, y));
+    _widgetEl.style.right  = 'auto';
+    _widgetEl.style.bottom = 'auto';
+    _widgetEl.style.left   = x + 'px';
+    _widgetEl.style.top    = y + 'px';
     e.preventDefault();
   }
   function onDragEnd() {
     dragging = false;
-    widget.style.cursor = 'default';
+    if (_widgetEl) _widgetEl.style.cursor = 'default';
   }
 
   function bindDrag() {
@@ -565,12 +581,14 @@
     el.addEventListener('click',      () => eatFood(el, food));
     el.addEventListener('touchstart', () => eatFood(el, food), { passive: true });
 
-    document.body.appendChild(el);
+    const foodTarget = document.body || document.documentElement;
+    if (!foodTarget) return;
+    foodTarget.appendChild(el);
     activeFood = el;
 
     // Usuń po czasie jeśli nie zjedzone
     setTimeout(() => {
-      if (document.body.contains(el)) {
+      if (document.body && document.body.contains(el)) {
         el.remove();
         if (activeFood === el) activeFood = null;
       }
@@ -582,7 +600,7 @@
 
     el.classList.add('ts_food_poof');
     setTimeout(() => {
-      if (document.body.contains(el)) el.remove();
+      if (document.body && document.body.contains(el)) el.remove();
       if (activeFood === el) activeFood = null;
     }, 400);
 
@@ -625,14 +643,17 @@
   }
 
   function showLevelUp() {
-    const existing = document.getElementById('__ts_levelup__');
-    if (existing) existing.remove();
+    const existingLU = document.getElementById('__ts_levelup__');
+    if (existingLU) existingLU.remove();
 
     const el = document.createElement('div');
     el.id = '__ts_levelup__';
     el.innerHTML = `🎉 POZIOM ${state.level}! 🎉<br><small>Żelek urósł!</small>`;
-    document.body.appendChild(el);
-    setTimeout(() => { if (document.body.contains(el)) el.remove(); }, 3000);
+    const target = document.body || document.documentElement;
+    if (target) {
+      target.appendChild(el);
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -671,7 +692,8 @@
   // ---------------------------------------------------------------------------
   // Inicjalizacja
   // ---------------------------------------------------------------------------
-  function init() {
+  function init(widget) {
+    _widgetEl = widget;
     bindDrag();
     bindToggle();
     bindRevive();
@@ -702,6 +724,13 @@
     setTimeout(trySpawnFood, 5000);
   }
 
-  init();
+  // ---------------------------------------------------------------------------
+  // Start – z ochroną przed wyjątkami
+  // ---------------------------------------------------------------------------
+  try {
+    mountWidget();
+  } catch (err) {
+    console.error('[TamaSkrypt] Błąd inicjalizacji:', err);
+  }
 
 })();
