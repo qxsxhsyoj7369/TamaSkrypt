@@ -1,7 +1,7 @@
 {
-  "version": "3.1.4",
+  "version": "3.2.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix hash policy: walidacja hash jest advisory (nie blokuje startu modułów) przy strictHashes=false.",
+  "changelog": "Dodano ranking Firebase: zapis score do daily/all-time oraz panel TOP 10 w UI.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -83,6 +83,14 @@
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
       "version": "3.1.0",
       "hash": "be49bb796f190327c77411fc897e3cb66b6104e2bf2ce4d56ed0ab35e252c78a",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "ranking",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
+      "version": "3.2.0",
+      "hash": "1426ac2ceed566707a9180513615925e233fbe30ee38f7a125c7e25c0ee6722f",
       "execute": "raw",
       "required": true
     },

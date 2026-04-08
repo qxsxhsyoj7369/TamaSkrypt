@@ -44,9 +44,9 @@
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
       #__ts_msg__ { text-align:center; font-size:11px; color:#764ba2; min-height:14px; font-weight:bold; margin-top:4px; }
-      #__ts_tabs__ { display:grid; grid-template-columns: repeat(3,1fr); gap:4px; margin-top:8px; }
+      #__ts_tabs__ { display:grid; grid-template-columns: repeat(4,1fr); gap:4px; margin-top:8px; }
       #__ts_tabs__ button { border:none; border-radius:6px; padding:5px; font-size:10px; cursor:pointer; background:#ece8f8; color:#49327a; }
-      #__ts_panel_shop__, #__ts_panel_inventory__ { margin-top:6px; max-height:140px; overflow:auto; border:1px solid #d9d0ef; border-radius:8px; padding:5px; background:#faf8ff; }
+      #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ { margin-top:6px; max-height:160px; overflow:auto; border:1px solid #d9d0ef; border-radius:8px; padding:5px; background:#faf8ff; }
       .__ts_card__ { border:1px solid #e1daf3; border-radius:8px; padding:5px; margin-bottom:5px; font-size:10px; }
       .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; }
       .__ts_btn__ { border:none; border-radius:6px; padding:4px 6px; font-size:10px; cursor:pointer; background:#6b46c1; color:#fff; }
@@ -98,9 +98,11 @@
           <button id="__ts_tab_status__">Status</button>
           <button id="__ts_tab_shop__">Sklep</button>
           <button id="__ts_tab_inventory__">Ekwipunek</button>
+          <button id="__ts_tab_ranking__">Ranking</button>
         </div>
         <div id="__ts_panel_shop__" style="display:none"></div>
         <div id="__ts_panel_inventory__" style="display:none"></div>
+        <div id="__ts_panel_ranking__" style="display:none"></div>
         <div id="__ts_msg__"></div>
       </div>
     `;
@@ -179,6 +181,7 @@
 
     if (R.renderShopPanel) R.renderShopPanel();
     if (R.renderInventoryPanel) R.renderInventoryPanel();
+    if (R.renderRankingPanel) R.renderRankingPanel();
   };
 
   R.mountWidget = function mountWidget() {

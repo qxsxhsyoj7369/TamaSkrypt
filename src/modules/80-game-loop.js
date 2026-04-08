@@ -137,12 +137,15 @@
     const tabStatus = document.getElementById('__ts_tab_status__');
     const tabShop = document.getElementById('__ts_tab_shop__');
     const tabInventory = document.getElementById('__ts_tab_inventory__');
+    const tabRanking = document.getElementById('__ts_tab_ranking__');
     const panelShop = document.getElementById('__ts_panel_shop__');
     const panelInventory = document.getElementById('__ts_panel_inventory__');
+    const panelRanking = document.getElementById('__ts_panel_ranking__');
 
     function hidePanels() {
       if (panelShop) panelShop.style.display = 'none';
       if (panelInventory) panelInventory.style.display = 'none';
+      if (panelRanking) panelRanking.style.display = 'none';
     }
 
     if (tabStatus) tabStatus.addEventListener('click', () => hidePanels());
@@ -155,6 +158,12 @@
       hidePanels();
       if (panelInventory) panelInventory.style.display = 'block';
       if (R.renderInventoryPanel) R.renderInventoryPanel();
+    });
+    if (tabRanking) tabRanking.addEventListener('click', async () => {
+      hidePanels();
+      if (panelRanking) panelRanking.style.display = 'block';
+      if (R.fetchLeaderboard) await R.fetchLeaderboard(true);
+      if (R.renderRankingPanel) R.renderRankingPanel();
     });
 
     const header = document.getElementById('__ts_header__');
@@ -205,11 +214,26 @@
   R.initGame = function initGame() {
     R.bindUIEvents();
     R.updateUI();
+    if (R.fetchLeaderboard) {
+      R.fetchLeaderboard(true).then(() => {
+        if (R.renderRankingPanel) R.renderRankingPanel();
+      }).catch(() => {});
+    }
+    if (R.syncRanking) {
+      R.syncRanking('game-init').catch(() => {});
+    }
 
     setInterval(R.mainLoop, 10000);
     setInterval(R.hpRegenTick, R.CONFIG.HP_REGEN_INTERVAL);
     setInterval(R.trySpawnFood, R.CONFIG.FOOD_SPAWN_INTERVAL);
     setInterval(R.persistState, 30000);
+    if (R.fetchLeaderboard) {
+      setInterval(() => {
+        R.fetchLeaderboard(false).then(() => {
+          if (R.renderRankingPanel) R.renderRankingPanel();
+        }).catch(() => {});
+      }, 30000);
+    }
 
     setInterval(() => {
       const el = document.getElementById('__ts_online__');

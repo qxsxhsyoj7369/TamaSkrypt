@@ -92,6 +92,9 @@
     R.firebaseWrite(`users/${R.currentUid}`, payload, 'PATCH')
       .then(() => {
         R.state.lastSave = savedAt;
+        if (R.syncRanking) {
+          R.syncRanking('persist-state').catch(() => {});
+        }
       })
       .catch((error) => {
         console.warn('[Gelek] Sync error:', error.message);
