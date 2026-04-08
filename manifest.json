@@ -1,7 +1,7 @@
 {
-  "version": "3.17.0",
+  "version": "3.18.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Slime refresh: żywszy Gelek z 4 wariantami kolorów, oddechem, mruganiem i squish animacją.",
+  "changelog": "Gelek emotions: miny rysowane bezpośrednio na slime (happy/neutral/hungry/sad/dead), bez osobnej emotki pod spodem.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.17.0",
-      "hash": "370ceecdbde90355cbe595c52e1c69dd6ceb8e9605a04d7d62273441e3c0dabf",
+      "version": "3.18.0",
+      "hash": "fb114fb8a0f2d823a377e21e110a3bbcfb2299f9a03d78e269e89953803b620c",
       "execute": "raw",
       "required": true
     },

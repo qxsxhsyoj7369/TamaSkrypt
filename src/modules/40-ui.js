@@ -177,6 +177,8 @@
 
   R.buildZelekSVG = function buildZelekSVG() {
     const level = R.state && Number.isFinite(R.state.level) ? R.state.level : 1;
+    const mood = R.getMood ? R.getMood() : null;
+    const moodEmoji = mood && mood.emoji ? mood.emoji : '😐';
     const palettes = [
       {
         body: '#1abc9c',
@@ -209,9 +211,56 @@
     ];
     const paletteIndex = level >= 15 ? 3 : level >= 10 ? 2 : level >= 5 ? 1 : 0;
     const palette = palettes[paletteIndex];
+    let moodClass = '__ts_slime_mood_neutral__';
+    let eyesMarkup = `
+      <ellipse class="__ts_slime_eye_white__" cx="38" cy="70" rx="5.2" ry="5.4"/>
+      <ellipse class="__ts_slime_eye_white__" cx="89" cy="70" rx="5.2" ry="5.4"/>
+      <circle class="__ts_slime_eye_core__" cx="38.7" cy="70.5" r="2.1"/>
+      <circle class="__ts_slime_eye_core__" cx="89.7" cy="70.5" r="2.1"/>
+      <circle class="__ts_slime_eye_gloss__" cx="39.6" cy="69.5" r="0.78"/>
+      <circle class="__ts_slime_eye_gloss__" cx="90.6" cy="69.5" r="0.78"/>
+    `;
+    let browsMarkup = '';
+    let mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M54 80 L76.8 80"/>';
+
+    if (moodEmoji === '😄') {
+      moodClass = '__ts_slime_mood_happy__';
+      mouthMarkup = `
+        <path class="__ts_slime_mouth_fill__" d="M49.8,77.5c0,3.4,2.1,6.2,5.1,8.1c3.6-2.1,7.6-3.2,10.9-3.2c3.3,0,7.2,1.1,10.8,3.2c3-1.9,5.1-4.7,5.1-8.1H65.8H49.8z"/>
+        <path class="__ts_slime_tongue__" d="M53.2 84.5c6.9 3.4 13.8 3.4 20.7 0c-5.9-3.2-14.8-3.2-20.7 0z"/>
+      `;
+    } else if (moodEmoji === '😟') {
+      moodClass = '__ts_slime_mood_hungry__';
+      browsMarkup = `
+        <path class="__ts_slime_brow__" d="M31.6 63.7c4.6-2.4 8.1-2.8 12.6-1.2"/>
+        <path class="__ts_slime_brow__" d="M82.2 62.5c4.5-1.6 8-1.2 12.6 1.2"/>
+      `;
+      mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M54.8 82.5c3.2-3 6.4-4.2 10.9-4.2c4.5 0 7.6 1.2 10.8 4.2"/>';
+    } else if (moodEmoji === '😢') {
+      moodClass = '__ts_slime_mood_sad__';
+      browsMarkup = `
+        <path class="__ts_slime_brow__" d="M32.2 63.3c4.2-2 7.8-2.6 12-1.1"/>
+        <path class="__ts_slime_brow__" d="M82.9 62.2c4.1-1.5 7.8-0.9 12 1.1"/>
+      `;
+      eyesMarkup = `
+        <path class="__ts_slime_eye_line__" d="M33.3 71.1c2.5 1.7 5 1.7 7.5 0"/>
+        <path class="__ts_slime_eye_line__" d="M84.4 71.1c2.5 1.7 5 1.7 7.5 0"/>
+        <path class="__ts_slime_tear__" d="M92.6 74.8c1.2 1.9 1.5 3.2 0 4.7c-1.4-1.5-1.2-2.8 0-4.7z"/>
+      `;
+      mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M54.4 84.3c3.4-3.4 7-4.7 11.3-4.7c4.4 0 7.9 1.3 11.3 4.7"/>';
+    } else if (moodEmoji === '💀') {
+      moodClass = '__ts_slime_mood_dead__';
+      eyesMarkup = `
+        <path class="__ts_slime_dead_mark__" d="M33.8 66.5l7.8 7.8"/>
+        <path class="__ts_slime_dead_mark__" d="M41.6 66.5l-7.8 7.8"/>
+        <path class="__ts_slime_dead_mark__" d="M84.8 66.5l7.8 7.8"/>
+        <path class="__ts_slime_dead_mark__" d="M92.6 66.5l-7.8 7.8"/>
+      `;
+      mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M55.2 82.2h21.2"/>';
+    }
 
     return `
-      <div class="__ts_slime_stage__" aria-label="Gelek" style="--ts-slime-body:${palette.body};--ts-slime-rim:${palette.rim};--ts-slime-mouth:${palette.mouth};--ts-slime-tongue:${palette.tongue};--ts-slime-glow:${palette.glow};">
+      <div class="__ts_slime_stage__ ${moodClass}" aria-label="Gelek" style="--ts-slime-body:${palette.body};--ts-slime-rim:${palette.rim};--ts-slime-mouth:${palette.mouth};--ts-slime-tongue:${palette.tongue};--ts-slime-glow:${palette.glow};">
         <svg class="__ts_slime_svg__" viewBox="0 0 126.75 103.25" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <g class="__ts_slime_body__">
             <path d="M126.153,71.798c0,35.275-30.128,31.452-65.403,31.452S0.411,107.073,0.411,71.798S34,0.927,63.282,0.927C92,0.927,126.153,36.523,126.153,71.798z"/>
@@ -223,18 +272,13 @@
             <ellipse transform="matrix(0.5486 -0.8361 0.8361 0.5486 20.2905 77.5842)" cx="82" cy="20" rx="7.75" ry="13.75"/>
           </g>
           <g class="__ts_slime_eyes__">
-            <g>
-              <path d="M36.833,66.583c-3.359,0-6.083,2.724-6.083,6.083c0,3.359,2.724,6.083,6.083,6.083c3.36,0,6.083-2.724,6.083-6.083C42.917,69.307,40.193,66.583,36.833,66.583z M39.5,71.25c-0.874,0-1.583-0.709-1.583-1.583c0-0.875,0.709-1.583,1.583-1.583c0.875,0,1.583,0.709,1.583,1.583C41.083,70.541,40.375,71.25,39.5,71.25z"/>
-              <circle class="__ts_slime_pupil__" cx="39.5" cy="69.667" r="1.583"/>
-              <path d="M88.833,66.583c-3.359,0-6.083,2.724-6.083,6.083c0,3.359,2.724,6.083,6.083,6.083c3.36,0,6.083-2.724,6.083-6.083C94.917,69.307,92.193,66.583,88.833,66.583z M91.5,71.25c-0.874,0-1.583-0.709-1.583-1.583c0-0.875,0.709-1.583,1.583-1.583c0.875,0,1.583,0.709,1.583,1.583C93.083,70.541,92.375,71.25,91.5,71.25z"/>
-              <circle class="__ts_slime_pupil__" cx="91.5" cy="69.667" r="1.583"/>
-            </g>
+            ${eyesMarkup}
+          </g>
+          <g class="__ts_slime_brows__">
+            ${browsMarkup}
           </g>
           <g class="__ts_slime_mouth__">
-            <path d="M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z">
-              <animate attributeName="d" dur="3s" repeatCount="indefinite" values="M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z;M49.9,73c0,3.151,1.885,10.435,4.528,12c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-8.849,4.528-12H65.584H49.9z;M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z" />
-            </path>
-            <path d="M52.678,84.25c7.116,3.558,15.028,3.558,22.144,0C68.463,80.485,59.037,80.485,52.678,84.25C52.679,84.25,52.656,84.25,52.678,84.25z"/>
+            ${mouthMarkup}
           </g>
         </svg>
       </div>`;
@@ -373,17 +417,44 @@
         animation: __ts_slime_blink__ 3s infinite ease-in-out;
         transform-origin: 62.5px 72px;
       }
-      #__ts_body_svg__ .__ts_slime_eyes__ path {
+      #__ts_body_svg__ .__ts_slime_eye_white__ {
+        fill: #eff8ff;
+      }
+      #__ts_body_svg__ .__ts_slime_eye_core__ {
         fill: #17202a;
       }
-      #__ts_body_svg__ .__ts_slime_pupil__ {
+      #__ts_body_svg__ .__ts_slime_eye_gloss__ {
         fill: #ffffff;
       }
-      #__ts_body_svg__ .__ts_slime_mouth__ path:first-child {
+      #__ts_body_svg__ .__ts_slime_eye_line__,
+      #__ts_body_svg__ .__ts_slime_brow__,
+      #__ts_body_svg__ .__ts_slime_mouth_line__,
+      #__ts_body_svg__ .__ts_slime_dead_mark__ {
+        fill: none;
+        stroke: #18212b;
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #__ts_body_svg__ .__ts_slime_brow__ {
+        stroke-width: 1.9;
+      }
+      #__ts_body_svg__ .__ts_slime_tear__ {
+        fill: rgba(220, 241, 255, 0.9);
+        stroke: rgba(138, 192, 229, 0.8);
+        stroke-width: 0.5;
+      }
+      #__ts_body_svg__ .__ts_slime_mouth_fill__ {
         fill: var(--ts-slime-mouth);
       }
-      #__ts_body_svg__ .__ts_slime_mouth__ path:last-child {
+      #__ts_body_svg__ .__ts_slime_tongue__ {
         fill: var(--ts-slime-tongue);
+      }
+      #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_eyes__ {
+        animation: none;
+      }
+      #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_svg__ {
+        filter: saturate(0.6) brightness(0.92);
       }
       @keyframes __ts_slime_breathe__ {
         0% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
@@ -407,7 +478,6 @@
         90% { transform: scaleY(1); }
         100% { transform: scaleY(1); }
       }
-      #__ts_mood__ { font-size:19px; margin-top:-2px; }
 
       #__ts_levelup_inline__ {
         margin: 0;
@@ -734,7 +804,7 @@
         </div>
         <div id="__ts_body__">
           <div id="__ts_levelup_inline__"></div>
-          <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
+          <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
@@ -812,12 +882,10 @@
     const state = R.state;
     const mood = R.getMood();
 
-    const moodEl = R.getElById('__ts_mood__');
     const onlineEl = R.getElById('__ts_online__');
     const svgEl = R.getElById('__ts_body_svg__');
     const zelekEl = R.getElById('__ts_zelek__');
 
-    if (moodEl) moodEl.textContent = mood.emoji;
     if (onlineEl) onlineEl.textContent = R.formatTime(state.totalOnline + (R.now() - state.sessionStart));
     if (svgEl) svgEl.innerHTML = R.buildZelekSVG();
     if (zelekEl) zelekEl.title = mood.label;
