@@ -32,6 +32,17 @@
     return '__ts_goal_badge_common__';
   };
 
+  R.renderEvolutionSummary = function renderEvolutionSummary() {
+    const evolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
+    const bonuses = R.getEvolutionBonuses && R.state ? R.getEvolutionBonuses(R.state.level) : null;
+    if (!evolution || !bonuses) return '<span>Forma: podstawowa</span>';
+
+    const hpBonus = Math.round(bonuses.hpMax || 0);
+    const foodBonusPct = Math.round(((bonuses.foodXpMultiplier || 1) - 1) * 100);
+    const drainReductionPct = Math.round((1 - (bonuses.hungerDrainMultiplier || 1)) * 100);
+    return `<span class="__ts_evo_badge__">${evolution.emoji || '🧬'} ${evolution.name}</span><span class="__ts_evo_meta__">+${hpBonus} HP • +${foodBonusPct}% XP z jedzenia • -${drainReductionPct}% głodu</span>`;
+  };
+
   R.renderHourlyGoalRows = function renderHourlyGoalRows() {
     const quest = R.state && R.state.dailyQuest ? R.state.dailyQuest : null;
     const goals = quest && Array.isArray(quest.goals) ? quest.goals : [];
@@ -59,8 +70,9 @@
   R.buildZelekSVG = function buildZelekSVG() {
     const state = R.state;
     const level = state ? state.level : 1;
+    const evolution = R.getEvolutionForLevel ? R.getEvolutionForLevel(level) : null;
     const colors = ['#FF6B9D', '#FF8E53', '#A8EB12', '#12C2E9', '#F64F59', '#C471ED'];
-    const color = colors[(level - 1) % colors.length];
+    const color = (evolution && evolution.color) || colors[(level - 1) % colors.length];
     return `
       <svg width="60" height="72" viewBox="0 0 60 72" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="30" cy="42" rx="22" ry="26" fill="${color}" opacity="0.9"/>
@@ -110,6 +122,9 @@
       .__ts_goal_badge_epic__ { background:#f3e8ff; color:#7e22ce; border-color:#d8b4fe; }
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
+      #__ts_evolution_line__ { margin-top:5px; display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:9px; color:#574085; }
+      .__ts_evo_badge__ { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:999px; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; font-weight:700; }
+      .__ts_evo_meta__ { color:#6f5f95; font-size:9px; text-align:right; }
       #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
       #__ts_diag_badge__ { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; letter-spacing:.02em; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; }
       #__ts_diag_mode__ { text-transform:uppercase; }
@@ -140,7 +155,8 @@
     const onlineMs = state.totalOnline + (R.now() - state.sessionStart);
     const xpPct = Math.round((state.xp / R.CONFIG.XP_PER_LEVEL) * 100);
     const hungerPct = R.clamp(state.hunger, 0, 100);
-    const hpPct = R.clamp(state.hp, 0, 100);
+    const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    const hpPct = R.clamp(Math.round((state.hp / Math.max(1, hpMax)) * 100), 0, 100);
     const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
     const canClaimDaily = R.isDailyQuestCompleted() && !state.dailyQuest.claimed;
     const diagnostics = R.getLauncherDiagnostics();
@@ -156,10 +172,11 @@
       <div id="__ts_body__">
         <div id="__ts_levelup_inline__"></div>
         <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
-        <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${R.CONFIG.HP_MAX}</span></div>
+        <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
         <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
+        <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
         <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
         <div style="margin-top:8px;border:1px dashed #b8a6d9;border-radius:10px;padding:6px;background:#faf8ff;">
           <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
@@ -241,9 +258,15 @@
     if (zelekEl) zelekEl.title = mood.label;
 
     const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
-    R.updateBar('__ts_hp_bar__', state.hp, R.CONFIG.HP_MAX, `${hpDisplay}/${R.CONFIG.HP_MAX}`);
+    const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    R.updateBar('__ts_hp_bar__', state.hp, hpMax, `${hpDisplay}/${hpMax}`);
     R.updateBar('__ts_hunger_bar__', state.hunger, 100, `${state.hunger}/100`);
     R.updateBar('__ts_xp_bar__', state.xp, R.CONFIG.XP_PER_LEVEL, `${state.xp}/${R.CONFIG.XP_PER_LEVEL}`);
+
+    const evolutionLine = document.getElementById('__ts_evolution_line__');
+    if (evolutionLine && R.renderEvolutionSummary) {
+      evolutionLine.innerHTML = R.renderEvolutionSummary();
+    }
 
     const goals = state.dailyQuest && Array.isArray(state.dailyQuest.goals) ? state.dailyQuest.goals : [];
     goals.forEach((goal) => {

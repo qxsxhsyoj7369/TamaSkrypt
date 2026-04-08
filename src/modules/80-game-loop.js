@@ -12,9 +12,15 @@
       R.incrementHourlyGoalProgress('gain_xp', gain);
     }
     while (R.state.xp >= R.CONFIG.XP_PER_LEVEL) {
+      const prevEvolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
       R.state.xp -= R.CONFIG.XP_PER_LEVEL;
       R.state.level += 1;
+      if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
       R.showLevelUp();
+      const nextEvolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
+      if (prevEvolution && nextEvolution && prevEvolution.id !== nextEvolution.id && R.showMessage) {
+        R.showMessage(`✨ Ewolucja! ${nextEvolution.emoji || '🧬'} ${nextEvolution.name}`, 3600);
+      }
     }
   };
 
@@ -50,7 +56,8 @@
     if (ticks < 1) return;
 
     const hungerMultiplier = R.getActiveEffect && R.getActiveEffect('slow_hunger') ? 0.5 : 1;
-    const hungerDrain = Math.max(1, Math.floor(ticks * R.CONFIG.HUNGER_DRAIN_RATE * hungerMultiplier));
+    const drainRate = R.getEffectiveHungerDrainRate ? R.getEffectiveHungerDrainRate() : R.CONFIG.HUNGER_DRAIN_RATE;
+    const hungerDrain = Math.max(1, Math.floor(ticks * drainRate * hungerMultiplier));
 
     R.state.lastHungerTick += ticks * R.CONFIG.HUNGER_DRAIN_INTERVAL;
     R.state.hunger = Math.max(0, R.state.hunger - hungerDrain);
@@ -69,8 +76,10 @@
   R.hpRegenTick = function hpRegenTick() {
     if (!R.state || !R.state.alive) return;
     const regenBoost = R.getActiveEffect && R.getActiveEffect('regen_boost') ? 2 : 1;
-    if (R.state.hunger > R.CONFIG.HP_REGEN_HUNGER_THRESHOLD && R.state.hp < R.CONFIG.HP_MAX) {
-      R.state.hp = Math.min(R.CONFIG.HP_MAX, R.state.hp + (R.CONFIG.HP_REGEN_AMOUNT * regenBoost));
+    const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    const hpRegen = R.getEffectiveHpRegenAmount ? R.getEffectiveHpRegenAmount() : R.CONFIG.HP_REGEN_AMOUNT;
+    if (R.state.hunger > R.CONFIG.HP_REGEN_HUNGER_THRESHOLD && R.state.hp < hpMax) {
+      R.state.hp = Math.min(hpMax, R.state.hp + (hpRegen * regenBoost));
       R.persistState();
       R.updateUI();
     }
@@ -102,8 +111,10 @@
       }
 
       const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;
-      R.gainXP(Math.round(food.xp * xpBoost));
-      R.showMessage(`${food.emoji} Mniam! +${food.hunger} sytości, +${food.xp} XP`);
+      const baseFoodXp = R.getEffectiveFoodXp ? R.getEffectiveFoodXp(food.xp) : food.xp;
+      const gainedXp = Math.round(baseFoodXp * xpBoost);
+      R.gainXP(gainedXp);
+      R.showMessage(`${food.emoji} Mniam! +${food.hunger} sytości, +${gainedXp} XP`);
       R.persistState();
       R.updateUI();
     };

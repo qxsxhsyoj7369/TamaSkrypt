@@ -227,6 +227,74 @@
     DEAD: { emoji: '💀', label: 'Martwy' },
   };
 
+  runtime.EVOLUTION_FORMS = [
+    {
+      id: 'jelly-seed',
+      name: 'Żelkowy Pąk',
+      emoji: '🟢',
+      minLevel: 1,
+      color: '#A8EB12',
+      bonuses: {
+        hpMax: 0,
+        regenMultiplier: 1,
+        foodXpMultiplier: 1,
+        hungerDrainMultiplier: 1,
+      },
+    },
+    {
+      id: 'jelly-spark',
+      name: 'Żelkowa Iskra',
+      emoji: '🟡',
+      minLevel: 5,
+      color: '#facc15',
+      bonuses: {
+        hpMax: 8,
+        regenMultiplier: 1.08,
+        foodXpMultiplier: 1.05,
+        hungerDrainMultiplier: 0.96,
+      },
+    },
+    {
+      id: 'jelly-bloom',
+      name: 'Żelkowy Kwiat',
+      emoji: '🟣',
+      minLevel: 10,
+      color: '#c084fc',
+      bonuses: {
+        hpMax: 16,
+        regenMultiplier: 1.15,
+        foodXpMultiplier: 1.1,
+        hungerDrainMultiplier: 0.9,
+      },
+    },
+    {
+      id: 'jelly-nova',
+      name: 'Żelkowa Nova',
+      emoji: '🔵',
+      minLevel: 15,
+      color: '#38bdf8',
+      bonuses: {
+        hpMax: 24,
+        regenMultiplier: 1.23,
+        foodXpMultiplier: 1.16,
+        hungerDrainMultiplier: 0.84,
+      },
+    },
+    {
+      id: 'jelly-legend',
+      name: 'Legendarny Gelek',
+      emoji: '🌈',
+      minLevel: 25,
+      color: '#fb7185',
+      bonuses: {
+        hpMax: 36,
+        regenMultiplier: 1.32,
+        foodXpMultiplier: 1.24,
+        hungerDrainMultiplier: 0.78,
+      },
+    },
+  ];
+
   runtime.ids = {
     WIDGET_ID: '__tamaskrypt_widget__',
     FOOD_PREFIX: '__tamaskrypt_food_',
@@ -242,6 +310,83 @@
   runtime.now = () => Date.now();
 
   runtime.clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  runtime.getEvolutionForLevel = function getEvolutionForLevel(level) {
+    const forms = Array.isArray(runtime.EVOLUTION_FORMS) ? runtime.EVOLUTION_FORMS : [];
+    const targetLevel = Math.max(1, Math.floor(Number(level) || 1));
+    let selected = forms[0] || null;
+
+    for (let index = 0; index < forms.length; index += 1) {
+      const form = forms[index];
+      if (!form) continue;
+      const minLevel = Math.max(1, Math.floor(Number(form.minLevel) || 1));
+      if (targetLevel >= minLevel) selected = form;
+    }
+
+    return selected || {
+      id: 'jelly-seed',
+      name: 'Żelkowy Pąk',
+      emoji: '🟢',
+      minLevel: 1,
+      color: '#A8EB12',
+      bonuses: { hpMax: 0, regenMultiplier: 1, foodXpMultiplier: 1, hungerDrainMultiplier: 1 },
+    };
+  };
+
+  runtime.getCurrentEvolution = function getCurrentEvolution() {
+    const level = runtime.state ? runtime.state.level : 1;
+    return runtime.getEvolutionForLevel(level);
+  };
+
+  runtime.getEvolutionBonuses = function getEvolutionBonuses(level) {
+    const evolution = runtime.getEvolutionForLevel(level);
+    const source = evolution && evolution.bonuses && typeof evolution.bonuses === 'object'
+      ? evolution.bonuses
+      : {};
+    return {
+      hpMax: Math.max(0, Number(source.hpMax) || 0),
+      regenMultiplier: Math.max(0.1, Number(source.regenMultiplier) || 1),
+      foodXpMultiplier: Math.max(0.1, Number(source.foodXpMultiplier) || 1),
+      hungerDrainMultiplier: Math.max(0.1, Number(source.hungerDrainMultiplier) || 1),
+    };
+  };
+
+  runtime.getEffectiveHpMaxForLevel = function getEffectiveHpMaxForLevel(level) {
+    const bonuses = runtime.getEvolutionBonuses(level);
+    return Math.max(1, Math.round((Number(runtime.CONFIG.HP_MAX) || 100) + bonuses.hpMax));
+  };
+
+  runtime.getEffectiveHpMax = function getEffectiveHpMax() {
+    const level = runtime.state ? runtime.state.level : 1;
+    return runtime.getEffectiveHpMaxForLevel(level);
+  };
+
+  runtime.getEffectiveHpRegenAmount = function getEffectiveHpRegenAmount() {
+    const level = runtime.state ? runtime.state.level : 1;
+    const bonuses = runtime.getEvolutionBonuses(level);
+    return Math.max(0.1, (Number(runtime.CONFIG.HP_REGEN_AMOUNT) || 0) * bonuses.regenMultiplier);
+  };
+
+  runtime.getEffectiveFoodXp = function getEffectiveFoodXp(baseXp) {
+    const level = runtime.state ? runtime.state.level : 1;
+    const bonuses = runtime.getEvolutionBonuses(level);
+    return Math.max(0, Math.round((Number(baseXp) || 0) * bonuses.foodXpMultiplier));
+  };
+
+  runtime.getEffectiveHungerDrainRate = function getEffectiveHungerDrainRate() {
+    const level = runtime.state ? runtime.state.level : 1;
+    const bonuses = runtime.getEvolutionBonuses(level);
+    return Math.max(0, (Number(runtime.CONFIG.HUNGER_DRAIN_RATE) || 0) * bonuses.hungerDrainMultiplier);
+  };
+
+  runtime.recalculateEvolutionStats = function recalculateEvolutionStats() {
+    if (!runtime.state) return;
+    const maxHp = runtime.getEffectiveHpMax();
+    runtime.state.hp = runtime.clamp(Number(runtime.state.hp) || 0, 0, maxHp);
+    const evo = runtime.getCurrentEvolution();
+    runtime.state.evolutionId = evo.id;
+    runtime.state.evolutionName = evo.name;
+  };
 
   runtime.getDayKey = function getDayKey(ts = Date.now()) {
     const d = new Date(ts);

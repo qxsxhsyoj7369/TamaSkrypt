@@ -60,7 +60,8 @@
 
     const previousHp = Number(R.state.hp) || 0;
     const increasedHp = Math.round((previousHp + 0.1) * 10) / 10;
-    R.state.hp = R.clamp(increasedHp, 0, R.CONFIG.HP_MAX);
+    const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    R.state.hp = R.clamp(increasedHp, 0, hpMax);
 
     if (typeof R.gainXP === 'function') {
       R.gainXP(1);

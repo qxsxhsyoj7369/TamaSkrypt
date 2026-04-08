@@ -1,7 +1,7 @@
 {
-  "version": "3.10.0",
+  "version": "3.11.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Dev/Admin: wsparcie ustawień gameplay per user w `progress.settings.gameplay` (spawn jedzenia, XP, hunger tick).",
+  "changelog": "Core gameplay: ewolucje Gelka co kilka leveli + bonusy statów (HP max, regen, XP z jedzenia, wolniejszy głód) i UI formy.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.10.0",
-      "hash": "a198e3810191d23d381ed76c7583c70d5509ec515eb8dca512caa09b19b9179d",
+      "version": "3.11.0",
+      "hash": "06e205df7ca68fa92506adeb5509095cb6693397e572bf85cff0947f036eb387",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.10.0",
-      "hash": "8248eeb09673ff416b672bf8e1d50591728bde7b9a20be808474031afce41e21",
+      "version": "3.11.0",
+      "hash": "7eff9c7ed81e6e6bb36f8a1c8716d15843c8bda32425df0e74a703cde2bd4519",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.9.0",
-      "hash": "d92b4b6e830dcce24870ac984d5734c7e2be9ea6eb88a3fbc1f9bb9b5374a5c9",
+      "version": "3.11.0",
+      "hash": "2c9d509e2d87d55b0dc2506e576cb920da3f5f9a25bbfc3c03470e485d5a6541",
       "execute": "raw",
       "required": true
     },
@@ -73,24 +73,24 @@
     {
       "name": "inventory",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/70-inventory.js",
-      "version": "3.1.0",
-      "hash": "a8a340ae4e02169e64789f994bddbf5732a803d38fdbdb60f40e10d2dd01317f",
+      "version": "3.11.0",
+      "hash": "ab3edde940ee833d754a1cf131d843ee447a4d643214e758aba6e7d0e0ffa58e",
       "execute": "raw",
       "required": true
     },
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.5.0",
-      "hash": "32b1c29a44a07d73c3b8f2d45a6b7ca287b592897aa7a966709402e05b1ea61b",
+      "version": "3.11.0",
+      "hash": "53e4be5d128ed69e9ca402a5591c0fed3603bdad01daf8b60c50b2a00184edaa",
       "execute": "raw",
       "required": true
     },
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.6.0",
-      "hash": "e6e5a3cb0b983576d3331c63cd809f52b33d3c98be7654898039286c0d2710ea",
+      "version": "3.11.0",
+      "hash": "c0f66eceea2e28140901ea12e34752d15144cf81df81638117de5065bce43a74",
       "execute": "raw",
       "required": true
     },

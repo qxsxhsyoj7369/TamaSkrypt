@@ -28,7 +28,7 @@
 
     R.state = {
       hunger: R.clamp(Number(pet?.hunger) || 100, 0, 100),
-      hp: R.clamp(Number(pet?.hp) || 100, 0, R.CONFIG.HP_MAX),
+      hp: R.clamp(Number(pet?.hp) || 100, 0, R.getEffectiveHpMaxForLevel ? R.getEffectiveHpMaxForLevel(pet?.level) : R.CONFIG.HP_MAX),
       level: Math.max(1, Number(pet?.level) || 1),
       xp: Math.max(0, Number(pet?.xp) || 0),
       coins: Math.max(0, Number(progress?.coins) || 0),
@@ -45,6 +45,10 @@
       lastDailyTick: R.now(),
       profileCreatedAt: Number(profile?.createdAt) || R.now(),
     };
+
+    if (R.recalculateEvolutionStats) {
+      R.recalculateEvolutionStats();
+    }
 
     const offlineMs = Math.min(R.now() - (R.state.lastSave || R.now()), R.CONFIG.OFFLINE_CATCHUP_MAX);
     const offlineMins = offlineMs / 60000;
@@ -69,6 +73,8 @@
     R.persistInFlight = true;
     const savedAt = R.now();
     const totalOnlineMs = R.state.totalOnline + (savedAt - R.state.sessionStart);
+    const effectiveHpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    const currentEvolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
 
     const payload = {
       profile: {
@@ -80,11 +86,13 @@
         level: R.state.level,
         xp: R.state.xp,
         hp: R.state.hp,
-        hpMax: R.CONFIG.HP_MAX,
+        hpMax: effectiveHpMax,
         hunger: R.state.hunger,
         hungerMax: 100,
         foodCollected: R.state.foodCollected,
         alive: R.state.alive,
+        evolutionId: currentEvolution ? currentEvolution.id : undefined,
+        evolutionName: currentEvolution ? currentEvolution.name : undefined,
         lastTickAt: R.state.lastHungerTick,
         updatedAt: savedAt,
       },

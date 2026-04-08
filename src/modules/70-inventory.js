@@ -18,12 +18,16 @@
 
     if (item.type === 'consume') {
       if (item.effect.hunger) R.state.hunger = R.clamp(R.state.hunger + item.effect.hunger, 0, 100);
-      if (item.effect.hp) R.state.hp = R.clamp(R.state.hp + item.effect.hp, 0, R.CONFIG.HP_MAX);
+      if (item.effect.hp) {
+        const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+        R.state.hp = R.clamp(R.state.hp + item.effect.hp, 0, hpMax);
+      }
       if (item.effect.xp) {
         R.state.xp += item.effect.xp;
         while (R.state.xp >= R.CONFIG.XP_PER_LEVEL) {
           R.state.xp -= R.CONFIG.XP_PER_LEVEL;
           R.state.level += 1;
+          if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
           R.showLevelUp();
         }
       }
