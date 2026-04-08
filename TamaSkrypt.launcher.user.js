@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.0.5
+// @version      3.1.0
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @connect      api.github.com
 // @connect      raw.githubusercontent.com
 // @connect      gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app
 // @run-at       document-end
@@ -17,7 +18,13 @@
 (function () {
   'use strict';
 
-  const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/manifest.json';
+  const GITHUB_OWNER = 'qxsxhsyoj7369';
+  const GITHUB_REPO = 'TamaSkrypt';
+  const GITHUB_BRANCH = 'main';
+  const MANIFEST_PATH = 'manifest.json';
+  const MANIFEST_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${MANIFEST_PATH}`;
+  const GITHUB_REF_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/ref/heads/${GITHUB_BRANCH}`;
+  const RAW_REPO_PREFIX = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/`;
   const FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
   const CHECK_INTERVAL_MS = 0;
 
@@ -29,6 +36,7 @@
   const KEY_MODULE_MANIFEST = '__ts_launcher_modules_manifest__';
   const KEY_MODULE_META = '__ts_launcher_modules_meta__';
   const KEY_MODULE_CODE_PREFIX = '__ts_launcher_mod_code__::';
+  const KEY_COMMIT_SHA = '__ts_launcher_commit_sha__';
 
   function setLauncherDiagnostics(info) {
     const current = window.__TS_LAUNCHER_DIAGNOSTICS__ || {};
@@ -36,8 +44,33 @@
       mode: info && info.mode ? info.mode : current.mode || 'unknown',
       manifestVersion: info && info.manifestVersion ? String(info.manifestVersion) : current.manifestVersion || '',
       source: info && info.source ? info.source : current.source || 'unknown',
+      commitSha: info && info.commitSha ? String(info.commitSha) : current.commitSha || '',
       updatedAt: Date.now(),
     };
+  }
+
+  function rewriteRawGithubUrl(url, ref) {
+    if (!url || !ref || typeof url !== 'string') return url;
+    if (!url.startsWith(RAW_REPO_PREFIX)) return url;
+    const rest = url.slice(RAW_REPO_PREFIX.length);
+    const slashIdx = rest.indexOf('/');
+    if (slashIdx < 0) return url;
+    const pathPart = rest.slice(slashIdx + 1);
+    return RAW_REPO_PREFIX + ref + '/' + pathPart;
+  }
+
+  function applyCommitShaToManifest(manifest, commitSha) {
+    if (!manifest || !commitSha) return manifest;
+    const cloned = JSON.parse(JSON.stringify(manifest));
+    cloned.__commitSha = commitSha;
+    cloned.scriptUrl = rewriteRawGithubUrl(cloned.scriptUrl, commitSha);
+    if (Array.isArray(cloned.modules)) {
+      cloned.modules = cloned.modules.map((entry) => ({
+        ...entry,
+        url: rewriteRawGithubUrl(entry.url, commitSha),
+      }));
+    }
+    return cloned;
   }
 
   function getJson(key, fallback) {
@@ -194,6 +227,18 @@
     })).filter(m => typeof m.url === 'string' && m.url.length > 0);
   }
 
+  async function fetchLatestCommitSha() {
+    try {
+      const body = await requestText(GITHUB_REF_API_URL, 10000);
+      const data = JSON.parse(body);
+      const sha = data && data.object && typeof data.object.sha === 'string' ? data.object.sha : '';
+      return sha || '';
+    } catch (error) {
+      console.warn('[TamaSkrypt Launcher] GitHub ref API unavailable:', error.message);
+      return '';
+    }
+  }
+
   async function executeModules(manifest, options = {}) {
     const moduleList = normalizeModuleManifest(manifest);
     if (!moduleList.length) return false;
@@ -210,6 +255,7 @@
         mode: 'modules',
         manifestVersion: manifest && manifest.version,
         source: allowNetwork ? 'network' : 'cache',
+        commitSha: manifest && manifest.__commitSha,
       });
 
       for (const mod of moduleList) {
@@ -285,10 +331,12 @@
         version: manifest.version,
         entryModule: manifest.entryModule || '',
         modules: moduleList,
+        __commitSha: manifest.__commitSha || '',
       });
       setJson(KEY_MODULE_META, moduleMeta);
       GM_setValue(KEY_MODE, 'modules');
       GM_setValue(KEY_VERSION, String(manifest.version || ''));
+      GM_setValue(KEY_COMMIT_SHA, String(manifest.__commitSha || ''));
       GM_setValue(KEY_CHECKED, Date.now());
       progress.done('Moduły gotowe');
       return true;
@@ -314,6 +362,7 @@
         mode: 'legacy',
         manifestVersion: manifest && manifest.version ? manifest.version : cachedVersion,
         source: 'cache',
+        commitSha: manifest && manifest.__commitSha ? manifest.__commitSha : GM_getValue(KEY_COMMIT_SHA, ''),
       });
       return runCode(cachedCode, 'legacy-cache');
     }
@@ -324,10 +373,12 @@
         mode: 'legacy',
         manifestVersion: manifest && manifest.version,
         source: 'network',
+        commitSha: manifest && manifest.__commitSha,
       });
       const code = await requestText(manifest.scriptUrl, 15000);
       GM_setValue(KEY_CODE, code);
       GM_setValue(KEY_VERSION, String(manifest.version || ''));
+      GM_setValue(KEY_COMMIT_SHA, String(manifest.__commitSha || ''));
       GM_setValue(KEY_CHECKED, Date.now());
       GM_setValue(KEY_MODE, 'legacy');
       return runCode(code, 'legacy-download');
@@ -337,6 +388,7 @@
         mode: 'legacy',
         manifestVersion: cachedVersion || (manifest && manifest.version) || '',
         source: 'cache-fallback',
+        commitSha: GM_getValue(KEY_COMMIT_SHA, ''),
       });
       return cachedCode ? runCode(cachedCode, 'legacy-cache-fallback') : false;
     }
@@ -353,13 +405,27 @@
       mode: 'legacy',
       manifestVersion: GM_getValue(KEY_VERSION, ''),
       source: 'cache',
+      commitSha: GM_getValue(KEY_COMMIT_SHA, ''),
     });
     return code ? runCode(code, 'legacy-cache') : false;
   }
 
   async function fetchManifest() {
-    const body = await requestText(MANIFEST_URL, 10000);
-    return JSON.parse(body);
+    const latestCommitSha = await fetchLatestCommitSha();
+    const preferredUrl = latestCommitSha
+      ? rewriteRawGithubUrl(MANIFEST_URL, latestCommitSha)
+      : MANIFEST_URL;
+
+    try {
+      const body = await requestText(preferredUrl, 10000);
+      const manifest = JSON.parse(body);
+      return applyCommitShaToManifest(manifest, latestCommitSha);
+    } catch (error) {
+      if (!latestCommitSha) throw error;
+      console.warn('[TamaSkrypt Launcher] Commit-pinned manifest unavailable, fallback to branch:', error.message);
+      const body = await requestText(MANIFEST_URL, 10000);
+      return JSON.parse(body);
+    }
   }
 
   async function run() {
