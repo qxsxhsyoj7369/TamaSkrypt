@@ -1,0 +1,2 @@
+# TamaSkrypt
+Ludek w przeglądarce 
