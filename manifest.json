@@ -1,7 +1,7 @@
 {
-  "version": "3.1.0",
+  "version": "3.1.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Rozcięto game-main na moduły: auth, state-sync, ui, game-loop, shop, inventory.",
+  "changelog": "Dodano diagnostykę DB (badge OK/ERROR/RETRY) i retry policy dla Firebase read/write.",
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "modules": [
@@ -50,6 +50,14 @@
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
       "version": "3.1.0",
       "hash": "40940091c16b0b7561fdae26a894675aea7dbfe812f52a6e9ee5649e3d37bcc8",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "db-status",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/50-db-status.js",
+      "version": "3.1.1",
+      "hash": "66f5892a041769e93f4d611251942642321665aa48827231adaf954269bd61ad",
       "execute": "raw",
       "required": true
     },
