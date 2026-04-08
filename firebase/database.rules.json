@@ -1,0 +1,77 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "meta": {
+      ".read": true,
+      ".write": "auth != null && root.child('users').child(auth.uid).child('profile').child('roles').child('isAdmin').val() === true"
+    },
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "usernameToUid": {
+      "$username": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"
+      }
+    },
+
+    "ranking": {
+      ".read": true,
+      "$scope": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+
+    "chat": {
+      "global": {
+        "$messageId": {
+          ".read": true,
+          ".write": "auth != null"
+        }
+      },
+      "rooms": {
+        "$roomId": {
+          ".read": true,
+          ".write": "auth != null"
+        }
+      }
+    },
+
+    "itemsCatalog": {
+      ".read": true,
+      "$itemId": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('profile').child('roles').child('isAdmin').val() === true"
+      }
+    },
+
+    "foodSpawns": {
+      ".read": true,
+      "$spawnId": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('profile').child('roles').child('isAdmin').val() === true"
+      }
+    },
+
+    "sessions": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "opsLog": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}

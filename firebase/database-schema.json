@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "project": "Gelek",
+    "updatedAt": 0
+  },
+  "users": {
+    "uid": {
+      "profile": {
+        "username": "Zelek",
+        "createdAt": 0,
+        "lastLoginAt": 0,
+        "avatar": "pink",
+        "roles": {
+          "isAdmin": false,
+          "isModerator": false
+        }
+      },
+      "pet": {
+        "name": "Gelek",
+        "level": 1,
+        "xp": 0,
+        "hp": 100,
+        "hpMax": 100,
+        "hunger": 100,
+        "hungerMax": 100,
+        "joy": 100,
+        "joyMax": 100,
+        "foodCollected": 0,
+        "alive": true,
+        "mood": "happy",
+        "lastFedAt": 0,
+        "lastTickAt": 0,
+        "updatedAt": 0
+      },
+      "inventory": {
+        "itemId": {
+          "name": "Strawberry",
+          "category": "food",
+          "quantity": 1,
+          "rarity": "common",
+          "updatedAt": 0
+        }
+      },
+      "stats": {
+        "totalOnlineMs": 0,
+        "foodsEaten": 0,
+        "deaths": 0,
+        "revives": 0,
+        "bestLevel": 1,
+        "updatedAt": 0
+      },
+      "settings": {
+        "widget": {
+          "x": null,
+          "y": null,
+          "collapsed": false
+        },
+        "notifications": {
+          "enabled": true,
+          "muteUntil": 0
+        },
+        "updatedAt": 0
+      }
+    }
+  },
+  "usernameToUid": {
+    "zelek": "uid"
+  },
+  "ranking": {
+    "daily": {
+      "uid": {
+        "username": "Zelek",
+        "level": 3,
+        "xp": 10,
+        "foodsEaten": 18,
+        "score": 318,
+        "updatedAt": 0
+      }
+    },
+    "allTime": {
+      "uid": {
+        "username": "Zelek",
+        "level": 15,
+        "xp": 74,
+        "foodsEaten": 144,
+        "score": 1658,
+        "updatedAt": 0
+      }
+    }
+  },
+  "chat": {
+    "global": {
+      "messageId": {
+        "uid": "uid",
+        "username": "Zelek",
+        "text": "Cześć!",
+        "createdAt": 0,
+        "editedAt": 0,
+        "deleted": false
+      }
+    },
+    "rooms": {
+      "roomId": {
+        "title": "Pokój 1",
+        "createdBy": "uid",
+        "createdAt": 0
+      }
+    }
+  },
+  "itemsCatalog": {
+    "itemId": {
+      "name": "Golden Apple",
+      "category": "food",
+      "hunger": 25,
+      "joy": 8,
+      "xp": 20,
+      "rarity": "rare",
+      "active": true
+    }
+  },
+  "foodSpawns": {
+    "spawnId": {
+      "type": "fruit",
+      "emoji": "🍓",
+      "name": "Truskawka",
+      "xp": 8,
+      "hunger": 15,
+      "joy": 3,
+      "rarity": "common",
+      "weight": 100,
+      "active": true
+    }
+  },
+  "sessions": {
+    "uid": {
+      "deviceId": {
+        "createdAt": 0,
+        "expiresAt": 0,
+        "lastSeenAt": 0,
+        "userAgent": "mobile"
+      }
+    }
+  },
+  "opsLog": {
+    "uid": {
+      "eventId": {
+        "type": "FEED",
+        "delta": {
+          "hunger": 10,
+          "xp": 5
+        },
+        "createdAt": 0
+      }
+    }
+  }
+}
