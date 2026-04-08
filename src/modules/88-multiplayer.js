@@ -186,17 +186,6 @@
     return FACTIONS.neon;
   }
 
-  function pickFactionFromUid(uid) {
-    const variants = Object.keys(FACTIONS);
-    if (!uid) return variants[0];
-    let score = 0;
-    const source = String(uid);
-    for (let index = 0; index < source.length; index += 1) {
-      score += source.charCodeAt(index);
-    }
-    return variants[score % variants.length];
-  }
-
   function toStashData(docSnap) {
     const value = docSnap && typeof docSnap.data === 'function' ? docSnap.data() : {};
     return {
@@ -385,8 +374,7 @@
       const profile = await R.firebaseRead(`users/${R.currentUid}/profile`);
       let factionId = profile && profile.faction ? String(profile.faction).toLowerCase() : '';
       if (!FACTIONS[factionId]) {
-        factionId = pickFactionFromUid(R.currentUid);
-        await R.firebaseWrite(`users/${R.currentUid}/profile/faction`, factionId, 'PUT');
+        factionId = 'neon';
       }
 
       multiplayer.playerFaction = factionId;
@@ -403,8 +391,8 @@
       return getFactionOrDefault(factionId);
     } catch (error) {
       emitError('ensurePlayerFaction', error);
-      multiplayer.playerFaction = pickFactionFromUid(R.currentUid);
-      return getFactionOrDefault(multiplayer.playerFaction);
+      multiplayer.playerFaction = 'neon';
+      return getFactionOrDefault('neon');
     }
   };
 
@@ -557,6 +545,12 @@
     return domainData;
   };
 
+  multiplayer.forceRefreshCache = function forceRefreshCache() {
+    const hostname = getCurrentDomain();
+    if (hostname) clearDomainCache(hostname);
+    multiplayer.currentDomainState = null;
+  };
+
   multiplayer.claimNeutralDomain = async function claimNeutralDomain() {
     if (!isAuthenticated()) throw new Error('User not authenticated');
     if (multiplayer.disabledReason === 'firestore-unavailable') {
@@ -566,7 +560,10 @@
     const hostname = getCurrentDomain();
     if (!hostname) throw new Error('Brak hosta domeny');
 
-    const playerFaction = multiplayer.getPlayerFaction().id;
+    const factionFromState = R.state && R.state.profileFaction ? String(R.state.profileFaction) : '';
+    const playerFaction = (FACTIONS[factionFromState] ? factionFromState : null)
+      || multiplayer.playerFaction
+      || 'neon';
     const db = getFirestoreDb();
     let claimed;
     if (db && typeof db.collection === 'function') {
@@ -624,6 +621,10 @@
     clearDomainCache(hostname);
     multiplayer.currentDomainState = nextState;
     writeDomainCache(hostname, nextState);
+
+    if (R.state) {
+      R.state.profileFaction = nextState.faction;
+    }
 
     emitEvent('multiplayer:domain_updated', nextState);
     emitEvent('multiplayer:domain_conquered', nextState);

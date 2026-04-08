@@ -1,7 +1,7 @@
 {
-  "version": "3.27.7",
+  "version": "3.27.8",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix multiplayer domains: naprawiony klucz RTDB dla hostów z kropkami, więc Zajmij (Darmowe) znów zapisuje przejęcie domeny.",
+  "changelog": "Wybór frakcji przy rejestracji (UI + auth), naprawa przycisku Zajmij (Darmowe) z dedykowanym onclick, usunięcie determinizmu frakcji per UID.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -33,8 +33,8 @@
     {
       "name": "auth",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/20-auth.js",
-      "version": "3.1.0",
-      "hash": "987b401c827c83e30916ff612e9a8932cf2d80fd8d2da34ab8a0ef832f5a9665",
+      "version": "3.28.0",
+      "hash": "694ca041b46704d44a1ae0074e7b605bcb21d16ae30cbfe55d20d570415bf973",
       "execute": "raw",
       "required": true
     },
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.27.4",
-      "hash": "9a57d8261d295f32b3b97439419e4de1cd8ae7c13a112927a9e65df54335e4e3",
+      "version": "3.28.0",
+      "hash": "9a372265fd0b1762e08f066d18dfe30d71a2da10c64226e05f189e8fd0f9b454",
       "execute": "raw",
       "required": true
     },
@@ -105,8 +105,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.7",
-      "hash": "19336c5398528890ee62c13c8f68ed6e2e5c76688fd0a9a6d8d018067ddb3c6b",
+      "version": "3.28.0",
+      "hash": "772e92df6d69a00cad4f24e4884c4080a8ad613baa11364439650af220ab9df3",
       "execute": "raw",
       "required": true
     },

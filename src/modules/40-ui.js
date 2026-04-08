@@ -1098,6 +1098,7 @@
               <div id="__ts_territory_status__">Status: skanowanie...</div>
               <div id="__ts_territory_actions__">
                 <button id="__ts_territory_action_btn__" class="__ts_btn__" data-action="" disabled>Brak akcji</button>
+                <button id="__ts_btn_claim_neutral__" class="__ts_btn__" style="display:none">🌐 Zajmij (Darmowe)</button>
               </div>
             </div>
           </div>
@@ -1292,26 +1293,52 @@
       }
     }
 
+    const claimNeutralBtn = R.widgetShadowRoot
+      ? R.widgetShadowRoot.getElementById('__ts_btn_claim_neutral__')
+      : document.getElementById('__ts_btn_claim_neutral__');
+
+    if (claimNeutralBtn) {
+      if (domainStatus.status === 'neutral' && multiplayerAvailable) {
+        claimNeutralBtn.style.display = '';
+        claimNeutralBtn.disabled = false;
+        claimNeutralBtn.onclick = async () => {
+          claimNeutralBtn.disabled = true;
+          claimNeutralBtn.textContent = '⏳ Zajmowanie...';
+          try {
+            await R.multiplayer.claimNeutralDomain();
+            if (R.multiplayer.forceRefreshCache) R.multiplayer.forceRefreshCache();
+            if (R.showMessage) R.showMessage('🌐 Domena przejęta!', 2400);
+            if (typeof R.updateUI === 'function') R.updateUI();
+          } catch (err) {
+            const msg = err && err.message ? err.message : 'Błąd zajmowania';
+            if (R.showMessage) R.showMessage(`⚠️ ${msg}`, 2800);
+            claimNeutralBtn.disabled = false;
+            claimNeutralBtn.textContent = '🌐 Zajmij (Darmowe)';
+          }
+        };
+      } else {
+        claimNeutralBtn.style.display = 'none';
+        claimNeutralBtn.onclick = null;
+      }
+    }
+
     if (territoryActionBtn) {
       if (domainStatus.status === 'neutral') {
-        if (multiplayerAvailable) {
-          territoryActionBtn.disabled = false;
-          territoryActionBtn.setAttribute('data-action', 'claim-neutral');
-          territoryActionBtn.textContent = 'Zajmij (Darmowe)';
-        } else {
-          territoryActionBtn.disabled = true;
-          territoryActionBtn.setAttribute('data-action', '');
-          territoryActionBtn.textContent = 'Multiplayer offline';
-        }
+        territoryActionBtn.style.display = 'none';
+        territoryActionBtn.disabled = true;
+        territoryActionBtn.setAttribute('data-action', '');
       } else if (domainState && domainState.kingUid === String(R.currentUid || '')) {
+        territoryActionBtn.style.display = '';
         territoryActionBtn.disabled = false;
         territoryActionBtn.setAttribute('data-action', 'fortify');
         territoryActionBtn.textContent = 'Fortyfikuj';
       } else if (domainState && domainState.kingUid) {
+        territoryActionBtn.style.display = '';
         territoryActionBtn.disabled = false;
         territoryActionBtn.setAttribute('data-action', 'sabotage');
         territoryActionBtn.textContent = 'Sabotuj';
       } else {
+        territoryActionBtn.style.display = 'none';
         territoryActionBtn.disabled = true;
         territoryActionBtn.setAttribute('data-action', '');
         territoryActionBtn.textContent = 'Brak akcji';
@@ -1394,6 +1421,46 @@
   R.buildAuthHTML = function buildAuthHTML() {
     return `
       <div id="__ts_auth_card__">
+        <style>
+          #__ts_faction_select_row__ {
+            display: none;
+            margin-bottom: 10px;
+          }
+          #__ts_auth_faction__ {
+            width: 100%;
+            padding: 9px 12px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: #e2d9f3;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c3b1e1' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 30px;
+            transition: border-color .2s, box-shadow .2s;
+          }
+          #__ts_auth_faction__:focus {
+            border-color: rgba(182,110,255,0.6);
+            box-shadow: 0 0 0 3px rgba(182,110,255,0.18);
+          }
+          #__ts_auth_faction__ option {
+            background: #2d1b4e;
+            color: #e2d9f3;
+          }
+          #__ts_faction_select_row__ label {
+            display: block;
+            font-size: 11px;
+            color: #c3b1e1;
+            margin-bottom: 4px;
+            letter-spacing: .03em;
+          }
+        </style>
         <div style="font-size:22px;font-weight:bold;color:#764ba2;margin-bottom:4px;">🟣 Gelek</div>
         <p style="font-size:13px;color:#888;margin:0 0 18px;">Twój wirtualny żelek czeka!</p>
         <div id="__ts_auth_tabs__">
@@ -1404,6 +1471,14 @@
           <div class="__ts_field__"><input id="__ts_auth_user__" type="text" name="username" autocomplete="username" required placeholder="nazwa użytkownika" /></div>
           <div class="__ts_field__"><input id="__ts_auth_pass__" type="password" name="password" autocomplete="current-password" required placeholder="hasło" /></div>
           <div class="__ts_field__" id="__ts_confirm_row__" style="display:none"><input id="__ts_auth_confirm__" type="password" name="confirm" autocomplete="new-password" placeholder="powtórz hasło" /></div>
+          <div id="__ts_faction_select_row__">
+            <label for="__ts_auth_faction__">⚑ Wybierz frakcję</label>
+            <select id="__ts_auth_faction__" name="faction">
+              <option value="neon">🟣 Neon (Fuksja)</option>
+              <option value="toxic">🟢 Toxic (Limonka)</option>
+              <option value="plasma">🔵 Plasma (Cyjan)</option>
+            </select>
+          </div>
           <div id="__ts_auth_err__"></div>
           <button type="submit" id="__ts_auth_submit__">Zaloguj się</button>
         </form>
@@ -1428,11 +1503,15 @@
     const btnSubmit = modal.querySelector('#__ts_auth_submit__');
     const confirmRow = modal.querySelector('#__ts_confirm_row__');
 
+    const factionRow = modal.querySelector('#__ts_faction_select_row__');
+    const factionSelect = modal.querySelector('#__ts_auth_faction__');
+
     function setTab(t) {
       activeTab = t;
       tabLogin.classList.toggle('active', t === 'login');
       tabRegister.classList.toggle('active', t === 'register');
       confirmRow.style.display = t === 'register' ? 'block' : 'none';
+      if (factionRow) factionRow.style.display = t === 'register' ? 'block' : 'none';
       btnSubmit.textContent = t === 'login' ? 'Zaloguj się' : 'Zarejestruj się';
       errEl.textContent = '';
     }
@@ -1445,6 +1524,7 @@
       const username = modal.querySelector('#__ts_auth_user__').value;
       const password = modal.querySelector('#__ts_auth_pass__').value;
       const confirm = modal.querySelector('#__ts_auth_confirm__').value;
+      const faction = factionSelect ? (factionSelect.value || 'neon') : 'neon';
 
       if (activeTab === 'register' && password !== confirm) {
         errEl.textContent = 'Hasła się nie zgadzają';
@@ -1457,7 +1537,7 @@
       try {
         const err = activeTab === 'login'
           ? await R.AUTH.login(username, password)
-          : await R.AUTH.register(username, password);
+          : await R.AUTH.register(username, password, faction);
 
         btnSubmit.disabled = false;
         setTab(activeTab);

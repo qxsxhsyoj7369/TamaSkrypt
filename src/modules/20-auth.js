@@ -83,11 +83,16 @@
       return R.firebaseRead(`usernameToUid/${encodeURIComponent(uname)}`);
     },
 
-    async register(username, password) {
+    async register(username, password, faction) {
       username = this.normalizeUsername(username);
       if (username.length < 2) return 'Nazwa musi mieć min. 2 znaki';
       if (password.length < 4) return 'Hasło musi mieć min. 4 znaki';
       if (!/^[a-z0-9_]{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (a-z, 0-9, _)';
+
+      const VALID_FACTIONS = ['neon', 'toxic', 'plasma'];
+      const chosenFaction = VALID_FACTIONS.includes(String(faction || '').toLowerCase())
+        ? String(faction).toLowerCase()
+        : 'neon';
 
       const existingUid = await this.resolveUidByUsername(username);
       if (existingUid) return 'Ta nazwa jest już zajęta';
@@ -101,6 +106,7 @@
         await R.firebaseWrite(`users/${uid}`, {
           profile: {
             username,
+            faction: chosenFaction,
             createdAt,
             lastLoginAt: createdAt,
             roles: { isAdmin: false, isModerator: false },
