@@ -37,10 +37,11 @@
     try {
       // eslint-disable-next-line no-eval
       eval(stripHeader(code));
+      return true;
     } catch (e) {
       console.error('[TamaSkrypt Launcher] Błąd wykonania skryptu z cache:', e);
+      return false; // pozwól wywołującemu pobrać świeżą kopię
     }
-    return true;
   }
 
   // Usuwa blok ==UserScript== z kodu (nie jest poprawnym JS)
@@ -55,6 +56,11 @@
     GM_xmlhttpRequest({
       method: 'GET',
       url: MANIFEST_URL + '?_=' + Date.now(),
+      timeout: 10000,
+      ontimeout: function () {
+        console.warn('[TamaSkrypt Launcher] Timeout pobierania manifestu – używam cache');
+        execCached();
+      },
       onload: function (resp) {
         if (resp.status !== 200) {
           console.warn('[TamaSkrypt Launcher] Błąd pobierania manifestu (status ' + resp.status + ') – używam cache');
@@ -96,6 +102,11 @@
     GM_xmlhttpRequest({
       method: 'GET',
       url: url + '?_=' + Date.now(),
+      timeout: 15000,
+      ontimeout: function () {
+        console.warn('[TamaSkrypt Launcher] Timeout pobierania skryptu – używam cache');
+        execCached();
+      },
       onload: function (resp) {
         if (resp.status !== 200) {
           console.warn('[TamaSkrypt Launcher] Błąd pobierania skryptu (status ' + resp.status + ') – używam cache');
