@@ -203,7 +203,14 @@
   };
 
   R.fetchFactionWarStats = async function fetchFactionWarStats(force = false) {
-    if (!R.multiplayer || typeof R.multiplayer.refreshWarStats !== 'function') return null;
+    if (!R.multiplayer || typeof R.multiplayer.refreshWarStats !== 'function') {
+      const now = R.now();
+      R.ranking.lastFactionFetchAt = now;
+      return {
+        dominance: R.ranking.factionDominance,
+        kings: R.ranking.factionKings,
+      };
+    }
     const now = R.now();
     if (!force && R.ranking.lastFactionFetchAt && now - R.ranking.lastFactionFetchAt < 30000) {
       return {
@@ -220,6 +227,7 @@
       R.ranking.lastFactionFetchAt = now;
       return stats;
     } catch (_) {
+      R.ranking.lastFactionFetchAt = now;
       return {
         dominance: R.ranking.factionDominance,
         kings: R.ranking.factionKings,
@@ -318,7 +326,15 @@
       });
     });
 
-    if (R.fetchFactionWarStats && !R.ranking.factionLoading) {
+    const shouldAutoFetchFaction = Boolean(
+      R.fetchFactionWarStats
+      && !R.ranking.factionLoading
+      && !R.ranking.lastFactionFetchAt
+      && !R.ranking.factionDominance
+      && !R.ranking.factionKings
+    );
+
+    if (shouldAutoFetchFaction) {
       R.fetchFactionWarStats(false).then(() => {
         if (panel.style.display !== 'none') R.renderRankingPanel();
       }).catch(() => {});

@@ -1,7 +1,7 @@
 {
-  "version": "3.27.1",
+  "version": "3.27.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix multiplayer init: brak Firestore nie wywala błędu w konsoli ani wejścia w ranking (graceful fallback).",
+  "changelog": "Hotfix rankingu: naprawiona pętla render/fetch statystyk frakcji powodująca freeze i ścinki przeglądarki.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "ranking",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
-      "version": "3.27.0",
-      "hash": "93388f404b73cec5359d0d13139ed71765782e35d37afabc3b7b834adc3766c3",
+      "version": "3.27.2",
+      "hash": "166fd0c836c69d608c95ff464488d73d790ce51f82f0f66d967b1b6f2489a412",
       "execute": "raw",
       "required": true
     },
