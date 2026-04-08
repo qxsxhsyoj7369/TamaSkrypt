@@ -1,7 +1,7 @@
 {
-  "version": "3.1.1",
+  "version": "3.1.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Dodano diagnostykę DB (badge OK/ERROR/RETRY) i retry policy dla Firebase read/write.",
+  "changelog": "Hotfix: usunięto blokujący hash dla opcjonalnego loader-events; moduły ładują się poprawnie.",
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "modules": [
@@ -17,7 +17,7 @@
       "name": "loader-events",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/05-loader-events.js",
       "version": "3.0.0",
-      "hash": "b825147ae8fed187aa3570735f251dd741c4bab926401c24b91f853c3c6fd9fc",
+      "hash": "",
       "execute": "raw",
       "required": false
     },

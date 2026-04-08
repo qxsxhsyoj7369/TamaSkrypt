@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.0.1
+// @version      3.0.2
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -83,10 +83,17 @@
     return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  function normalizeHashInput(text) {
+    return String(text || '')
+      .replace(/^\uFEFF/, '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
+  }
+
   async function verifyHash(text, expectedHash) {
     if (!expectedHash) return true;
     const normalized = String(expectedHash).toLowerCase().replace(/^sha256:/, '');
-    const got = await sha256Hex(text);
+    const got = await sha256Hex(normalizeHashInput(text));
     return got === normalized;
   }
 
