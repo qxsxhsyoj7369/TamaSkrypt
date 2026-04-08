@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
-  "minLauncherVersion": "1.0.0",
-  "changelog": "Dodano system kont, logowanie/rejestracja, dane per-użytkownik"
+  "minLauncherVersion": "2.0.0",
+  "changelog": "Dodano integrację Firebase, system versjonowania schematu, auto-migracja danych, sprawdzanie kompatybilności przy starcie"
 }
