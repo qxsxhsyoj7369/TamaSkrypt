@@ -247,14 +247,15 @@
 
     const dominance = R.ranking.factionDominance;
     const factionKings = R.ranking.factionKings || {};
+    const hasDominanceData = Boolean(dominance && Number(dominance.total || 0) > 0 && Array.isArray(dominance.factions));
 
-    const dominanceSegments = dominance && Array.isArray(dominance.factions)
+    const dominanceSegments = hasDominanceData
       ? dominance.factions.map((entry) => `<span style="height:100%;width:${Math.max(0, Math.min(100, Number(entry.percent) || 0))}%;background:${escapeHtml(entry.color || '#888')};display:inline-block;"></span>`).join('')
-      : '<span style="height:100%;width:100%;background:rgba(255,255,255,.15);display:inline-block;"></span>';
+      : '<span style="height:100%;width:100%;background:rgba(160,160,160,.45);display:inline-block;"></span>';
 
-    const dominanceLegend = dominance && Array.isArray(dominance.factions)
+    const dominanceLegend = hasDominanceData
       ? dominance.factions.map((entry) => `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.08);font-size:9px;">${escapeHtml(entry.emoji || '⚑')} ${escapeHtml(entry.name || entry.id)} ${Number(entry.percent || 0).toFixed(1)}%</span>`).join('')
-      : '<span style="font-size:9px;opacity:.75;">Brak danych dominacji</span>';
+      : '<span style="font-size:9px;opacity:.85;">Internet czeka na podbój!</span>';
 
     const factionRows = ['neon', 'toxic', 'plasma'].map((factionId) => {
       const rowsForFaction = Array.isArray(factionKings[factionId]) ? factionKings[factionId] : [];

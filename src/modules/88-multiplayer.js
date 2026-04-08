@@ -130,6 +130,12 @@
     } catch (_) {}
   }
 
+  function safeSessionStorageRemove(key) {
+    try {
+      sessionStorage.removeItem(key);
+    } catch (_) {}
+  }
+
   function getFactionOrDefault(value) {
     const key = String(value || '').toLowerCase();
     if (FACTIONS[key]) return FACTIONS[key];
@@ -239,6 +245,34 @@
     return multiplayer.currentDomainState;
   };
 
+  multiplayer.getDomainStatus = function getDomainStatus(domainState) {
+    const state = domainState || multiplayer.currentDomainState;
+    const currentUid = String(R.currentUid || '');
+    const playerFaction = multiplayer.getPlayerFaction().id;
+
+    if (!state || !state.kingUid) {
+      return {
+        status: 'neutral',
+        message: 'Ziemia Niczyja (Brak podatku)',
+        taxable: false,
+      };
+    }
+
+    if (String(state.kingUid) === currentUid || (state.faction && state.faction === playerFaction)) {
+      return {
+        status: 'allied',
+        message: 'Terytorium Sojusznicze (+10% Drop)',
+        taxable: false,
+      };
+    }
+
+    return {
+      status: 'hostile',
+      message: 'Strefa Wroga (Opłacasz podatek)',
+      taxable: true,
+    };
+  };
+
   function getDomainCacheKey(hostname) {
     return `gelek_domain_cache_v1:${hostname}`;
   }
@@ -265,6 +299,11 @@
       cachedAt: Date.now(),
       data,
     }));
+  }
+
+  function clearDomainCache(hostname) {
+    if (!hostname) return;
+    safeSessionStorageRemove(getDomainCacheKey(hostname));
   }
 
   function readWarCache() {
@@ -443,6 +482,55 @@
     return domainData;
   };
 
+  multiplayer.claimNeutralDomain = async function claimNeutralDomain() {
+    if (!isAuthenticated()) throw new Error('User not authenticated');
+
+    const db = ensureFirestoreReady('claimNeutralDomain');
+    const hostname = getCurrentDomain();
+    if (!hostname) throw new Error('Brak hosta domeny');
+
+    const playerFaction = multiplayer.getPlayerFaction().id;
+    const claimed = await db.runTransaction(async (tx) => {
+      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+      const snap = await tx.get(ref);
+      const current = snap.exists ? (snap.data() || {}) : {};
+
+      if (current.kingUid) {
+        throw new Error('Domena już ma władcę');
+      }
+
+      const payload = {
+        hostname,
+        kingUid: String(R.currentUid),
+        kingName: String(R.currentUser || R.currentUid),
+        faction: playerFaction,
+        defensePoints: 100,
+        collectedTax: 0,
+        timeSpent: normalizePositive(current.timeSpent, 0),
+        timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
+        conquestByUid: current.conquestByUid && typeof current.conquestByUid === 'object' ? current.conquestByUid : {},
+        updatedAt: getServerTimestamp(),
+      };
+
+      tx.set(ref, payload, { merge: true });
+      return payload;
+    });
+
+    const nextState = {
+      ...claimed,
+      factionName: getFactionOrDefault(claimed.faction).name,
+      factionColor: getFactionOrDefault(claimed.faction).color,
+    };
+
+    clearDomainCache(hostname);
+    multiplayer.currentDomainState = nextState;
+    writeDomainCache(hostname, nextState);
+
+    emitEvent('multiplayer:domain_updated', nextState);
+    emitEvent('multiplayer:domain_conquered', nextState);
+    return nextState;
+  };
+
   multiplayer.reportEarnings = async function reportEarnings(payload) {
     if (!isAuthenticated()) return null;
 
@@ -452,11 +540,8 @@
     if (xpGain <= 0 && coinGain <= 0) return null;
 
     const domainData = multiplayer.currentDomainState || await multiplayer.getDomainControl({ force: false });
-    if (!domainData || !domainData.kingUid) return null;
-    if (domainData.kingUid === String(R.currentUid)) return null;
-
-    const playerFaction = multiplayer.getPlayerFaction().id;
-    if (domainData.faction === playerFaction) return null;
+    const domainStatus = multiplayer.getDomainStatus(domainData);
+    if (!domainData || domainStatus.status !== 'hostile') return null;
 
     const taxFromXp = Math.max(0, Math.floor(xpGain * TAX_RATE));
     const taxFromCoins = Math.max(0, Math.floor(coinGain * TAX_RATE));

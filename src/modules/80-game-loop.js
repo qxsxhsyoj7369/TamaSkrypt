@@ -4,11 +4,17 @@
   const R = window.GelekRuntime;
   if (!R) return;
 
+  function shouldReportHostileTax() {
+    if (!R.multiplayer || typeof R.multiplayer.getDomainStatus !== 'function') return false;
+    const status = R.multiplayer.getDomainStatus();
+    return status && status.status === 'hostile';
+  }
+
   R.gainXP = function gainXP(amount) {
     if (!R.state || !R.state.alive) return;
     const gain = Math.max(0, Number(amount) || 0);
     R.state.xp += gain;
-    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && gain > 0) {
+    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && gain > 0 && shouldReportHostileTax()) {
       R.multiplayer.reportEarnings({ xp: gain }).catch(() => {});
     }
     if (R.incrementHourlyGoalProgress) {
@@ -45,7 +51,7 @@
 
     R.state.dailyQuest.claimed = true;
     R.state.coins += rewards.coins;
-    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && rewards.coins > 0) {
+    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && rewards.coins > 0 && shouldReportHostileTax()) {
       R.multiplayer.reportEarnings({ coins: rewards.coins }).catch(() => {});
     }
     R.gainXP(rewards.xp);
@@ -236,6 +242,9 @@
           } else if (action === 'sabotage' && typeof R.multiplayer.sabotageDomain === 'function') {
             await R.multiplayer.sabotageDomain();
             if (R.showMessage) R.showMessage('🧨 Sabotaż wykonany', 2200);
+          } else if (action === 'claim-neutral' && typeof R.multiplayer.claimNeutralDomain === 'function') {
+            await R.multiplayer.claimNeutralDomain();
+            if (R.showMessage) R.showMessage('🌐 Domena przejęta!', 2400);
           }
           if (typeof R.multiplayer.getDomainControl === 'function') {
             await R.multiplayer.getDomainControl({ force: true });

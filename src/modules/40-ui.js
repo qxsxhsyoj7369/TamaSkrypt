@@ -1256,7 +1256,12 @@
     const playerFaction = (R.multiplayer && typeof R.multiplayer.getPlayerFaction === 'function')
       ? R.multiplayer.getPlayerFaction().id
       : '';
-    const allied = Boolean(domainState && (domainState.kingUid === String(R.currentUid || '') || (domainState.faction && domainState.faction === playerFaction)));
+    const domainStatus = (R.multiplayer && typeof R.multiplayer.getDomainStatus === 'function')
+      ? R.multiplayer.getDomainStatus(domainState)
+      : {
+        status: Boolean(domainState && (domainState.kingUid === String(R.currentUid || '') || (domainState.faction && domainState.faction === playerFaction))) ? 'allied' : 'hostile',
+        message: 'Strefa Wroga (Opłacasz podatek)',
+      };
 
     if (territoryKingEl) {
       if (domainState && domainState.kingUid) {
@@ -1265,23 +1270,29 @@
           : '⚑';
         territoryKingEl.textContent = `Władca: ${factionEmoji} ${domainState.kingName || domainState.kingUid} • DEF ${Math.round(Number(domainState.defensePoints) || 0)}`;
       } else {
-        territoryKingEl.textContent = 'Władca: brak (domena wolna)';
+        territoryKingEl.textContent = 'Władca: brak (Ziemia Niczyja)';
       }
     }
 
     if (territoryStatusEl) {
       territoryStatusEl.classList.remove('__ts_status_ally__', '__ts_status_enemy__');
-      if (allied) {
-        territoryStatusEl.textContent = 'Terytorium Sojusznicze (+10% Drop)';
+      if (domainStatus.status === 'allied') {
+        territoryStatusEl.textContent = domainStatus.message || 'Terytorium Sojusznicze (+10% Drop)';
         territoryStatusEl.classList.add('__ts_status_ally__');
+      } else if (domainStatus.status === 'neutral') {
+        territoryStatusEl.textContent = domainStatus.message || 'Ziemia Niczyja';
       } else {
-        territoryStatusEl.textContent = 'Strefa Wroga (Opłacasz podatek)';
+        territoryStatusEl.textContent = domainStatus.message || 'Strefa Wroga (Opłacasz podatek)';
         territoryStatusEl.classList.add('__ts_status_enemy__');
       }
     }
 
     if (territoryActionBtn) {
-      if (domainState && domainState.kingUid === String(R.currentUid || '')) {
+      if (domainStatus.status === 'neutral') {
+        territoryActionBtn.disabled = false;
+        territoryActionBtn.setAttribute('data-action', 'claim-neutral');
+        territoryActionBtn.textContent = 'Zajmij (Darmowe)';
+      } else if (domainState && domainState.kingUid === String(R.currentUid || '')) {
         territoryActionBtn.disabled = false;
         territoryActionBtn.setAttribute('data-action', 'fortify');
         territoryActionBtn.textContent = 'Fortyfikuj';
