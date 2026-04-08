@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         TamaSkrypt – Żelek w przeglądarce
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      1.0.0
+// @version      2.0.0
 // @description  Wirtualny żelek żyjący w Twojej przeglądarce. Karm go, opiekuj się nim i zdobywaj poziomy!
 // @author       TamaSkrypt
 // @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @updateURL    https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js
+// @downloadURL  https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js
 // @run-at       document-end
 // @noframes
 // ==/UserScript==
@@ -57,51 +59,123 @@
   };
 
   // ---------------------------------------------------------------------------
-  // Persystencja danych
+  // System kont i sesji (AUTH)
   // ---------------------------------------------------------------------------
+  const AUTH = {
+    SESSION_TTL: 30 * 24 * 60 * 60 * 1000, // 30 dni w ms
+
+    // FNV-1a 32-bit hash – wystarczy dla tej gry (nie dane medyczne)
+    _hash(username, password) {
+      const str = username + '\x00' + password;
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619) >>> 0;
+      }
+      return h.toString(16).padStart(8, '0');
+    },
+
+    accounts() {
+      try { return JSON.parse(GM_getValue('ts_accounts', '{}')); } catch { return {}; }
+    },
+    saveAccounts(a) {
+      GM_setValue('ts_accounts', JSON.stringify(a));
+    },
+
+    session() {
+      try {
+        const s = JSON.parse(GM_getValue('ts_session', 'null'));
+        return (s && s.expires > Date.now()) ? s : null;
+      } catch { return null; }
+    },
+    startSession(username) {
+      GM_setValue('ts_session', JSON.stringify({
+        username,
+        expires: Date.now() + this.SESSION_TTL,
+      }));
+    },
+
+    register(username, password) {
+      username = (username || '').trim();
+      if (username.length < 2)      return 'Nazwa musi mieć min. 2 znaki';
+      if (password.length < 4)      return 'Hasło musi mieć min. 4 znaki';
+      if (!/^\w{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (litery, cyfry, _)';
+      const accs = this.accounts();
+      if (accs[username])            return 'Ta nazwa jest już zajęta';
+      accs[username] = { hash: this._hash(username, password), created: Date.now() };
+      this.saveAccounts(accs);
+      this.startSession(username);
+      return null;
+    },
+
+    login(username, password) {
+      username = (username || '').trim();
+      const accs = this.accounts();
+      const acc  = accs[username];
+      if (!acc || acc.hash !== this._hash(username, password))
+        return 'Nieprawidłowy login lub hasło';
+      this.startSession(username);
+      return null;
+    },
+  };
+
+  // ---------------------------------------------------------------------------
+  // Aktualnie zalogowany użytkownik (ustawiany po auth)
+  // ---------------------------------------------------------------------------
+  let _currentUser = '';
+
+  // Prefiks klucza pamięci – każdy użytkownik ma własne dane
+  function sk(key) { return _currentUser ? _currentUser + '_' + key : key; }
+
+
   function load(key, def) {
     try {
-      const v = GM_getValue(key, null);
+      const v = GM_getValue(sk(key), null);
       return v === null ? def : v;
     } catch {
       return def;
     }
   }
   function save(key, value) {
-    try { GM_setValue(key, value); } catch { /* ignore */ }
+    try { GM_setValue(sk(key), value); } catch { /* ignore */ }
   }
 
   // ---------------------------------------------------------------------------
-  // Stan gry
+  // Stan gry (inicjalizowany po zalogowaniu przez loadStateForUser)
   // ---------------------------------------------------------------------------
   const now = () => Date.now();
 
-  let state = {
-    hunger:       load('hunger',       100),
-    hp:           load('hp',           100),
-    level:        load('level',        1),
-    xp:           load('xp',           0),
-    totalOnline:  load('totalOnline',  0),   // ms
-    sessionStart: now(),
-    lastSave:     now(),
-    lastHungerTick: load('lastHungerTick', now()),
-    alive:        load('alive', true),
-  };
+  let state = null;
 
-  // Nadrabiamy czas nieobecności (max 2h)
-  const offlineMs   = Math.min(now() - load('lastSave', now()), CONFIG.OFFLINE_CATCHUP_MAX);
-  const offlineMins = offlineMs / 60000;
-  const hungerLost  = Math.floor(offlineMins * CONFIG.HUNGER_DRAIN_RATE);
-  if (state.alive) {
-    state.hunger = Math.max(0, state.hunger - hungerLost);
-    if (state.hunger === 0) {
-      const hpLost = Math.floor(offlineMins / (CONFIG.HUNGER_DRAIN_INTERVAL / 60000)) * CONFIG.HP_DRAIN_WHEN_STARVING;
-      state.hp = Math.max(0, state.hp - hpLost);
-      if (state.hp === 0) state.alive = false;
+  function loadStateForUser() {
+    state = {
+      hunger:         load('hunger',         100),
+      hp:             load('hp',             100),
+      level:          load('level',          1),
+      xp:             load('xp',             0),
+      totalOnline:    load('totalOnline',    0),   // ms
+      sessionStart:   now(),
+      lastSave:       now(),
+      lastHungerTick: load('lastHungerTick', now()),
+      alive:          load('alive',          true),
+    };
+
+    // Nadrabiamy czas nieobecności (max 2h)
+    const offlineMs   = Math.min(now() - load('lastSave', now()), CONFIG.OFFLINE_CATCHUP_MAX);
+    const offlineMins = offlineMs / 60000;
+    const hungerLost  = Math.floor(offlineMins * CONFIG.HUNGER_DRAIN_RATE);
+    if (state.alive) {
+      state.hunger = Math.max(0, state.hunger - hungerLost);
+      if (state.hunger === 0) {
+        const hpLost = Math.floor(offlineMins / (CONFIG.HUNGER_DRAIN_INTERVAL / 60000)) * CONFIG.HP_DRAIN_WHEN_STARVING;
+        state.hp = Math.max(0, state.hp - hpLost);
+        if (state.hp === 0) state.alive = false;
+      }
     }
   }
 
   function persistState() {
+    if (!state) return;
     save('hunger',       state.hunger);
     save('hp',           state.hp);
     save('level',        state.level);
@@ -176,6 +250,8 @@
       <div id="__ts_header__">
         <span id="__ts_toggle__" title="Pokaż/Ukryj">🟢</span>
         <span id="__ts_title__">TamaSkrypt</span>
+        <span id="__ts_username__" title="Zalogowany jako: ${_currentUser}">👤 ${_currentUser}</span>
+        <button id="__ts_logout__" title="Wyloguj">⏏</button>
       </div>
       <div id="__ts_body__">
         <div id="__ts_zelek__" title="${mood.label}">
@@ -396,13 +472,215 @@
         animation: ts_fadein 0.3s ease;
         pointer-events: none;
       }
+
+      /* ── Nazwa użytkownika i wylogowanie w nagłówku widgetu ── */
+      #__ts_username__ {
+        margin-left: auto;
+        font-size: 10px;
+        opacity: 0.85;
+        max-width: 72px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #__ts_logout__ {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 0 2px;
+        line-height: 1;
+      }
+
+      /* ── Modal logowania / rejestracji ── */
+      #__ts_auth_modal__ {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.72);
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        animation: ts_fadein 0.25s ease;
+      }
+      #__ts_auth_card__ {
+        background: #fff;
+        border-radius: 20px;
+        padding: 28px 24px 24px;
+        width: min(340px, 92vw);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+        text-align: center;
+      }
+      #__ts_auth_logo__ {
+        font-size: 22px;
+        font-weight: bold;
+        color: #764ba2;
+        margin-bottom: 4px;
+      }
+      #__ts_auth_sub__ {
+        font-size: 13px;
+        color: #888;
+        margin: 0 0 18px;
+      }
+      #__ts_auth_tabs__ {
+        display: flex;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid #764ba2;
+        margin-bottom: 18px;
+      }
+      #__ts_auth_tabs__ button {
+        flex: 1;
+        padding: 9px 0;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: bold;
+        color: #764ba2;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+      }
+      #__ts_auth_tabs__ button.active {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff;
+      }
+      .__ts_field__ {
+        text-align: left;
+        margin-bottom: 12px;
+      }
+      .__ts_field__ label {
+        display: block;
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 4px;
+        font-weight: bold;
+      }
+      .__ts_field__ input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid #ddd;
+        border-radius: 10px;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .__ts_field__ input:focus {
+        border-color: #764ba2;
+      }
+      #__ts_auth_err__ {
+        color: #e74c3c;
+        font-size: 12px;
+        min-height: 18px;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      #__ts_auth_submit__ {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      #__ts_auth_submit__:active { opacity: 0.85; }
     `;
     (document.head || document.documentElement || document.body).appendChild(style);
   }
 
   // ---------------------------------------------------------------------------
-  // Obsługa przeciągania widgetu
+  // Modal logowania / rejestracji
   // ---------------------------------------------------------------------------
+  const AUTH_MODAL_ID = '__ts_auth_modal__';
+
+  function showAuthModal(onSuccess) {
+    applyWidgetStyles();
+    if (document.getElementById(AUTH_MODAL_ID)) return;
+
+    const modal = document.createElement('div');
+    modal.id = AUTH_MODAL_ID;
+    modal.innerHTML = buildAuthHTML();
+    (document.body || document.documentElement).appendChild(modal);
+
+    let activeTab = 'login';
+    const tabLogin    = modal.querySelector('#__ts_tab_login__');
+    const tabRegister = modal.querySelector('#__ts_tab_register__');
+    const form        = modal.querySelector('#__ts_auth_form__');
+    const errEl       = modal.querySelector('#__ts_auth_err__');
+    const btnSubmit   = modal.querySelector('#__ts_auth_submit__');
+    const confirmRow  = modal.querySelector('#__ts_confirm_row__');
+
+    function setTab(t) {
+      activeTab = t;
+      tabLogin.classList.toggle('active', t === 'login');
+      tabRegister.classList.toggle('active', t === 'register');
+      confirmRow.style.display = t === 'register' ? 'block' : 'none';
+      btnSubmit.textContent    = t === 'login' ? 'Zaloguj się' : 'Zarejestruj się';
+      errEl.textContent        = '';
+    }
+
+    tabLogin.addEventListener('click',    () => setTab('login'));
+    tabRegister.addEventListener('click', () => setTab('register'));
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const username = modal.querySelector('#__ts_auth_user__').value;
+      const password = modal.querySelector('#__ts_auth_pass__').value;
+      const confirm  = modal.querySelector('#__ts_auth_confirm__').value;
+
+      if (activeTab === 'register' && password !== confirm) {
+        errEl.textContent = 'Hasła się nie zgadzają';
+        return;
+      }
+
+      const err = activeTab === 'login'
+        ? AUTH.login(username, password)
+        : AUTH.register(username, password);
+
+      if (err) { errEl.textContent = err; return; }
+
+      modal.remove();
+      onSuccess(username.trim());
+    });
+  }
+
+  function buildAuthHTML() {
+    return `
+      <div id="__ts_auth_card__">
+        <div id="__ts_auth_logo__">🟣 TamaSkrypt</div>
+        <p id="__ts_auth_sub__">Twój wirtualny żelek czeka!</p>
+        <div id="__ts_auth_tabs__">
+          <button type="button" id="__ts_tab_login__" class="active">Zaloguj się</button>
+          <button type="button" id="__ts_tab_register__">Zarejestruj się</button>
+        </div>
+        <form id="__ts_auth_form__" autocomplete="on">
+          <div class="__ts_field__">
+            <label for="__ts_auth_user__">Nazwa użytkownika</label>
+            <input id="__ts_auth_user__" type="text" name="username"
+                   autocomplete="username" required placeholder="np. zelek123" />
+          </div>
+          <div class="__ts_field__">
+            <label for="__ts_auth_pass__">Hasło</label>
+            <input id="__ts_auth_pass__" type="password" name="password"
+                   autocomplete="current-password" required placeholder="min. 4 znaki" />
+          </div>
+          <div class="__ts_field__" id="__ts_confirm_row__" style="display:none">
+            <label for="__ts_auth_confirm__">Potwierdź hasło</label>
+            <input id="__ts_auth_confirm__" type="password" name="confirm"
+                   autocomplete="new-password" placeholder="powtórz hasło" />
+          </div>
+          <div id="__ts_auth_err__"></div>
+          <button type="submit" id="__ts_auth_submit__">Zaloguj się</button>
+        </form>
+      </div>
+    `;
+  }
   const header = () => document.getElementById('__ts_header__');
 
   let dragging = false;
@@ -682,6 +960,23 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Wylogowanie
+  // ---------------------------------------------------------------------------
+  function bindLogout() {
+    const btn = document.getElementById('__ts_logout__');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      persistState();
+      GM_setValue('ts_session', 'null');
+      state       = null;
+      _currentUser = '';
+      const widget = document.getElementById(WIDGET_ID);
+      if (widget) widget.remove();
+      showAuthModal(startGame);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Główna pętla
   // ---------------------------------------------------------------------------
   function mainLoop() {
@@ -697,6 +992,7 @@
     bindDrag();
     bindToggle();
     bindRevive();
+    bindLogout();
     updateUI();
 
     // Ticki gry
@@ -725,10 +1021,36 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Start – z ochroną przed wyjątkami
+  // Start – sprawdź sesję lub pokaż modal logowania
   // ---------------------------------------------------------------------------
+
+  // Zapobiega podwójnemu uruchomieniu (np. gdy launcher + bezpośredni install)
+  if (window.__TS_RUNNING__) return;
+  window.__TS_RUNNING__ = true;
+
+  function startGame(username) {
+    _currentUser = username;
+    loadStateForUser();
+    try {
+      mountWidget();
+    } catch (err) {
+      console.error('[TamaSkrypt] Błąd montowania widgetu:', err);
+    }
+  }
+
   try {
-    mountWidget();
+    const session = AUTH.session();
+    if (session) {
+      startGame(session.username);
+    } else {
+      // Pierwsze wejście lub wygasła sesja – pokaż modal
+      const target = document.body || document.documentElement;
+      if (target) {
+        showAuthModal(startGame);
+      } else {
+        setTimeout(() => showAuthModal(startGame), 500);
+      }
+    }
   } catch (err) {
     console.error('[TamaSkrypt] Błąd inicjalizacji:', err);
   }
