@@ -1,7 +1,7 @@
 {
-  "version": "3.19.0",
+  "version": "3.20.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Gelek polish: większe oczy, naturalniejsze mruganie z rzadkimi winkami lewo/prawo, podskok przy głaskaniu tylko na samym Gelku + dodatkowe cute idle animacje.",
+  "changelog": "UI tabs refresh: dolna nawigacja ma nowy styl Pill Dock (ciemny kontener, miękkie hover/active).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.19.0",
-      "hash": "c76aaf3a5fc77d1c477e4ddfd861934f93b72b3b2ec7a539afe3861b90136fe7",
+      "version": "3.20.0",
+      "hash": "3301b6ab1cbca5d214d97cbbc6ad90736ff9828a096bd89619b69ce8b239dcf2",
       "execute": "raw",
       "required": true
     },

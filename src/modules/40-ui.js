@@ -770,38 +770,36 @@
 
       #__ts_tabs {
         display:flex;
-        gap:2px;
+        gap:4px;
         margin-top:2px;
         padding: 4px;
-        border-radius: 99px;
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
+        border-radius: 24px;
+        background: rgba(0, 0, 0, 0.25);
       }
       #__ts_tabs button {
         flex:1;
-        border:1px solid transparent;
-        border-radius:99px;
-        padding:6px;
+        border:none;
+        border-radius:20px;
+        padding:8px 0;
         font-size:10px;
         font-weight:680;
         letter-spacing: -0.02em;
         cursor:pointer;
-        color: rgba(255, 255, 255, 0.88);
+        color: rgba(255, 255, 255, 0.5);
         background: transparent;
         box-shadow: none;
-        transition: background-color .22s ease, box-shadow .22s ease, color .22s ease, transform .22s ease;
+        transition: all 0.3s ease;
       }
       #__ts_tabs button:hover {
         color: #fff;
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       }
       #__ts_tabs button:active,
       #__ts_tabs button.__ts_tab_active__ {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.12);
-        box-shadow: 0 0 18px oklch(65% 0.25 310 / 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       }
 
       #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ {
