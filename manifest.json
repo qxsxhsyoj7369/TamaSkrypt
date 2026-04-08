@@ -1,7 +1,7 @@
 {
-  "version": "3.15.0",
+  "version": "3.16.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI refresh force-load: Magic UI + Linear styl (bento glass, neon tubes, shiny skill button) oraz nowy high-end Gelek.",
+  "changelog": "Ultra-Fluid UI: Liquid Glass blob Gelka, oddychające tło panelu i floating pill dock zakładek.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.15.0",
-      "hash": "a9dbfc271eb353701eab662777353e22d6a554322f676b66fd187839d005ab42",
+      "version": "3.16.0",
+      "hash": "4f252eae48c9ea896f961c6cce6ef83e113a2002ff34adb4c486e07ef4f73626",
       "execute": "raw",
       "required": true
     },

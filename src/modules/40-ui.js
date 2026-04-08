@@ -176,62 +176,14 @@
   };
 
   R.buildZelekSVG = function buildZelekSVG() {
-    const state = R.state;
-    const level = state ? state.level : 1;
-    const glowPower = 0.22 + (Math.min(40, level) / 120);
     return `
-      <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg" aria-label="Gelek">
-        <defs>
-          <radialGradient id="__ts_g_core__" cx="48%" cy="34%" r="74%">
-            <stop offset="0%" stop-color="oklch(86% 0.11 320)" stop-opacity="0.98" />
-            <stop offset="36%" stop-color="oklch(74% 0.19 318)" stop-opacity="0.9" />
-            <stop offset="72%" stop-color="oklch(63% 0.24 312)" stop-opacity="0.83" />
-            <stop offset="100%" stop-color="oklch(54% 0.19 292)" stop-opacity="0.76" />
-          </radialGradient>
-          <radialGradient id="__ts_g_skin__" cx="34%" cy="20%" r="78%">
-            <stop offset="0%" stop-color="oklch(94% 0.04 325)" stop-opacity="0.95" />
-            <stop offset="42%" stop-color="oklch(79% 0.12 322)" stop-opacity="0.9" />
-            <stop offset="100%" stop-color="oklch(63% 0.23 311)" stop-opacity="0.86" />
-          </radialGradient>
-          <radialGradient id="__ts_g_inner__" cx="50%" cy="44%" r="64%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5" />
-            <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-          </radialGradient>
-          <filter id="__ts_g_jelly__" x="-40%" y="-40%" width="185%" height="190%" color-interpolation-filters="sRGB">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="alphaBlur" />
-            <feSpecularLighting in="alphaBlur" surfaceScale="7" specularConstant="0.85" specularExponent="24" lighting-color="#ffe7ff" result="specLight">
-              <fePointLight x="15" y="10" z="46" />
-            </feSpecularLighting>
-            <feComposite in="specLight" in2="SourceAlpha" operator="in" result="specIn" />
-            <feBlend in="SourceGraphic" in2="specIn" mode="screen" />
-          </filter>
-          <filter id="__ts_g_neon__" x="-40%" y="-40%" width="190%" height="190%">
-            <feGaussianBlur stdDeviation="2.9" result="blur" />
-            <feColorMatrix in="blur" type="matrix" values="0.9 0 0 0 0.16  0 0.46 0 0 0.12  0 0 1 0 0.42  0 0 0 ${glowPower} 0" />
-          </filter>
-          <linearGradient id="__ts_g_rim__" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="oklch(89% 0.08 320)" stop-opacity="0.72" />
-            <stop offset="100%" stop-color="oklch(60% 0.22 295)" stop-opacity="0.2" />
-          </linearGradient>
-        </defs>
-
-        <ellipse cx="32" cy="67" rx="21" ry="5.4" fill="oklch(47% 0.13 286 / 0.42)" filter="url(#__ts_g_neon__)" />
-
-        <g class="__ts_blob_body__" filter="url(#__ts_g_jelly__)">
-          <path d="M13 45c0-14.4 8.2-28.8 19-30.8 11.3-2.1 18.8 10 18.8 22.7 0 13.8-7.4 30.8-19.2 31.7C20.3 69.5 13 59 13 45z" fill="url(#__ts_g_core__)" />
-          <ellipse cx="32" cy="22.8" rx="17.2" ry="15.3" fill="url(#__ts_g_skin__)" opacity="0.92" />
-          <ellipse cx="31.8" cy="42" rx="15.6" ry="18.2" fill="url(#__ts_g_inner__)" opacity="0.8" />
-          <path d="M15.5 44.5c.2-14.1 8.3-27.1 18.9-29 11.4-2 18.7 10.3 18.1 21.9-.8 14.6-8.3 29.4-19.1 30" fill="none" stroke="url(#__ts_g_rim__)" stroke-width="1.2" stroke-linecap="round" opacity="0.9" />
-          <ellipse cx="23" cy="15.2" rx="7" ry="4.5" fill="#fff" opacity="0.64" filter="url(#__ts_g_neon__)" />
-          <ellipse cx="39.3" cy="34.6" rx="4.8" ry="3" fill="#ffeaff" opacity="0.38" />
-        </g>
-
-        <circle cx="25" cy="22" r="3.6" fill="#0f172a" />
-        <circle cx="39" cy="22" r="3.6" fill="#0f172a" />
-        <circle cx="24.15" cy="20.95" r="0.95" fill="#fff" opacity="0.44" />
-        <circle cx="38.15" cy="20.95" r="0.95" fill="#fff" opacity="0.44" />
-        <path d="M24.9 30 Q32 36.2 39.1 30" stroke="#0f172a" stroke-width="2.35" fill="none" stroke-linecap="round" />
-      </svg>`;
+      <div class="__ts_liquid_blob_wrap__" aria-label="Gelek">
+        <div class="__ts_liquid_blob__">
+          <span class="__ts_blob_eye__ __ts_blob_eye_l__"></span>
+          <span class="__ts_blob_eye__ __ts_blob_eye_r__"></span>
+          <span class="__ts_blob_mouth__"></span>
+        </div>
+      </div>`;
   };
 
   R.applyWidgetStyles = function applyWidgetStyles() {
@@ -301,9 +253,16 @@
           radial-gradient(120% 100% at 95% 16%, oklch(76% 0.13 232 / 0.15), transparent 66%),
           radial-gradient(130% 110% at 50% 105%, oklch(73% 0.21 338 / 0.13), transparent 70%),
           linear-gradient(150deg, var(--ts-bg-panel), oklch(18% 0.03 280 / 0.88));
+        background-size: 170% 170%;
         border: 1px solid oklch(100% 0 0 / 0.16);
         backdrop-filter: blur(20px) saturate(1.28);
         box-shadow: var(--ts-shadow), inset 0 1px 0 oklch(100% 0 0 / 0.18);
+        animation: __ts_panel_flow__ 26s ease-in-out infinite alternate;
+      }
+      @keyframes __ts_panel_flow__ {
+        0% { background-position: 0% 10%, 100% 25%, 42% 100%, 50% 50%; }
+        50% { background-position: 52% 22%, 68% 80%, 38% 20%, 50% 50%; }
+        100% { background-position: 100% 40%, 0% 0%, 60% 75%, 50% 50%; }
       }
 
       #__ts_body__.hidden { display: none; }
@@ -316,15 +275,68 @@
         padding: 8px;
         border-radius: 16px;
         background: var(--ts-glass);
-        border: 1px solid var(--ts-glass-edge);
-        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
-      #__ts_body_svg__ svg { animation: __ts_blob_breathe__ 3.8s ease-in-out infinite; transform-origin: 50% 58%; }
+      #__ts_body_svg__ { width:78px; height:86px; display:flex; align-items:center; justify-content:center; }
+      #__ts_body_svg__ .__ts_liquid_blob_wrap__ { width:72px; height:82px; display:flex; align-items:flex-end; justify-content:center; }
+      #__ts_body_svg__ .__ts_liquid_blob__ {
+        width:56px;
+        height:66px;
+        position: relative;
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        background: radial-gradient(130% 130% at 30% 18%, oklch(92% 0.05 324), oklch(72% 0.2 314) 42%, oklch(58% 0.23 300) 100%);
+        box-shadow:
+          inset -8px -10px 18px oklch(48% 0.24 302 / 0.62),
+          inset 8px 10px 15px rgba(255, 255, 255, 0.72),
+          0 10px 22px oklch(18% 0.08 284 / 0.45),
+          0 0 22px oklch(66% 0.22 310 / 0.28);
+        animation: __ts_blob_morph__ 8.2s ease-in-out infinite, __ts_blob_drift__ 4.8s ease-in-out infinite;
+      }
+      #__ts_body_svg__ .__ts_liquid_blob__::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        width: 16px;
+        height: 9px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.58);
+        filter: blur(0.3px);
+      }
+      #__ts_body_svg__ .__ts_blob_eye__ {
+        position: absolute;
+        top: 22px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #111827;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+      }
+      #__ts_body_svg__ .__ts_blob_eye_l__ { left: 17px; }
+      #__ts_body_svg__ .__ts_blob_eye_r__ { right: 17px; }
+      #__ts_body_svg__ .__ts_blob_mouth__ {
+        position: absolute;
+        left: 50%;
+        bottom: 21px;
+        transform: translateX(-50%);
+        width: 15px;
+        height: 8px;
+        border-bottom: 2.2px solid #1f2937;
+        border-radius: 0 0 10px 10px;
+      }
+      @keyframes __ts_blob_morph__ {
+        0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+        25% { border-radius: 52% 48% 38% 62% / 52% 40% 60% 48%; }
+        50% { border-radius: 60% 40% 44% 56% / 45% 62% 38% 55%; }
+        75% { border-radius: 36% 64% 58% 42% / 58% 42% 64% 36%; }
+        100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      }
+      @keyframes __ts_blob_drift__ {
+        0%, 100% { transform: translateY(0) rotate(0.001deg); }
+        50% { transform: translateY(-2px) rotate(-1deg); }
+      }
       #__ts_mood__ { font-size:19px; margin-top:-2px; }
-      @keyframes __ts_blob_breathe__ {
-        0%,100% { transform: scale(1, 1); }
-        50% { transform: scale(1.018, 0.986); }
-      }
 
       #__ts_levelup_inline__ {
         margin: 0;
@@ -400,7 +412,8 @@
         padding: 6px 8px;
         border-radius: 14px;
         background: var(--ts-glass);
-        border: 1px solid var(--ts-glass-edge);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
         font-size:10px;
         color: var(--ts-text-muted);
       }
@@ -412,7 +425,8 @@
         padding: 7px 8px;
         border-radius: 14px;
         background: var(--ts-glass);
-        border: 1px solid var(--ts-glass-edge);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
       .__ts_evo_badge__,
       .__ts_evo_badge {
@@ -442,10 +456,10 @@
       .__ts_goal_block__,
       .__ts_card__ {
         border-radius: 16px;
-        border: 1px solid var(--ts-glass-edge);
+        border: 1px solid rgba(255, 255, 255, 0.04);
         background: var(--ts-glass);
         backdrop-filter: blur(20px) saturate(1.2);
-        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.2), 0 10px 26px oklch(8% 0.03 280 / 0.32);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
 
       .__ts_goal_block__ { padding: 7px 8px; margin-bottom: 6px; }
@@ -569,26 +583,39 @@
       #__ts_msg__ { text-align:center; font-size:11px; color: oklch(88% 0.04 310); min-height:14px; font-weight:700; margin-top:2px; }
 
       #__ts_tabs {
-        display:grid;
-        grid-template-columns: repeat(4,1fr);
-        gap:6px;
+        display:flex;
+        gap:2px;
         margin-top:2px;
-        padding: 6px;
-        border-radius: 14px;
-        background: var(--ts-glass);
-        border: 1px solid var(--ts-glass-edge);
+        padding: 4px;
+        border-radius: 99px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
       #__ts_tabs button {
-        border:1px solid oklch(100% 0 0 / 0.18);
-        border-radius:10px;
+        flex:1;
+        border:1px solid transparent;
+        border-radius:99px;
         padding:6px;
         font-size:10px;
         font-weight:680;
         letter-spacing: -0.02em;
         cursor:pointer;
-        color: var(--ts-text-main);
-        background: linear-gradient(145deg, oklch(35% 0.06 284 / 0.65), oklch(30% 0.05 280 / 0.8));
-        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.2), 0 6px 14px oklch(6% 0.02 280 / 0.35);
+        color: rgba(255, 255, 255, 0.88);
+        background: transparent;
+        box-shadow: none;
+        transition: background-color .22s ease, box-shadow .22s ease, color .22s ease, transform .22s ease;
+      }
+      #__ts_tabs button:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.07);
+      }
+      #__ts_tabs button:active,
+      #__ts_tabs button.__ts_tab_active__ {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 18px oklch(65% 0.25 310 / 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.2);
       }
 
       #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ {

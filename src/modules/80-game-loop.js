@@ -187,6 +187,13 @@
     const panelShop = R.getElById ? R.getElById('__ts_panel_shop__') : document.getElementById('__ts_panel_shop__');
     const panelInventory = R.getElById ? R.getElById('__ts_panel_inventory__') : document.getElementById('__ts_panel_inventory__');
     const panelRanking = R.getElById ? R.getElById('__ts_panel_ranking__') : document.getElementById('__ts_panel_ranking__');
+    const tabButtons = [tabStatus, tabShop, tabInventory, tabRanking].filter(Boolean);
+
+    function setActiveTab(activeTab) {
+      tabButtons.forEach((button) => {
+        button.classList.toggle('__ts_tab_active__', button === activeTab);
+      });
+    }
 
     function hidePanels() {
       if (panelShop) panelShop.style.display = 'none';
@@ -194,19 +201,25 @@
       if (panelRanking) panelRanking.style.display = 'none';
     }
 
-    if (tabStatus) tabStatus.addEventListener('click', () => hidePanels());
+    if (tabStatus) tabStatus.addEventListener('click', () => {
+      hidePanels();
+      setActiveTab(tabStatus);
+    });
     if (tabShop) tabShop.addEventListener('click', () => {
       hidePanels();
+      setActiveTab(tabShop);
       if (panelShop) panelShop.style.display = 'block';
       if (R.renderShopPanel) R.renderShopPanel();
     });
     if (tabInventory) tabInventory.addEventListener('click', () => {
       hidePanels();
+      setActiveTab(tabInventory);
       if (panelInventory) panelInventory.style.display = 'block';
       if (R.renderInventoryPanel) R.renderInventoryPanel();
     });
     if (tabRanking) tabRanking.addEventListener('click', async () => {
       hidePanels();
+      setActiveTab(tabRanking);
       if (panelRanking) panelRanking.style.display = 'block';
       if (R.ranking) {
         R.ranking.loading = true;
@@ -215,6 +228,8 @@
       if (R.fetchLeaderboard) await R.fetchLeaderboard(true);
       if (R.renderRankingPanel) R.renderRankingPanel();
     });
+
+    if (tabStatus) setActiveTab(tabStatus);
 
     const header = R.getElById ? R.getElById('__ts_header__') : document.getElementById('__ts_header__');
     if (header && R.widgetEl) {
