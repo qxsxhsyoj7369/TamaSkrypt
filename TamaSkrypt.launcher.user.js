@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.0.4
+// @version      3.0.5
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -19,7 +19,7 @@
 
   const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/manifest.json';
   const FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
-  const CHECK_INTERVAL_MS = 60 * 60 * 1000;
+  const CHECK_INTERVAL_MS = 0;
 
   const KEY_CODE = '__ts_launcher_code__';
   const KEY_VERSION = '__ts_launcher_version__';
