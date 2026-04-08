@@ -38,6 +38,10 @@
       id: 'feed',
       icon: '🍽️',
       label: 'Karm',
+      rarity: 'common',
+      rarityLabel: 'Pospolite',
+      weight: 24,
+      rewardMultiplier: 1,
       unit: 'count',
       minTarget: 2,
       maxTarget: 6,
@@ -50,6 +54,10 @@
       id: 'online',
       icon: '⏱️',
       label: 'Graj',
+      rarity: 'common',
+      rarityLabel: 'Pospolite',
+      weight: 22,
+      rewardMultiplier: 1,
       unit: 'ms',
       minTargetMinutes: 4,
       maxTargetMinutes: 12,
@@ -62,6 +70,10 @@
       id: 'pet',
       icon: '🤲',
       label: 'Głaszcz',
+      rarity: 'common',
+      rarityLabel: 'Pospolite',
+      weight: 20,
+      rewardMultiplier: 1,
       unit: 'count',
       minTarget: 12,
       maxTarget: 40,
@@ -74,6 +86,10 @@
       id: 'gain_xp',
       icon: '⭐',
       label: 'Zdobądź XP',
+      rarity: 'uncommon',
+      rarityLabel: 'Niepospolite',
+      weight: 15,
+      rewardMultiplier: 1.08,
       unit: 'count',
       minTarget: 20,
       maxTarget: 90,
@@ -86,6 +102,10 @@
       id: 'keep_hp',
       icon: '❤️',
       label: 'Utrzymaj HP',
+      rarity: 'rare',
+      rarityLabel: 'Rzadkie',
+      weight: 9,
+      rewardMultiplier: 1.2,
       unit: 'ms',
       minTargetMinutes: 3,
       maxTargetMinutes: 10,
@@ -100,6 +120,10 @@
       id: 'keep_hunger',
       icon: '🍬',
       label: 'Utrzymaj sytość',
+      rarity: 'rare',
+      rarityLabel: 'Rzadkie',
+      weight: 9,
+      rewardMultiplier: 1.2,
       unit: 'ms',
       minTargetMinutes: 3,
       maxTargetMinutes: 10,
@@ -114,6 +138,10 @@
       id: 'eat_specific_food',
       icon: '🍓',
       label: 'Zjedz konkretny przysmak',
+      rarity: 'epic',
+      rarityLabel: 'Epickie',
+      weight: 5,
+      rewardMultiplier: 1.35,
       unit: 'count',
       minTarget: 1,
       maxTarget: 3,
@@ -126,6 +154,10 @@
       id: 'survive_time',
       icon: '🛡️',
       label: 'Przetrwaj',
+      rarity: 'uncommon',
+      rarityLabel: 'Niepospolite',
+      weight: 12,
+      rewardMultiplier: 1.1,
       unit: 'ms',
       minTargetMinutes: 5,
       maxTargetMinutes: 15,
@@ -211,31 +243,46 @@
     return min + Math.floor(roll * (max - min + 1));
   };
 
-  runtime.pickRandomItems = function pickRandomItems(items, count, random) {
-    const source = Array.isArray(items) ? items.slice() : [];
-    for (let index = source.length - 1; index > 0; index -= 1) {
-      const swapWith = runtime.randomInt(0, index, random);
-      const temp = source[index];
-      source[index] = source[swapWith];
-      source[swapWith] = temp;
+  runtime.pickWeightedItems = function pickWeightedItems(items, count, random) {
+    const pool = Array.isArray(items) ? items.slice() : [];
+    const selected = [];
+    const drawCount = Math.max(0, Math.min(count, pool.length));
+
+    for (let draw = 0; draw < drawCount; draw += 1) {
+      const totalWeight = pool.reduce((sum, item) => sum + Math.max(0.0001, Number(item && item.weight) || 1), 0);
+      let cursor = (typeof random === 'function' ? random() : Math.random()) * totalWeight;
+      let pickedIndex = pool.length - 1;
+
+      for (let index = 0; index < pool.length; index += 1) {
+        cursor -= Math.max(0.0001, Number(pool[index] && pool[index].weight) || 1);
+        if (cursor <= 0) {
+          pickedIndex = index;
+          break;
+        }
+      }
+
+      selected.push(pool[pickedIndex]);
+      pool.splice(pickedIndex, 1);
     }
-    return source.slice(0, Math.max(0, Math.min(count, source.length)));
+
+    return selected;
   };
 
   runtime.computeHourlyGoalReward = function computeHourlyGoalReward(definition, targetValue) {
     if (!definition) return { coins: 0, xp: 0 };
+    const multiplier = Math.max(0.5, Number(definition.rewardMultiplier) || 1);
     if (definition.unit === 'ms') {
       const minutes = Math.max(1, Math.round(targetValue / 60000));
       const level = Math.max(0, minutes - (definition.minTargetMinutes || minutes));
       return {
-        coins: definition.baseRewardCoins + (level * definition.rewardStepCoins),
-        xp: definition.baseRewardXp + (level * definition.rewardStepXp),
+        coins: Math.round((definition.baseRewardCoins + (level * definition.rewardStepCoins)) * multiplier),
+        xp: Math.round((definition.baseRewardXp + (level * definition.rewardStepXp)) * multiplier),
       };
     }
     const level = Math.max(0, Number(targetValue) - Number(definition.minTarget || targetValue));
     return {
-      coins: definition.baseRewardCoins + (level * definition.rewardStepCoins),
-      xp: definition.baseRewardXp + (level * definition.rewardStepXp),
+      coins: Math.round((definition.baseRewardCoins + (level * definition.rewardStepCoins)) * multiplier),
+      xp: Math.round((definition.baseRewardXp + (level * definition.rewardStepXp)) * multiplier),
     };
   };
 
@@ -247,6 +294,8 @@
       icon: definition.icon,
       label: definition.label,
       displayLabel: definition.label,
+      rarity: definition.rarity || 'common',
+      rarityLabel: definition.rarityLabel || 'Pospolite',
       unit: definition.unit,
       target: 1,
       progress: 0,
@@ -287,7 +336,7 @@
 
   runtime.createHourlyGoals = function createHourlyGoals(seedText) {
     const random = runtime.createSeededRng(seedText);
-    const pickedDefs = runtime.pickRandomItems(runtime.HOURLY_GOAL_DEFS, runtime.HOURLY_GOAL_POOL_SIZE, random);
+    const pickedDefs = runtime.pickWeightedItems(runtime.HOURLY_GOAL_DEFS, runtime.HOURLY_GOAL_POOL_SIZE, random);
     return pickedDefs
       .map(definition => runtime.createHourlyGoal(definition, random))
       .filter(Boolean);
@@ -409,6 +458,8 @@
         foodName: (existing && existing.foodName) || defGoal.foodName,
         foodEmoji: (existing && existing.foodEmoji) || defGoal.foodEmoji,
         displayLabel: (existing && existing.displayLabel) || defGoal.displayLabel || defGoal.label,
+        rarity: (existing && existing.rarity) || defGoal.rarity,
+        rarityLabel: (existing && existing.rarityLabel) || defGoal.rarityLabel,
       };
     });
 
