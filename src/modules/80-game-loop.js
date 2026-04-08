@@ -162,6 +162,10 @@
     if (tabRanking) tabRanking.addEventListener('click', async () => {
       hidePanels();
       if (panelRanking) panelRanking.style.display = 'block';
+      if (R.ranking) {
+        R.ranking.loading = true;
+        if (R.renderRankingPanel) R.renderRankingPanel();
+      }
       if (R.fetchLeaderboard) await R.fetchLeaderboard(true);
       if (R.renderRankingPanel) R.renderRankingPanel();
     });
