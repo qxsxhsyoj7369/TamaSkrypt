@@ -1,7 +1,7 @@
 {
-  "version": "3.2.0",
+  "version": "3.2.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Dodano ranking Firebase: zapis score do daily/all-time oraz panel TOP 10 w UI.",
+  "changelog": "Dodano badge diagnostyczny launchera oraz odświeżono cache modułu UI.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.1.0",
-      "hash": "40940091c16b0b7561fdae26a894675aea7dbfe812f52a6e9ee5649e3d37bcc8",
+      "version": "3.2.1",
+      "hash": "cdf3a92b2233b77887e3354a61b80c7cbad525918a205f5c0e00983d8592e91b",
       "execute": "raw",
       "required": true
     },
