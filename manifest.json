@@ -1,7 +1,7 @@
 {
-  "version": "3.4.0",
+  "version": "3.5.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Dodano misję godzinową (karmienie, czas gry, głaskanie) oraz nowy moduł głaskania z animacją i nagrodą +1 XP / +0.1 HP.",
+  "changelog": "Quests Hourly Plus: 3 losowe cele co godzinę z różnymi rewardami oraz dynamiczny panel postępu.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.4.0",
-      "hash": "701a87f8f727b4bff86beb30e4a2c3ed327cc9dabe68512971c47d4d32ede7cf",
+      "version": "3.5.0",
+      "hash": "8560eef9eb3fbd7956d241267cf7bdcb5ecbbe8421f035f3dffe626e3b0a2401",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.4.0",
-      "hash": "3607aa89a70eb7ff65662436fd34e92f2b63146a3e9db858b538ff41f6706a17",
+      "version": "3.5.0",
+      "hash": "6f129c3826eac712ba709386532ce21ec207e231bcc952f1a69ca88c231c63b2",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.4.0",
-      "hash": "dca8697a9cd55f2fc1256e0db11ce38c8a925d94334afad1d268da7cc63d9288",
+      "version": "3.5.0",
+      "hash": "627b66dc976d5e73565339d68ca57e0e4765d3f46ab67d9961ee03c2d4dd66a5",
       "execute": "raw",
       "required": true
     },
@@ -81,16 +81,16 @@
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.4.0",
-      "hash": "966ada90928bb8ed29beec644300d3fcbcdb64f7530abf8aaef973e0ea1ba1d1",
+      "version": "3.5.0",
+      "hash": "32b1c29a44a07d73c3b8f2d45a6b7ca287b592897aa7a966709402e05b1ea61b",
       "execute": "raw",
       "required": true
     },
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.4.0",
-      "hash": "226d9aa2b111805dec5e3f23779733271ce5329970f6870cfbf3f76ba68e4a0a",
+      "version": "3.5.0",
+      "hash": "9613ed70776d487b25d88d2361c0c6c65174d68e99f189c37f4ebc83e523e278",
       "execute": "raw",
       "required": true
     },

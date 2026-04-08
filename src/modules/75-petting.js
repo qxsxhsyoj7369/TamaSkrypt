@@ -68,9 +68,8 @@
       R.state.xp = (Number(R.state.xp) || 0) + 1;
     }
 
-    if (R.state.dailyQuest) {
-      const currentPet = Number(R.state.dailyQuest.petProgress) || 0;
-      R.state.dailyQuest.petProgress = Math.min(R.CONFIG.HOURLY_PET_TARGET, currentPet + 1);
+    if (R.incrementHourlyGoalProgress) {
+      R.incrementHourlyGoalProgress('pet', 1);
     }
 
     const rect = evt && evt.currentTarget && evt.currentTarget.getBoundingClientRect

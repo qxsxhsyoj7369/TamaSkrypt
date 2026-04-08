@@ -115,15 +115,14 @@
     if ((R.state.dailyQuest.hourKey || R.state.dailyQuest.dayKey) !== hourKey) {
       R.state.dailyQuest = R.makeDailyQuest();
       R.state.lastDailyTick = R.now();
-      if (R.showMessage) R.showMessage('🕐 Nowa misja godzinowa jest już dostępna!', 3000);
+      if (R.showMessage) R.showMessage('🕐 Nowy zestaw 3 misji godzinowych!', 3000);
     }
 
     const tickNow = R.now();
     const delta = Math.max(0, tickNow - R.state.lastDailyTick);
     R.state.lastDailyTick = tickNow;
-    R.state.dailyQuest.onlineProgressMs = Math.min(
-      R.CONFIG.HOURLY_ONLINE_TARGET_MS,
-      R.state.dailyQuest.onlineProgressMs + delta
-    );
+    if (R.incrementHourlyGoalProgress) {
+      R.incrementHourlyGoalProgress('online', delta);
+    }
   };
 })();

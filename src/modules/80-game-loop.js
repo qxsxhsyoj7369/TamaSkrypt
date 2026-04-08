@@ -25,10 +25,15 @@
       return;
     }
 
+    const rewards = R.getHourlyQuestRewards ? R.getHourlyQuestRewards(R.state.dailyQuest) : {
+      coins: R.CONFIG.HOURLY_REWARD_COINS,
+      xp: R.CONFIG.HOURLY_REWARD_XP,
+    };
+
     R.state.dailyQuest.claimed = true;
-    R.state.coins += R.CONFIG.HOURLY_REWARD_COINS;
-    R.gainXP(R.CONFIG.HOURLY_REWARD_XP);
-    R.showMessage(`🎁 +${R.CONFIG.HOURLY_REWARD_COINS} monet, +${R.CONFIG.HOURLY_REWARD_XP} XP`, 3500);
+    R.state.coins += rewards.coins;
+    R.gainXP(rewards.xp);
+    R.showMessage(`🎁 +${rewards.coins} monet, +${rewards.xp} XP`, 3500);
     R.persistState();
     R.updateUI();
   };
@@ -87,7 +92,9 @@
 
       R.state.hunger = R.clamp(R.state.hunger + food.hunger, 0, 100);
       R.state.foodCollected += 1;
-      R.state.dailyQuest.feedProgress = Math.min(R.CONFIG.HOURLY_FEED_TARGET, R.state.dailyQuest.feedProgress + 1);
+      if (R.incrementHourlyGoalProgress) {
+        R.incrementHourlyGoalProgress('feed', 1);
+      }
 
       const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;
       R.gainXP(Math.round(food.xp * xpBoost));

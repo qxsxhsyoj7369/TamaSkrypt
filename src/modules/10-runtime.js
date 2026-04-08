@@ -30,6 +30,45 @@
   runtime.CONFIG.DAILY_REWARD_COINS = runtime.CONFIG.HOURLY_REWARD_COINS;
   runtime.CONFIG.DAILY_REWARD_XP = runtime.CONFIG.HOURLY_REWARD_XP;
 
+  runtime.HOURLY_GOAL_DEFS = [
+    {
+      id: 'feed',
+      icon: '🍽️',
+      label: 'Karm',
+      unit: 'count',
+      minTarget: 2,
+      maxTarget: 5,
+      baseRewardCoins: 8,
+      baseRewardXp: 6,
+      rewardStepCoins: 4,
+      rewardStepXp: 3,
+    },
+    {
+      id: 'online',
+      icon: '⏱️',
+      label: 'Graj',
+      unit: 'ms',
+      minTargetMinutes: 4,
+      maxTargetMinutes: 12,
+      baseRewardCoins: 10,
+      baseRewardXp: 8,
+      rewardStepCoins: 3,
+      rewardStepXp: 2,
+    },
+    {
+      id: 'pet',
+      icon: '🤲',
+      label: 'Głaszcz',
+      unit: 'count',
+      minTarget: 12,
+      maxTarget: 36,
+      baseRewardCoins: 9,
+      baseRewardXp: 7,
+      rewardStepCoins: 3,
+      rewardStepXp: 2,
+    },
+  ];
+
   runtime.FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
   runtime.FIREBASE_TIMEOUT = 10000;
 
@@ -85,12 +124,117 @@
     return `${y}-${m}-${day}-${h}`;
   };
 
-  runtime.makeHourlyQuest = function makeHourlyQuest() {
+  runtime.createSeededRng = function createSeededRng(seedText) {
+    let seed = 2166136261;
+    const text = String(seedText || 'gelek');
+    for (let index = 0; index < text.length; index += 1) {
+      seed ^= text.charCodeAt(index);
+      seed = Math.imul(seed, 16777619);
+      seed >>>= 0;
+    }
+    return function nextRandom() {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+  };
+
+  runtime.randomInt = function randomInt(min, max, random) {
+    if (max <= min) return min;
+    const roll = typeof random === 'function' ? random() : Math.random();
+    return min + Math.floor(roll * (max - min + 1));
+  };
+
+  runtime.computeHourlyGoalReward = function computeHourlyGoalReward(definition, targetValue) {
+    if (!definition) return { coins: 0, xp: 0 };
+    if (definition.unit === 'ms') {
+      const minutes = Math.max(1, Math.round(targetValue / 60000));
+      const level = Math.max(0, minutes - (definition.minTargetMinutes || minutes));
+      return {
+        coins: definition.baseRewardCoins + (level * definition.rewardStepCoins),
+        xp: definition.baseRewardXp + (level * definition.rewardStepXp),
+      };
+    }
+    const level = Math.max(0, Number(targetValue) - Number(definition.minTarget || targetValue));
     return {
-      hourKey: runtime.getHourKey(),
-      feedProgress: 0,
-      onlineProgressMs: 0,
-      petProgress: 0,
+      coins: definition.baseRewardCoins + (level * definition.rewardStepCoins),
+      xp: definition.baseRewardXp + (level * definition.rewardStepXp),
+    };
+  };
+
+  runtime.createHourlyGoal = function createHourlyGoal(definition, random) {
+    if (!definition) return null;
+    const target = definition.unit === 'ms'
+      ? runtime.randomInt(definition.minTargetMinutes, definition.maxTargetMinutes, random) * 60000
+      : runtime.randomInt(definition.minTarget, definition.maxTarget, random);
+    const reward = runtime.computeHourlyGoalReward(definition, target);
+    return {
+      id: definition.id,
+      icon: definition.icon,
+      label: definition.label,
+      unit: definition.unit,
+      target,
+      progress: 0,
+      rewardCoins: reward.coins,
+      rewardXp: reward.xp,
+    };
+  };
+
+  runtime.createHourlyGoals = function createHourlyGoals(seedText) {
+    const random = runtime.createSeededRng(seedText);
+    return runtime.HOURLY_GOAL_DEFS
+      .map(definition => runtime.createHourlyGoal(definition, random))
+      .filter(Boolean);
+  };
+
+  runtime.getHourlyGoalById = function getHourlyGoalById(quest, goalId) {
+    if (!quest || !Array.isArray(quest.goals)) return null;
+    return quest.goals.find(goal => goal && goal.id === goalId) || null;
+  };
+
+  runtime.formatGoalProgress = function formatGoalProgress(goal) {
+    if (!goal) return '0/0';
+    if (goal.unit === 'ms') {
+      const currentMinutes = Math.floor((Number(goal.progress) || 0) / 60000);
+      const targetMinutes = Math.max(1, Math.round((Number(goal.target) || 0) / 60000));
+      return `${currentMinutes}/${targetMinutes}m`;
+    }
+    return `${Math.floor(Number(goal.progress) || 0)}/${Math.max(1, Math.floor(Number(goal.target) || 0))}`;
+  };
+
+  runtime.getHourlyGoalPercent = function getHourlyGoalPercent(goal) {
+    if (!goal) return 0;
+    const target = Math.max(1, Number(goal.target) || 1);
+    const progress = Math.max(0, Number(goal.progress) || 0);
+    return runtime.clamp(Math.round((progress / target) * 100), 0, 100);
+  };
+
+  runtime.getHourlyQuestRewards = function getHourlyQuestRewards(quest) {
+    const goals = quest && Array.isArray(quest.goals) ? quest.goals : [];
+    return goals.reduce((acc, goal) => {
+      acc.coins += Math.max(0, Number(goal && goal.rewardCoins) || 0);
+      acc.xp += Math.max(0, Number(goal && goal.rewardXp) || 0);
+      return acc;
+    }, { coins: 0, xp: 0 });
+  };
+
+  runtime.incrementHourlyGoalProgress = function incrementHourlyGoalProgress(goalId, amount) {
+    if (!runtime.state || !runtime.state.dailyQuest) return;
+    const goal = runtime.getHourlyGoalById(runtime.state.dailyQuest, goalId);
+    if (!goal) return;
+    const delta = Math.max(0, Number(amount) || 0);
+    goal.progress = runtime.clamp((Number(goal.progress) || 0) + delta, 0, Math.max(1, Number(goal.target) || 1));
+  };
+
+  runtime.makeHourlyQuest = function makeHourlyQuest() {
+    const hourKey = runtime.getHourKey();
+    const seedIdentity = runtime.currentUid || runtime.currentUser || 'guest';
+    const goals = runtime.createHourlyGoals(`${seedIdentity}::${hourKey}`);
+    const rewards = runtime.getHourlyQuestRewards({ goals });
+    return {
+      hourKey,
+      goals,
+      rewardCoins: rewards.coins,
+      rewardXp: rewards.xp,
       claimed: false,
     };
   };
@@ -103,11 +247,36 @@
     if (!raw || typeof raw !== 'object') return runtime.makeHourlyQuest();
     const hourKey = raw.hourKey || raw.dayKey;
     if (hourKey !== runtime.getHourKey()) return runtime.makeHourlyQuest();
+
+    const seedIdentity = runtime.currentUid || runtime.currentUser || 'guest';
+    const defaults = runtime.createHourlyGoals(`${seedIdentity}::${hourKey}`);
+    const incomingGoals = Array.isArray(raw.goals) ? raw.goals : [];
+    const mergedGoals = defaults.map((defGoal) => {
+      const existing = incomingGoals.find(goal => goal && goal.id === defGoal.id) || null;
+      let progressValue = Number(existing && existing.progress);
+      if (!Number.isFinite(progressValue)) {
+        if (defGoal.id === 'feed') progressValue = Number(raw.feedProgress);
+        if (defGoal.id === 'online') progressValue = Number(raw.onlineProgressMs);
+        if (defGoal.id === 'pet') progressValue = Number(raw.petProgress);
+      }
+      const target = Math.max(1, Number(existing && existing.target) || Number(defGoal.target) || 1);
+      const rewardCoins = Math.max(0, Number(existing && existing.rewardCoins) || Number(defGoal.rewardCoins) || 0);
+      const rewardXp = Math.max(0, Number(existing && existing.rewardXp) || Number(defGoal.rewardXp) || 0);
+      return {
+        ...defGoal,
+        target,
+        progress: runtime.clamp(Number.isFinite(progressValue) ? progressValue : 0, 0, target),
+        rewardCoins,
+        rewardXp,
+      };
+    });
+
+    const rewards = runtime.getHourlyQuestRewards({ goals: mergedGoals });
     return {
       hourKey,
-      feedProgress: runtime.clamp(Number(raw.feedProgress) || 0, 0, runtime.CONFIG.HOURLY_FEED_TARGET),
-      onlineProgressMs: runtime.clamp(Number(raw.onlineProgressMs) || 0, 0, runtime.CONFIG.HOURLY_ONLINE_TARGET_MS),
-      petProgress: runtime.clamp(Number(raw.petProgress) || 0, 0, runtime.CONFIG.HOURLY_PET_TARGET),
+      goals: mergedGoals,
+      rewardCoins: rewards.coins,
+      rewardXp: rewards.xp,
       claimed: Boolean(raw.claimed),
     };
   };
@@ -116,9 +285,9 @@
 
   runtime.isDailyQuestCompleted = function isDailyQuestCompleted() {
     if (!runtime.state || !runtime.state.dailyQuest) return false;
-    return runtime.state.dailyQuest.feedProgress >= runtime.CONFIG.HOURLY_FEED_TARGET
-      && runtime.state.dailyQuest.onlineProgressMs >= runtime.CONFIG.HOURLY_ONLINE_TARGET_MS
-      && runtime.state.dailyQuest.petProgress >= runtime.CONFIG.HOURLY_PET_TARGET;
+    const goals = runtime.state.dailyQuest.goals;
+    if (!Array.isArray(goals) || goals.length < 1) return false;
+    return goals.every(goal => (Number(goal.progress) || 0) >= (Number(goal.target) || 1));
   };
 
   runtime.formatTime = function formatTime(ms) {
