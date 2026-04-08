@@ -1,7 +1,7 @@
 {
-  "version": "3.23.0",
+  "version": "3.24.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Nowy scroll UX 2026: hover-reveal scrollbar, subtelna maska overflow i lepsze skalowanie wysokości paneli (CSS-only).",
+  "changelog": "Minimalizacja 2.0: zostaje animowany Gelek bez tła, poprawiony przycisk toggle bez emoji oraz nowa nazwa Gelek.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.23.0",
-      "hash": "d40b2dae609b2cbdc50b57b5c93389050502578008ef474ff8e4e277ab56e490",
+      "version": "3.24.0",
+      "hash": "458fe6e0de86845058a3656dd9002f9fe1352159fe66c4eb2c79569c1df45aeb",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.22.0",
-      "hash": "66844fe416a15ab16f5ee7748c5589b1482ea7190bbaf7c4d6a28d87c3d10dd9",
+      "version": "3.24.0",
+      "hash": "ab6ceb90ea604d8a9e3db2804e31f645b75a7a78341f8620cb005d102f8fc1a5",
       "execute": "raw",
       "required": true
     },

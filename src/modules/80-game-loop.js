@@ -152,9 +152,22 @@
     const toggle = R.getElById ? R.getElById('__ts_toggle__') : document.getElementById('__ts_toggle__');
     const body = R.getElById ? R.getElById('__ts_body__') : document.getElementById('__ts_body__');
     if (toggle && body) {
+      const widget = R.getElById ? R.getElById('__tamaskrypt_widget__') : document.getElementById('__tamaskrypt_widget__');
+      const updateToggleVisual = () => {
+        const minimized = widget ? widget.classList.contains('__ts_minimized__') : body.classList.contains('hidden');
+        toggle.textContent = minimized ? '+' : '−';
+        toggle.title = minimized ? 'Rozwiń' : 'Minimalizuj';
+      };
+
+      updateToggleVisual();
       toggle.addEventListener('click', () => {
-        body.classList.toggle('hidden');
-        toggle.textContent = body.classList.contains('hidden') ? '🔴' : '🟢';
+        if (widget) {
+          widget.classList.toggle('__ts_minimized__');
+        } else {
+          body.classList.toggle('hidden');
+        }
+        updateToggleVisual();
+        if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
       });
     }
 

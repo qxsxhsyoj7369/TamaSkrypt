@@ -351,6 +351,7 @@
         border: 1px solid oklch(100% 0 0 / 0.2);
         border-bottom-color: oklch(100% 0 0 / 0.12);
         box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32);
+        transition: padding .22s ease, border-radius .22s ease, background .22s ease, box-shadow .22s ease, border-color .22s ease;
       }
 
       #__ts_body__ {
@@ -446,8 +447,55 @@
         100% { background-position: 100% 40%, 0% 0%, 60% 75%, 50% 50%; }
       }
 
-      #__ts_body__.hidden { display: none; }
-      #__ts_toggle__ { cursor: pointer; font-size: 10px; }
+      #__ts_toggle__ {
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: oklch(98% 0.01 300);
+        border: 1px solid oklch(100% 0 0 / 0.35);
+        background: oklch(100% 0 0 / 0.1);
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32);
+      }
+
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_header__ {
+        padding: 6px 10px;
+        border-radius: 16px;
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+      }
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_body__ {
+        min-width: 0;
+        display: block;
+        max-height: none;
+        padding: 0;
+        margin-top: 2px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        animation: none;
+        overflow: visible;
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_body__ > :not(#__ts_zelek__) {
+        display: none !important;
+      }
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_zelek__ {
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
 
       #__ts_zelek__ {
         display:flex;
@@ -915,8 +963,8 @@
     return `
       <div id="__tamaskrypt_widget__">
         <div id="__ts_header__">
-          <span id="__ts_toggle__">🟢</span>
-          <span>TamaSkrypt</span>
+          <span id="__ts_toggle__" title="Minimalizuj">−</span>
+          <span>Gelek</span>
           <span style="margin-left:auto;font-size:10px;opacity:.85;">👤 ${R.currentUser}</span>
           <button id="__ts_logout__" style="background:none;border:none;color:#fff;cursor:pointer;">⏏</button>
         </div>
@@ -1122,7 +1170,7 @@
   R.buildAuthHTML = function buildAuthHTML() {
     return `
       <div id="__ts_auth_card__">
-        <div style="font-size:22px;font-weight:bold;color:#764ba2;margin-bottom:4px;">🟣 TamaSkrypt</div>
+        <div style="font-size:22px;font-weight:bold;color:#764ba2;margin-bottom:4px;">🟣 Gelek</div>
         <p style="font-size:13px;color:#888;margin:0 0 18px;">Twój wirtualny żelek czeka!</p>
         <div id="__ts_auth_tabs__">
           <button type="button" id="__ts_tab_login__" class="active">Zaloguj się</button>
