@@ -5,7 +5,15 @@
   if (!R) return;
 
   const STYLE_ID_WIDGET = '__ts_petting_styles_widget__';
-  const STYLE_ID_GLOBAL = '__ts_petting_styles_global__';
+  const PET_PARTICLES = [
+    { content: '❤️', type: 'heart' },
+    { content: '✨', type: 'spark' },
+    { content: '🎵', type: 'music' },
+  ];
+  const PETTING_SOUND_URL = 'https://www.myinstants.com/media/sounds/cartoonslip.mp3';
+  const PETTING_PERSIST_DEBOUNCE_MS = 850;
+  let pettingPersistTimer = null;
+  let pettingAudio = null;
 
   function ensureStyles() {
     const widgetRoot = R.getWidgetRoot ? R.getWidgetRoot() : null;
@@ -37,26 +45,6 @@
       widgetRoot.appendChild(widgetStyle);
     }
 
-    if (document.getElementById(STYLE_ID_GLOBAL)) return;
-    const globalStyle = document.createElement('style');
-    globalStyle.id = STYLE_ID_GLOBAL;
-    globalStyle.textContent = `
-      .__ts_petting_fx__ {
-        position: fixed;
-        z-index: 2147483647;
-        font: 700 11px/1 'Segoe UI', Arial, sans-serif;
-        color: #6b46c1;
-        pointer-events: none;
-        animation: __tsPetFloat .8s ease-out forwards;
-        text-shadow: 0 1px 2px rgba(255,255,255,.75);
-      }
-      @keyframes __tsPetFloat {
-        0% { opacity: 0; transform: translate(-50%, 0) scale(.85); }
-        15% { opacity: 1; transform: translate(-50%, -3px) scale(1); }
-        100% { opacity: 0; transform: translate(-50%, -28px) scale(1.05); }
-      }
-    `;
-    (document.head || document.documentElement).appendChild(globalStyle);
   }
 
   function playPettingAnimation(targetEl) {
@@ -66,20 +54,51 @@
     targetEl.classList.add('__ts_petting_pop__');
   }
 
-  function showPettingFx(x, y) {
-    const fx = document.createElement('div');
-    fx.className = '__ts_petting_fx__';
-    fx.textContent = '🤲 +1XP +0.1HP';
-    fx.style.left = `${Math.round(x)}px`;
-    fx.style.top = `${Math.round(y)}px`;
-    (document.body || document.documentElement).appendChild(fx);
-    setTimeout(() => {
-      if (fx.parentNode) fx.remove();
-    }, 900);
+  function schedulePersistState() {
+    if (pettingPersistTimer) clearTimeout(pettingPersistTimer);
+    pettingPersistTimer = setTimeout(() => {
+      pettingPersistTimer = null;
+      if (typeof R.persistState === 'function') R.persistState();
+    }, PETTING_PERSIST_DEBOUNCE_MS);
+  }
+
+  function playPettingSound() {
+    try {
+      if (!pettingAudio) {
+        pettingAudio = new Audio(PETTING_SOUND_URL);
+        pettingAudio.preload = 'auto';
+        pettingAudio.volume = 0.2;
+      }
+      const snd = pettingAudio.cloneNode ? pettingAudio.cloneNode() : new Audio(PETTING_SOUND_URL);
+      snd.volume = 0.2;
+      const playPromise = snd.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } catch (_) {}
+  }
+
+  function spawnPetParticles(evt, targetEl) {
+    if (!R.spawnParticle) return;
+    const rect = targetEl && targetEl.getBoundingClientRect ? targetEl.getBoundingClientRect() : null;
+    const pointX = evt && Number.isFinite(evt.clientX) ? evt.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
+    const pointY = evt && Number.isFinite(evt.clientY) ? evt.clientY : (rect ? rect.top + 14 : window.innerHeight / 2);
+    const widget = R.getElById ? R.getElById('__tamaskrypt_widget__') : document.getElementById('__tamaskrypt_widget__');
+    const widgetRect = widget && widget.getBoundingClientRect ? widget.getBoundingClientRect() : { left: 0, top: 0 };
+    const x = pointX - widgetRect.left;
+    const y = pointY - widgetRect.top;
+    const randomParticle = PET_PARTICLES[Math.floor(Math.random() * PET_PARTICLES.length)] || PET_PARTICLES[0];
+
+    R.spawnParticle(x, y, randomParticle.content, randomParticle.type);
+    R.spawnParticle(x + ((Math.random() * 16) - 8), y + 2, '+1 XP', 'xp');
   }
 
   R.handlePetting = function handlePetting(evt) {
     if (!R.state || !R.state.alive) return;
+
+    const petEl = evt && evt.currentTarget ? evt.currentTarget : (R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__'));
+    spawnPetParticles(evt, petEl);
+    playPettingSound();
 
     const previousHp = Number(R.state.hp) || 0;
     const increasedHp = Math.round((previousHp + 0.1) * 10) / 10;
@@ -96,18 +115,10 @@
       R.incrementHourlyGoalProgress('pet', 1);
     }
 
-    const rect = evt && evt.currentTarget && evt.currentTarget.getBoundingClientRect
-      ? evt.currentTarget.getBoundingClientRect()
-      : null;
-    const pointX = evt && Number.isFinite(evt.clientX) ? evt.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
-    const pointY = evt && Number.isFinite(evt.clientY) ? evt.clientY : (rect ? rect.top + 10 : window.innerHeight / 2);
-
     const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
-    const petRoot = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
-    playPettingAnimation(petBody || petRoot);
-    showPettingFx(pointX, pointY);
+    playPettingAnimation(petBody || petEl);
 
-    if (typeof R.persistState === 'function') R.persistState();
+    schedulePersistState();
     if (typeof R.updateUI === 'function') R.updateUI();
   };
 

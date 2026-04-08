@@ -296,6 +296,36 @@
       </div>`;
   };
 
+  R.spawnParticle = function spawnParticle(x, y, content, type) {
+    const bodyEl = R.getElById ? R.getElById('__ts_body__') : document.getElementById('__ts_body__');
+    const widgetEl = R.getElById ? R.getElById('__tamaskrypt_widget__') : document.getElementById('__tamaskrypt_widget__');
+    if (!bodyEl || !widgetEl) return;
+
+    const safeX = Number.isFinite(x) ? x : 0;
+    const safeY = Number.isFinite(y) ? y : 0;
+    const bodyRect = bodyEl.getBoundingClientRect();
+    const widgetRect = widgetEl.getBoundingClientRect();
+    const offsetX = bodyRect.left - widgetRect.left;
+    const offsetY = bodyRect.top - widgetRect.top;
+
+    const particle = document.createElement('span');
+    const particleType = String(type || 'default').replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+    particle.className = `__ts_particle__ __ts_particle_${particleType || 'default'}__`;
+    particle.textContent = content == null ? '✨' : String(content);
+
+    const localX = safeX - offsetX + bodyEl.scrollLeft;
+    const localY = safeY - offsetY + bodyEl.scrollTop;
+    particle.style.left = `${Math.round(localX)}px`;
+    particle.style.top = `${Math.round(localY)}px`;
+
+    bodyEl.appendChild(particle);
+    const removeParticle = () => {
+      if (particle.parentNode) particle.remove();
+    };
+    particle.addEventListener('animationend', removeParticle, { once: true });
+    setTimeout(removeParticle, 1600);
+  };
+
   R.applyWidgetStyles = function applyWidgetStyles() {
     const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
     const styleHost = root || document.head || document.documentElement || document.body;
@@ -360,6 +390,7 @@
         border-radius: 0 0 18px 18px;
         display: grid;
         gap: 8px;
+        position: relative;
         max-height: min(85vh, calc(100vh - 86px));
         overflow-y: auto;
         overflow-x: hidden;
@@ -495,6 +526,34 @@
         border-radius: 0;
         background: transparent;
         box-shadow: none;
+      }
+
+      .__ts_particle__ {
+        position: absolute;
+        pointer-events: none;
+        z-index: 7;
+        left: 0;
+        top: 0;
+        transform: translate(-50%, 0) scale(0.5);
+        opacity: 0;
+        font-size: 14px;
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 6px oklch(4% 0.02 280 / 0.35), 0 0 10px oklch(100% 0 0 / 0.42);
+        filter: saturate(1.15);
+        animation: floatUp 1.5s cubic-bezier(.18,.72,.22,1) forwards;
+        will-change: transform, opacity;
+      }
+      .__ts_particle_heart__ { color: oklch(82% 0.22 8); }
+      .__ts_particle_spark__ { color: oklch(92% 0.08 90); }
+      .__ts_particle_music__ { color: oklch(84% 0.13 238); }
+      .__ts_particle_xp__ { color: oklch(82% 0.18 154); font-size: 11px; }
+
+      @keyframes floatUp {
+        0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); }
+        22% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
+        100% { opacity: 0; transform: translate(-50%, -46px) scale(1); }
       }
 
       #__ts_zelek__ {
