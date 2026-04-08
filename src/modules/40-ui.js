@@ -4,6 +4,15 @@
   const R = window.GelekRuntime;
   if (!R) return;
 
+  R.getLauncherDiagnostics = function getLauncherDiagnostics() {
+    const info = window.__TS_LAUNCHER_DIAGNOSTICS__ || {};
+    return {
+      mode: info.mode || 'unknown',
+      manifestVersion: info.manifestVersion || 'n/a',
+      source: info.source || 'unknown',
+    };
+  };
+
   R.buildZelekSVG = function buildZelekSVG() {
     const state = R.state;
     const level = state ? state.level : 1;
@@ -43,6 +52,9 @@
       .__ts_daily_online_bar__ { background: linear-gradient(90deg,#06d6a0,#118ab2); }
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
+      #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
+      #__ts_diag_badge__ { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; letter-spacing:.02em; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; }
+      #__ts_diag_mode__ { text-transform:uppercase; }
       #__ts_msg__ { text-align:center; font-size:11px; color:#764ba2; min-height:14px; font-weight:bold; margin-top:4px; }
       #__ts_tabs__ { display:grid; grid-template-columns: repeat(4,1fr); gap:4px; margin-top:8px; }
       #__ts_tabs__ button { border:none; border-radius:6px; padding:5px; font-size:10px; cursor:pointer; background:#ece8f8; color:#49327a; }
@@ -74,6 +86,7 @@
     const dailyFeedPct = Math.round((state.dailyQuest.feedProgress / R.CONFIG.DAILY_FEED_TARGET) * 100);
     const dailyOnlinePct = Math.round((state.dailyQuest.onlineProgressMs / R.CONFIG.DAILY_ONLINE_TARGET_MS) * 100);
     const canClaimDaily = R.isDailyQuestCompleted() && !state.dailyQuest.claimed;
+    const diagnostics = R.getLauncherDiagnostics();
 
     return `
       <div id="__ts_header__">
@@ -88,6 +101,7 @@
         <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
         <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
+        <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
         <div style="margin-top:8px;border:1px dashed #b8a6d9;border-radius:10px;padding:6px;background:#faf8ff;">
           <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">📅 Misja dnia</div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍽️ Karm</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_daily_feed_bar__" style="width:${R.clamp(dailyFeedPct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_daily_feed_val__">${state.dailyQuest.feedProgress}/${R.CONFIG.DAILY_FEED_TARGET}</span></div>
@@ -171,6 +185,14 @@
 
     const coinsEl = document.getElementById('__ts_coins__');
     if (coinsEl) coinsEl.textContent = String(state.coins);
+
+    const diagnostics = R.getLauncherDiagnostics();
+    const diagModeEl = document.getElementById('__ts_diag_mode__');
+    const diagVersionEl = document.getElementById('__ts_diag_version__');
+    const diagBadgeEl = document.getElementById('__ts_diag_badge__');
+    if (diagModeEl) diagModeEl.textContent = diagnostics.mode;
+    if (diagVersionEl) diagVersionEl.textContent = `v${diagnostics.manifestVersion}`;
+    if (diagBadgeEl) diagBadgeEl.title = `source: ${diagnostics.source}`;
 
     const claimBtn = document.getElementById('__ts_claim_daily__');
     if (claimBtn) {

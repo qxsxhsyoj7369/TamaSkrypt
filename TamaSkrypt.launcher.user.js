@@ -30,6 +30,16 @@
   const KEY_MODULE_META = '__ts_launcher_modules_meta__';
   const KEY_MODULE_CODE_PREFIX = '__ts_launcher_mod_code__::';
 
+  function setLauncherDiagnostics(info) {
+    const current = window.__TS_LAUNCHER_DIAGNOSTICS__ || {};
+    window.__TS_LAUNCHER_DIAGNOSTICS__ = {
+      mode: info && info.mode ? info.mode : current.mode || 'unknown',
+      manifestVersion: info && info.manifestVersion ? String(info.manifestVersion) : current.manifestVersion || '',
+      source: info && info.source ? info.source : current.source || 'unknown',
+      updatedAt: Date.now(),
+    };
+  }
+
   function getJson(key, fallback) {
     try {
       const raw = GM_getValue(key, null);
@@ -196,6 +206,12 @@
     let completed = 0;
 
     try {
+      setLauncherDiagnostics({
+        mode: 'modules',
+        manifestVersion: manifest && manifest.version,
+        source: allowNetwork ? 'network' : 'cache',
+      });
+
       for (const mod of moduleList) {
         const cacheKey = KEY_MODULE_CODE_PREFIX + mod.name;
         const cachedInfo = moduleMeta[mod.name] || {};
@@ -294,11 +310,21 @@
     const cachedVersion = GM_getValue(KEY_VERSION, '');
 
     if (!allowNetwork || (manifest.version === cachedVersion && cachedCode)) {
+      setLauncherDiagnostics({
+        mode: 'legacy',
+        manifestVersion: manifest && manifest.version ? manifest.version : cachedVersion,
+        source: 'cache',
+      });
       return runCode(cachedCode, 'legacy-cache');
     }
 
     if (!manifest.scriptUrl) return false;
     try {
+      setLauncherDiagnostics({
+        mode: 'legacy',
+        manifestVersion: manifest && manifest.version,
+        source: 'network',
+      });
       const code = await requestText(manifest.scriptUrl, 15000);
       GM_setValue(KEY_CODE, code);
       GM_setValue(KEY_VERSION, String(manifest.version || ''));
@@ -307,6 +333,11 @@
       return runCode(code, 'legacy-download');
     } catch (error) {
       console.warn('[TamaSkrypt Launcher] Legacy download failed:', error.message);
+      setLauncherDiagnostics({
+        mode: 'legacy',
+        manifestVersion: cachedVersion || (manifest && manifest.version) || '',
+        source: 'cache-fallback',
+      });
       return cachedCode ? runCode(cachedCode, 'legacy-cache-fallback') : false;
     }
   }
@@ -318,6 +349,11 @@
       if (ok) return true;
     }
     const code = GM_getValue(KEY_CODE, '');
+    setLauncherDiagnostics({
+      mode: 'legacy',
+      manifestVersion: GM_getValue(KEY_VERSION, ''),
+      source: 'cache',
+    });
     return code ? runCode(code, 'legacy-cache') : false;
   }
 
