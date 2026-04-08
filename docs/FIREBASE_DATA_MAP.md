@@ -118,3 +118,39 @@ Plik: `firebase/database.rules.json`
   }
 }
 ```
+
+## 8) Wersjonowanie schematu
+
+- `meta/schemaVersion` — zawsze zawiera bieżącą wersję schematu
+- Przy każdej zmianie struktury bazy: podwyższ wersję i dodaj wpis do `docs/MIGRATIONS.md`
+- Userscript sprawdza `schemaVersion` przy uruchomieniu — jeśli się nie zgadza, wyświetla warning
+
+Więcej informacji: `docs/MIGRATIONS.md`
+
+## 9) Constraints i validacja
+
+Każde pole ma określone reguły walidacji:
+
+- `hp`, `hunger`, `joy`: `[0, 100]` (integer)
+- `xp`: `[0, ∞)` (integer)
+- `level`: `[1, 999]` (integer)
+- `foodCollected`: `[0, ∞)` (integer)
+- `username`: `[2, 20]` znaki, lowercase + digits + `_`
+- `name`: `[1, 50]` znaki
+
+Userscript waliduje te pola **przed** zapisaniem do Firebase i po pobraniu z serwera.
+
+## 10) Synchronizacja i conflict resolution
+
+Każdy rekord gracza ma `updatedAt` — timestamp ostatniej modyfikacji.
+
+**Reguła**: Jeśli serwer ma nowszą wersję (większy `updatedAt`) — zmerguj je (server wins, ale preserve lokalne niezapisane zmiany).
+
+Algorytm:
+```javascript
+if (localData.updatedAt < serverData.updatedAt) {
+  // Server has newer version
+  localData = mergeStates(serverData, unsavedLocalChanges);
+  saveToLocalStorage(localData);
+}
+```
