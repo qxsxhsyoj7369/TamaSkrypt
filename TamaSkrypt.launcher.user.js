@@ -1,15 +1,18 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.1.0
+// @version      3.2.0
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
+// @updateURL    https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.launcher.user.js
+// @downloadURL  https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.launcher.user.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
+// @connect      cdn.jsdelivr.net
 // @connect      gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app
 // @run-at       document-end
 // @noframes
@@ -23,6 +26,7 @@
   const GITHUB_BRANCH = 'main';
   const MANIFEST_PATH = 'manifest.json';
   const MANIFEST_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${MANIFEST_PATH}`;
+  const MANIFEST_CDN_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${MANIFEST_PATH}`;
   const GITHUB_REF_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/ref/heads/${GITHUB_BRANCH}`;
   const RAW_REPO_PREFIX = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/`;
   const FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
@@ -415,16 +419,25 @@
     const preferredUrl = latestCommitSha
       ? rewriteRawGithubUrl(MANIFEST_URL, latestCommitSha)
       : MANIFEST_URL;
+    const cdnPreferredUrl = latestCommitSha
+      ? `https://cdn.jsdelivr.net/gh/${GITHUB_OWNER}/${GITHUB_REPO}@${latestCommitSha}/${MANIFEST_PATH}`
+      : MANIFEST_CDN_URL;
 
     try {
       const body = await requestText(preferredUrl, 10000);
       const manifest = JSON.parse(body);
       return applyCommitShaToManifest(manifest, latestCommitSha);
     } catch (error) {
-      if (!latestCommitSha) throw error;
-      console.warn('[TamaSkrypt Launcher] Commit-pinned manifest unavailable, fallback to branch:', error.message);
-      const body = await requestText(MANIFEST_URL, 10000);
-      return JSON.parse(body);
+      console.warn('[TamaSkrypt Launcher] Primary manifest unavailable, trying fallback:', error.message);
+      try {
+        const body = await requestText(MANIFEST_URL, 10000);
+        return JSON.parse(body);
+      } catch (branchError) {
+        console.warn('[TamaSkrypt Launcher] Branch manifest unavailable, trying CDN:', branchError.message);
+        const body = await requestText(cdnPreferredUrl, 10000);
+        const manifest = JSON.parse(body);
+        return applyCommitShaToManifest(manifest, latestCommitSha);
+      }
     }
   }
 
