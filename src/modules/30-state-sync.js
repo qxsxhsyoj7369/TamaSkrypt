@@ -15,6 +15,17 @@
       R.firebaseRead(`users/${R.currentUid}/progress`),
     ]);
 
+    const progressSettings = (progress && progress.settings && typeof progress.settings === 'object')
+      ? progress.settings
+      : {};
+
+    if (R.applyUserGameplaySettings) {
+      const gameplaySettings = (progressSettings.gameplay && typeof progressSettings.gameplay === 'object')
+        ? progressSettings.gameplay
+        : null;
+      R.applyUserGameplaySettings(gameplaySettings);
+    }
+
     R.state = {
       hunger: R.clamp(Number(pet?.hunger) || 100, 0, 100),
       hp: R.clamp(Number(pet?.hp) || 100, 0, R.CONFIG.HP_MAX),
@@ -30,6 +41,7 @@
       dailyQuest: R.normalizeDailyQuest(progress?.dailyQuest),
       inventory: (progress && progress.inventory && typeof progress.inventory === 'object') ? progress.inventory : {},
       activeEffects: (progress && progress.activeEffects && typeof progress.activeEffects === 'object') ? progress.activeEffects : {},
+      progressSettings,
       lastDailyTick: R.now(),
       profileCreatedAt: Number(profile?.createdAt) || R.now(),
     };
@@ -85,6 +97,9 @@
         inventory: R.state.inventory || {},
         activeEffects: R.state.activeEffects || {},
         dailyQuest: R.state.dailyQuest,
+        settings: (R.state.progressSettings && typeof R.state.progressSettings === 'object')
+          ? R.state.progressSettings
+          : {},
         updatedAt: savedAt,
       },
     };

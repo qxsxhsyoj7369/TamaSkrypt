@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TamaSkrypt • Panel Administratora</title>
+  <style>
+    :root {
+      --bg: #0f1221;
+      --bg-soft: #171a2d;
+      --card: #1f2340;
+      --card-2: #22284a;
+      --text: #eef1ff;
+      --muted: #a9b2d0;
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --border: #343b67;
+      --shadow: 0 20px 50px rgba(0, 0, 0, .35);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(139, 92, 246, .24) 0, transparent 35%),
+        radial-gradient(circle at 90% 30%, rgba(34, 211, 238, .18) 0, transparent 35%),
+        linear-gradient(170deg, #0d1020, #101429 50%, #0c1022);
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, .20), rgba(34, 211, 238, .16));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, .55);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: #d7def9;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 980px) {
+      .grid { grid-template-columns: 380px 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #dbe5ff;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .row-1 { margin-bottom: 8px; }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #475087;
+      background: rgba(9, 12, 25, .48);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, .14);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      cursor: pointer;
+      color: #fff;
+      transition: transform .12s ease, filter .15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .btn-primary { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+    .btn-ok { background: linear-gradient(135deg, #16a34a, #22c55e); }
+    .btn-warn { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .btn-danger { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    .btn-soft { background: linear-gradient(135deg, #4b5563, #64748b); }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      background: rgba(148, 163, 184, .14);
+      color: #d7defa;
+    }
+
+    .status.ok {
+      background: rgba(34, 197, 94, .15);
+      border-color: rgba(34, 197, 94, .35);
+      color: #c8ffd9;
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, .15);
+      border-color: rgba(239, 68, 68, .35);
+      color: #ffd4d4;
+    }
+
+    .status.warn {
+      background: rgba(245, 158, 11, .14);
+      border-color: rgba(245, 158, 11, .35);
+      color: #ffe7c0;
+    }
+
+    .small {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.45;
+    }
+
+    .split {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1100px) {
+      .split { grid-template-columns: 1fr 1fr; }
+    }
+
+    .kbd {
+      display: inline-block;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: #e6edff;
+      background: rgba(17, 24, 39, .6);
+      border: 1px solid #49507f;
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 6px;
+    }
+
+    .inline-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #d3dbf9;
+    }
+
+    .inline-toggle input {
+      width: auto;
+      transform: translateY(1px);
+    }
+
+    .muted-box {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(71, 80, 135, .6);
+      background: rgba(9, 12, 25, .42);
+      color: #c7d1f6;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1 class="title">🛠️ TamaSkrypt Admin Panel</h1>
+        <p class="subtitle">Edycja danych użytkownika w Firebase Realtime Database (HTML5)</p>
+      </div>
+      <div class="badge">Realtime DB • users/{uid}</div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2 class="section-title">Połączenie i użytkownik</h2>
+
+        <div class="row-1">
+          <label for="dbUrl">Firebase Database URL</label>
+          <input id="dbUrl" value="https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app" />
+        </div>
+
+        <div class="row-1">
+          <label for="authToken">Auth token (opcjonalnie)</label>
+          <input id="authToken" placeholder="np. token administracyjny / secret" />
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="lookupMode">Szukaj po</label>
+            <select id="lookupMode">
+              <option value="uid">UID</option>
+              <option value="username">username</option>
+            </select>
+          </div>
+          <div>
+            <label for="lookupValue">Wartość</label>
+            <input id="lookupValue" placeholder="uid_xxx lub nazwa" />
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn-primary" id="btnLoad">Wczytaj użytkownika</button>
+          <button class="btn-soft" id="btnClear">Wyczyść formularz</button>
+        </div>
+
+        <div class="status" id="statusBox">Gotowy. Wczytaj użytkownika, aby rozpocząć edycję.</div>
+
+        <div class="muted-box">
+          <strong>Uwaga bezpieczeństwo:</strong> panel daje pełną edycję dokumentu użytkownika.
+          Zmiany loginu (`profile.username` / `usernameToUid`) bez spójnej aktualizacji hasha mogą zablokować logowanie.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Edycja danych</h2>
+
+        <div class="split">
+          <div>
+            <h3 class="section-title">Profil i pet</h3>
+            <div class="row">
+              <div>
+                <label for="uid">UID</label>
+                <input id="uid" readonly />
+              </div>
+              <div>
+                <label for="username">Nick (`profile.username`)</label>
+                <input id="username" />
+              </div>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <label for="level">Level</label>
+                <input id="level" type="number" min="1" step="1" />
+              </div>
+              <div>
+                <label for="xp">XP</label>
+                <input id="xp" type="number" min="0" step="1" />
+              </div>
+              <div>
+                <label for="coins">Monety</label>
+                <input id="coins" type="number" min="0" step="1" />
+              </div>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <label for="hp">HP</label>
+                <input id="hp" type="number" min="0" step="1" />
+              </div>
+              <div>
+                <label for="hunger">Sytość</label>
+                <input id="hunger" type="number" min="0" step="1" />
+              </div>
+              <div>
+                <label for="alive">Alive</label>
+                <select id="alive">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <label for="foodCollected">foodCollected</label>
+                <input id="foodCollected" type="number" min="0" step="1" />
+              </div>
+              <div>
+                <label for="totalOnlineMs">totalOnlineMs</label>
+                <input id="totalOnlineMs" type="number" min="0" step="1" />
+              </div>
+              <div>
+                <label for="hourKey">hourKey misji</label>
+                <input id="hourKey" placeholder="YYYY-MM-DD-HH" />
+              </div>
+            </div>
+
+            <div class="inline-toggle">
+              <input id="syncUsernameMap" type="checkbox" />
+              <label for="syncUsernameMap" style="margin:0;color:#d9e1ff;">Synchronizuj `usernameToUid/{username}` przy zmianie nicku</label>
+            </div>
+
+            <p class="small">Opcja mapowania username jest zaawansowana — używaj tylko jeśli świadomie zarządzasz logowaniem.</p>
+          </div>
+
+          <div>
+            <h3 class="section-title">Misje i gameplay (per user)</h3>
+
+            <div class="row-3">
+              <div>
+                <label for="foodSpawnChance">Spawn chance jedzenia (0..1)</label>
+                <input id="foodSpawnChance" type="number" min="0" max="1" step="0.01" />
+              </div>
+              <div>
+                <label for="foodSpawnInterval">Spawn interval (ms)</label>
+                <input id="foodSpawnInterval" type="number" min="1000" step="500" />
+              </div>
+              <div>
+                <label for="foodDuration">Czas życia jedzenia (ms)</label>
+                <input id="foodDuration" type="number" min="1000" step="500" />
+              </div>
+            </div>
+
+            <div class="row-3">
+              <div>
+                <label for="hungerDrainRate">Hunger drain rate</label>
+                <input id="hungerDrainRate" type="number" min="0" step="0.1" />
+              </div>
+              <div>
+                <label for="hungerDrainInterval">Hunger drain interval (ms)</label>
+                <input id="hungerDrainInterval" type="number" min="1000" step="500" />
+              </div>
+              <div>
+                <label for="xpPerLevel">XP per level</label>
+                <input id="xpPerLevel" type="number" min="10" step="1" />
+              </div>
+            </div>
+
+            <div class="row-1">
+              <label for="dailyQuestJson">`progress.dailyQuest` (JSON)</label>
+              <textarea id="dailyQuestJson" spellcheck="false"></textarea>
+            </div>
+
+            <div class="row-1">
+              <label for="rawUserJson">Podgląd `users/{uid}` (JSON)</label>
+              <textarea id="rawUserJson" spellcheck="false"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn-ok" id="btnSaveMain">Zapisz level/xp/nick/misję + gameplay</button>
+          <button class="btn-warn" id="btnSaveQuestOnly">Zapisz tylko misję</button>
+          <button class="btn-danger" id="btnResetQuest">Resetuj misję (nowa godzina)</button>
+        </div>
+
+        <p class="small">Panel zapisuje zmiany do `users/{uid}` metodą `PATCH` i automatycznie ustawia `updatedAt`.</p>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const ui = {
+      dbUrl: document.getElementById('dbUrl'),
+      authToken: document.getElementById('authToken'),
+      lookupMode: document.getElementById('lookupMode'),
+      lookupValue: document.getElementById('lookupValue'),
+      statusBox: document.getElementById('statusBox'),
+      uid: document.getElementById('uid'),
+      username: document.getElementById('username'),
+      level: document.getElementById('level'),
+      xp: document.getElementById('xp'),
+      coins: document.getElementById('coins'),
+      hp: document.getElementById('hp'),
+      hunger: document.getElementById('hunger'),
+      alive: document.getElementById('alive'),
+      foodCollected: document.getElementById('foodCollected'),
+      totalOnlineMs: document.getElementById('totalOnlineMs'),
+      hourKey: document.getElementById('hourKey'),
+      foodSpawnChance: document.getElementById('foodSpawnChance'),
+      foodSpawnInterval: document.getElementById('foodSpawnInterval'),
+      foodDuration: document.getElementById('foodDuration'),
+      hungerDrainRate: document.getElementById('hungerDrainRate'),
+      hungerDrainInterval: document.getElementById('hungerDrainInterval'),
+      xpPerLevel: document.getElementById('xpPerLevel'),
+      dailyQuestJson: document.getElementById('dailyQuestJson'),
+      rawUserJson: document.getElementById('rawUserJson'),
+      syncUsernameMap: document.getElementById('syncUsernameMap'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnClear: document.getElementById('btnClear'),
+      btnSaveMain: document.getElementById('btnSaveMain'),
+      btnSaveQuestOnly: document.getElementById('btnSaveQuestOnly'),
+      btnResetQuest: document.getElementById('btnResetQuest'),
+    };
+
+    let loadedUser = null;
+
+    function normalizeDbUrl(url) {
+      return String(url || '').trim().replace(/\/+$/, '');
+    }
+
+    function buildUrl(path) {
+      const root = normalizeDbUrl(ui.dbUrl.value);
+      if (!root) throw new Error('Brak Database URL');
+      const token = String(ui.authToken.value || '').trim();
+      const tokenSuffix = token ? `${path.includes('?') ? '&' : '?'}auth=${encodeURIComponent(token)}` : '';
+      return `${root}/${path}.json${tokenSuffix}`;
+    }
+
+    async function dbRead(path) {
+      const resp = await fetch(buildUrl(path));
+      if (!resp.ok) throw new Error(`GET ${path}: ${resp.status}`);
+      return resp.json();
+    }
+
+    async function dbWrite(path, data, method = 'PATCH') {
+      const resp = await fetch(buildUrl(path), {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!resp.ok) throw new Error(`${method} ${path}: ${resp.status}`);
+      return resp.json().catch(() => null);
+    }
+
+    function setStatus(text, type = '') {
+      ui.statusBox.textContent = text;
+      ui.statusBox.className = `status ${type}`.trim();
+    }
+
+    function nowTs() {
+      return Date.now();
+    }
+
+    function getHourKey(ts = Date.now()) {
+      const d = new Date(ts);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      return `${y}-${m}-${day}-${h}`;
+    }
+
+    function num(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function safeJsonParse(text, fallback = null) {
+      try { return JSON.parse(text); } catch { return fallback; }
+    }
+
+    function fillForm(uid, userDoc) {
+      loadedUser = userDoc;
+      const profile = userDoc.profile || {};
+      const pet = userDoc.pet || {};
+      const stats = userDoc.stats || {};
+      const progress = userDoc.progress || {};
+      const settings = (progress.settings && typeof progress.settings === 'object') ? progress.settings : {};
+      const gameplay = (settings.gameplay && typeof settings.gameplay === 'object') ? settings.gameplay : {};
+
+      ui.uid.value = uid || '';
+      ui.username.value = profile.username || '';
+      ui.level.value = num(pet.level, 1);
+      ui.xp.value = num(pet.xp, 0);
+      ui.coins.value = num(progress.coins, 0);
+      ui.hp.value = num(pet.hp, 100);
+      ui.hunger.value = num(pet.hunger, 100);
+      ui.alive.value = String(typeof pet.alive === 'boolean' ? pet.alive : true);
+      ui.foodCollected.value = num(pet.foodCollected, 0);
+      ui.totalOnlineMs.value = num(stats.totalOnlineMs, 0);
+      ui.hourKey.value = (progress.dailyQuest && progress.dailyQuest.hourKey) || getHourKey();
+
+      ui.foodSpawnChance.value = gameplay.HUNGER_FOOD_SPAWN_CHANCE ?? 0.35;
+      ui.foodSpawnInterval.value = gameplay.FOOD_SPAWN_INTERVAL ?? 30000;
+      ui.foodDuration.value = gameplay.FOOD_DURATION ?? 15000;
+      ui.hungerDrainRate.value = gameplay.HUNGER_DRAIN_RATE ?? 1;
+      ui.hungerDrainInterval.value = gameplay.HUNGER_DRAIN_INTERVAL ?? 60000;
+      ui.xpPerLevel.value = gameplay.XP_PER_LEVEL ?? 100;
+
+      const quest = progress.dailyQuest || { hourKey: getHourKey(), version: 2, goals: [], claimed: false };
+      ui.dailyQuestJson.value = JSON.stringify(quest, null, 2);
+      ui.rawUserJson.value = JSON.stringify(userDoc, null, 2);
+    }
+
+    function clearForm() {
+      loadedUser = null;
+      ui.uid.value = '';
+      ui.username.value = '';
+      ui.level.value = '';
+      ui.xp.value = '';
+      ui.coins.value = '';
+      ui.hp.value = '';
+      ui.hunger.value = '';
+      ui.alive.value = 'true';
+      ui.foodCollected.value = '';
+      ui.totalOnlineMs.value = '';
+      ui.hourKey.value = '';
+      ui.foodSpawnChance.value = '';
+      ui.foodSpawnInterval.value = '';
+      ui.foodDuration.value = '';
+      ui.hungerDrainRate.value = '';
+      ui.hungerDrainInterval.value = '';
+      ui.xpPerLevel.value = '';
+      ui.dailyQuestJson.value = '';
+      ui.rawUserJson.value = '';
+    }
+
+    async function resolveUid() {
+      const mode = ui.lookupMode.value;
+      const value = String(ui.lookupValue.value || '').trim();
+      if (!value) throw new Error('Wpisz UID lub username');
+      if (mode === 'uid') return value;
+      const uid = await dbRead(`usernameToUid/${encodeURIComponent(value.toLowerCase())}`);
+      if (!uid) throw new Error(`Nie znaleziono UID dla username: ${value}`);
+      return uid;
+    }
+
+    async function loadUser() {
+      setStatus('Wczytywanie użytkownika...');
+      const uid = await resolveUid();
+      const userDoc = await dbRead(`users/${uid}`);
+      if (!userDoc) throw new Error(`Brak users/${uid} w bazie`);
+      fillForm(uid, userDoc);
+      setStatus(`Wczytano users/${uid}`, 'ok');
+    }
+
+    function buildMainPatch() {
+      const uid = String(ui.uid.value || '').trim();
+      if (!uid) throw new Error('Brak UID — najpierw wczytaj użytkownika');
+
+      const oldUsername = String((loadedUser && loadedUser.profile && loadedUser.profile.username) || '').trim().toLowerCase();
+      const newUsernameRaw = String(ui.username.value || '').trim();
+      const newUsername = newUsernameRaw.toLowerCase();
+
+      const parsedQuest = safeJsonParse(ui.dailyQuestJson.value, null);
+      if (!parsedQuest || typeof parsedQuest !== 'object') {
+        throw new Error('Niepoprawny JSON misji (`progress.dailyQuest`)');
+      }
+
+      const ts = nowTs();
+      const patch = {
+        profile: {
+          ...(loadedUser?.profile || {}),
+          username: newUsernameRaw,
+          lastLoginAt: ts,
+        },
+        pet: {
+          ...(loadedUser?.pet || {}),
+          level: Math.max(1, Math.floor(num(ui.level.value, 1))),
+          xp: Math.max(0, Math.floor(num(ui.xp.value, 0))),
+          hp: Math.max(0, Math.floor(num(ui.hp.value, 100))),
+          hunger: Math.max(0, Math.floor(num(ui.hunger.value, 100))),
+          foodCollected: Math.max(0, Math.floor(num(ui.foodCollected.value, 0))),
+          alive: ui.alive.value === 'true',
+          updatedAt: ts,
+        },
+        stats: {
+          ...(loadedUser?.stats || {}),
+          totalOnlineMs: Math.max(0, Math.floor(num(ui.totalOnlineMs.value, 0))),
+          updatedAt: ts,
+        },
+        progress: {
+          ...(loadedUser?.progress || {}),
+          coins: Math.max(0, Math.floor(num(ui.coins.value, 0))),
+          dailyQuest: parsedQuest,
+          settings: {
+            ...((loadedUser?.progress?.settings && typeof loadedUser.progress.settings === 'object') ? loadedUser.progress.settings : {}),
+            gameplay: {
+              HUNGER_FOOD_SPAWN_CHANCE: Math.min(1, Math.max(0, num(ui.foodSpawnChance.value, 0.35))),
+              FOOD_SPAWN_INTERVAL: Math.max(1000, Math.floor(num(ui.foodSpawnInterval.value, 30000))),
+              FOOD_DURATION: Math.max(1000, Math.floor(num(ui.foodDuration.value, 15000))),
+              HUNGER_DRAIN_RATE: Math.max(0, num(ui.hungerDrainRate.value, 1)),
+              HUNGER_DRAIN_INTERVAL: Math.max(1000, Math.floor(num(ui.hungerDrainInterval.value, 60000))),
+              XP_PER_LEVEL: Math.max(10, Math.floor(num(ui.xpPerLevel.value, 100))),
+            },
+          },
+          updatedAt: ts,
+        },
+      };
+
+      return { uid, patch, oldUsername, newUsername };
+    }
+
+    async function saveMain() {
+      const { uid, patch, oldUsername, newUsername } = buildMainPatch();
+      setStatus('Zapisywanie głównego patcha...');
+
+      await dbWrite(`users/${uid}`, patch, 'PATCH');
+
+      if (ui.syncUsernameMap.checked && newUsername) {
+        await dbWrite(`usernameToUid/${encodeURIComponent(newUsername)}`, uid, 'PUT');
+        if (oldUsername && oldUsername !== newUsername) {
+          await dbWrite(`usernameToUid/${encodeURIComponent(oldUsername)}`, null, 'PUT');
+        }
+      }
+
+      loadedUser = await dbRead(`users/${uid}`);
+      fillForm(uid, loadedUser);
+      setStatus(`Zapisano users/${uid}`, 'ok');
+    }
+
+    async function saveQuestOnly() {
+      const uid = String(ui.uid.value || '').trim();
+      if (!uid) throw new Error('Brak UID — najpierw wczytaj użytkownika');
+
+      const parsedQuest = safeJsonParse(ui.dailyQuestJson.value, null);
+      if (!parsedQuest || typeof parsedQuest !== 'object') {
+        throw new Error('Niepoprawny JSON misji (`progress.dailyQuest`)');
+      }
+
+      setStatus('Zapisywanie misji...');
+      await dbWrite(`users/${uid}/progress/dailyQuest`, parsedQuest, 'PUT');
+      await dbWrite(`users/${uid}/progress/updatedAt`, nowTs(), 'PUT');
+
+      const refreshed = await dbRead(`users/${uid}`);
+      fillForm(uid, refreshed);
+      setStatus(`Zapisano misję dla ${uid}`, 'ok');
+    }
+
+    async function resetQuest() {
+      const uid = String(ui.uid.value || '').trim();
+      if (!uid) throw new Error('Brak UID — najpierw wczytaj użytkownika');
+
+      const reset = {
+        hourKey: ui.hourKey.value.trim() || getHourKey(),
+        version: 2,
+        goals: [],
+        claimed: false,
+      };
+
+      ui.dailyQuestJson.value = JSON.stringify(reset, null, 2);
+      await saveQuestOnly();
+      setStatus(`Zresetowano misję dla ${uid}`, 'warn');
+    }
+
+    function bindEvents() {
+      ui.btnLoad.addEventListener('click', async () => {
+        try { await loadUser(); } catch (error) { setStatus(error.message, 'error'); }
+      });
+
+      ui.btnClear.addEventListener('click', () => {
+        clearForm();
+        setStatus('Wyczyszczono formularz.');
+      });
+
+      ui.btnSaveMain.addEventListener('click', async () => {
+        try { await saveMain(); } catch (error) { setStatus(error.message, 'error'); }
+      });
+
+      ui.btnSaveQuestOnly.addEventListener('click', async () => {
+        try { await saveQuestOnly(); } catch (error) { setStatus(error.message, 'error'); }
+      });
+
+      ui.btnResetQuest.addEventListener('click', async () => {
+        try { await resetQuest(); } catch (error) { setStatus(error.message, 'error'); }
+      });
+    }
+
+    bindEvents();
+  </script>
+</body>
+</html>

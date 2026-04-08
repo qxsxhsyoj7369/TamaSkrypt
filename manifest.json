@@ -1,7 +1,7 @@
 {
-  "version": "3.9.0",
+  "version": "3.10.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI: level-up jako animowany napis wewnątrz GUI (bez pełnoekranowego popupu).",
+  "changelog": "Dev/Admin: wsparcie ustawień gameplay per user w `progress.settings.gameplay` (spawn jedzenia, XP, hunger tick).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.7.0",
-      "hash": "99efb75aef1d0d525a2dca3ceb010b1913fe486692d92c8825a64455626a33a5",
+      "version": "3.10.0",
+      "hash": "a198e3810191d23d381ed76c7583c70d5509ec515eb8dca512caa09b19b9179d",
       "execute": "raw",
       "required": true
     },
@@ -41,8 +41,8 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.6.0",
-      "hash": "68ea6186b1fba3aa5d28d0ab57e810e75dd2bfd80b3b1c88747e33bc7ce6c9f1",
+      "version": "3.10.0",
+      "hash": "8248eeb09673ff416b672bf8e1d50591728bde7b9a20be808474031afce41e21",
       "execute": "raw",
       "required": true
     },

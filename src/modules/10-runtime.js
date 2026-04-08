@@ -30,6 +30,43 @@
   runtime.CONFIG.DAILY_REWARD_COINS = runtime.CONFIG.HOURLY_REWARD_COINS;
   runtime.CONFIG.DAILY_REWARD_XP = runtime.CONFIG.HOURLY_REWARD_XP;
 
+  runtime.BASE_CONFIG = Object.freeze({ ...runtime.CONFIG });
+
+  runtime.applyUserGameplaySettings = function applyUserGameplaySettings(gameplay) {
+    const defaults = runtime.BASE_CONFIG;
+    const source = gameplay && typeof gameplay === 'object' ? gameplay : {};
+
+    runtime.CONFIG.HUNGER_FOOD_SPAWN_CHANCE = runtime.clamp(Number(source.HUNGER_FOOD_SPAWN_CHANCE), 0, 1);
+    if (!Number.isFinite(runtime.CONFIG.HUNGER_FOOD_SPAWN_CHANCE)) {
+      runtime.CONFIG.HUNGER_FOOD_SPAWN_CHANCE = defaults.HUNGER_FOOD_SPAWN_CHANCE;
+    }
+
+    runtime.CONFIG.FOOD_SPAWN_INTERVAL = Math.max(1000, Math.floor(Number(source.FOOD_SPAWN_INTERVAL)));
+    if (!Number.isFinite(runtime.CONFIG.FOOD_SPAWN_INTERVAL)) {
+      runtime.CONFIG.FOOD_SPAWN_INTERVAL = defaults.FOOD_SPAWN_INTERVAL;
+    }
+
+    runtime.CONFIG.FOOD_DURATION = Math.max(1000, Math.floor(Number(source.FOOD_DURATION)));
+    if (!Number.isFinite(runtime.CONFIG.FOOD_DURATION)) {
+      runtime.CONFIG.FOOD_DURATION = defaults.FOOD_DURATION;
+    }
+
+    runtime.CONFIG.HUNGER_DRAIN_RATE = Math.max(0, Number(source.HUNGER_DRAIN_RATE));
+    if (!Number.isFinite(runtime.CONFIG.HUNGER_DRAIN_RATE)) {
+      runtime.CONFIG.HUNGER_DRAIN_RATE = defaults.HUNGER_DRAIN_RATE;
+    }
+
+    runtime.CONFIG.HUNGER_DRAIN_INTERVAL = Math.max(1000, Math.floor(Number(source.HUNGER_DRAIN_INTERVAL)));
+    if (!Number.isFinite(runtime.CONFIG.HUNGER_DRAIN_INTERVAL)) {
+      runtime.CONFIG.HUNGER_DRAIN_INTERVAL = defaults.HUNGER_DRAIN_INTERVAL;
+    }
+
+    runtime.CONFIG.XP_PER_LEVEL = Math.max(10, Math.floor(Number(source.XP_PER_LEVEL)));
+    if (!Number.isFinite(runtime.CONFIG.XP_PER_LEVEL)) {
+      runtime.CONFIG.XP_PER_LEVEL = defaults.XP_PER_LEVEL;
+    }
+  };
+
   runtime.HOURLY_QUEST_VERSION = 2;
   runtime.HOURLY_GOAL_POOL_SIZE = 3;
 
