@@ -776,7 +776,10 @@
         border-radius: 24px;
         background: rgba(0, 0, 0, 0.25);
       }
-      #__ts_tabs button {
+      #__ts_tabs > button {
+        appearance: none;
+        -webkit-appearance: none;
+        background-color: transparent;
         flex:1;
         border:none;
         border-radius:20px;
@@ -790,13 +793,13 @@
         box-shadow: none;
         transition: all 0.3s ease;
       }
-      #__ts_tabs button:hover {
+      #__ts_tabs > button:hover {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       }
-      #__ts_tabs button:active,
-      #__ts_tabs button.__ts_tab_active__ {
+      #__ts_tabs > button:active,
+      #__ts_tabs > button.__ts_tab_active__ {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);

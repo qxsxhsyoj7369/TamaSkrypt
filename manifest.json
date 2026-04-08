@@ -1,7 +1,7 @@
 {
-  "version": "3.20.0",
+  "version": "3.20.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI tabs refresh: dolna nawigacja ma nowy styl Pill Dock (ciemny kontener, miękkie hover/active).",
+  "changelog": "UI tabs fix: wymuszony styl Pill Dock dla przycisków (reset natywnego appearance), aby nie wracał szary systemowy wygląd.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.20.0",
-      "hash": "3301b6ab1cbca5d214d97cbbc6ad90736ff9828a096bd89619b69ce8b239dcf2",
+      "version": "3.20.1",
+      "hash": "39bc1352c223b2390dbf0378c1fadb68dad40a36593cb954cb8c0c35ac271e8c",
       "execute": "raw",
       "required": true
     },
