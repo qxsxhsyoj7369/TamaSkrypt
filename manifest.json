@@ -1,7 +1,7 @@
 {
-  "version": "3.27.5",
+  "version": "3.27.6",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix multiplayer backend: fallback RTDB dla domen i rankingów wojny, gdy Firestore SDK nie jest dostępny (koniec permanentnego trybu offline).",
+  "changelog": "Hotfix UI: ukryty debugowy badge DB (DB: ERROR/RETRY) w produkcji; retry DB działa dalej w tle.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -57,8 +57,8 @@
     {
       "name": "db-status",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/50-db-status.js",
-      "version": "3.1.1",
-      "hash": "66f5892a041769e93f4d611251942642321665aa48827231adaf954269bd61ad",
+      "version": "3.1.2",
+      "hash": "37084eaa7e018c38102c6444d34f2a79ffdceb12ab9d5dd98ebe4394e493f397",
       "execute": "raw",
       "required": true
     },

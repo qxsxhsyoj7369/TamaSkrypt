@@ -17,7 +17,17 @@
 
   const BADGE_ID = '__gelek_db_status_badge__';
 
+  function isBadgeEnabled() {
+    if (R.CONFIG && R.CONFIG.SHOW_DB_BADGE === true) return true;
+    try {
+      return window.localStorage && window.localStorage.getItem('gelek:dbBadge') === '1';
+    } catch (_) {
+      return false;
+    }
+  }
+
   function ensureBadge() {
+    if (!isBadgeEnabled()) return null;
     let badge = document.getElementById(BADGE_ID);
     if (badge) return badge;
 
@@ -45,6 +55,7 @@
 
   function renderBadge() {
     const badge = ensureBadge();
+    if (!badge) return;
     const s = R.dbStatus;
 
     let text = 'DB: INIT';
@@ -150,6 +161,13 @@
   };
 
   const bootBadge = () => {
+    if (!isBadgeEnabled()) {
+      const existingBadge = document.getElementById(BADGE_ID);
+      if (existingBadge && existingBadge.parentNode) {
+        existingBadge.parentNode.removeChild(existingBadge);
+      }
+      return;
+    }
     ensureBadge();
     renderBadge();
   };
