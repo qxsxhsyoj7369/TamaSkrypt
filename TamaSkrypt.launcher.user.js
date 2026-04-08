@@ -16,8 +16,8 @@
 (function () {
   'use strict';
 
-  // URL manifestu na GitHub (główna gałąź) – tylko to nigdy nie zmienia
-  const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/manifest.json';
+  // URL manifestu na GitHub
+  const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/copilot/add-gummy-bear-script/manifest.json';
 
   // Sprawdzaj aktualizacje co godzinę
   const CHECK_INTERVAL_MS = 60 * 60 * 1000;
