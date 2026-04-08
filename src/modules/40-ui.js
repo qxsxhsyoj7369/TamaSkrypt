@@ -480,19 +480,28 @@
 
       #__ts_toggle__ {
         cursor: pointer;
-        font-size: 12px;
-        font-weight: 700;
+        font-size: 11px;
+        font-weight: 800;
         line-height: 1;
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         border-radius: 999px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         color: oklch(98% 0.01 300);
-        border: 1px solid oklch(100% 0 0 / 0.35);
-        background: oklch(100% 0 0 / 0.1);
-        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32);
+        border: 1px solid oklch(100% 0 0 / 0.45);
+        background: var(--ts-toggle-bg, oklch(100% 0 0 / 0.1));
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32), 0 0 0 0 var(--ts-toggle-glow, rgba(255,255,255,0.25));
+        animation: __ts_toggle_pulse__ 2.6s ease-in-out infinite;
+      }
+      #__ts_toggle__.__ts_toggle_faction_neon__ { --ts-toggle-bg: rgba(255, 63, 191, 0.2); --ts-toggle-glow: rgba(255, 63, 191, 0.56); }
+      #__ts_toggle__.__ts_toggle_faction_toxic__ { --ts-toggle-bg: rgba(141, 255, 79, 0.2); --ts-toggle-glow: rgba(141, 255, 79, 0.56); }
+      #__ts_toggle__.__ts_toggle_faction_plasma__ { --ts-toggle-bg: rgba(55, 233, 255, 0.2); --ts-toggle-glow: rgba(55, 233, 255, 0.56); }
+      #__ts_toggle__.__ts_toggle_faction_neutral__ { --ts-toggle-bg: oklch(100% 0 0 / 0.1); --ts-toggle-glow: rgba(210, 210, 235, 0.36); }
+      @keyframes __ts_toggle_pulse__ {
+        0%, 100% { box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32), 0 0 0 0 var(--ts-toggle-glow, rgba(255,255,255,0.25)); }
+        50% { box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32), 0 0 10px 1px var(--ts-toggle-glow, rgba(255,255,255,0.25)); }
       }
 
       #__tamaskrypt_widget__.__ts_minimized__ #__ts_header__ {
@@ -798,6 +807,44 @@
         border: 1px solid rgba(255, 255, 255, 0.04);
         box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
+      #__ts_territory_card__ {
+        border-radius: 14px;
+        background: var(--ts-glass);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 1px 1px rgba(255,255,255,.12), 0 8px 22px rgba(0,0,0,.24);
+        padding: 6px 8px;
+      }
+      #__ts_territory_toggle__ {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      #__ts_territory_title__ {
+        color: var(--ts-violet-1);
+      }
+      #__ts_territory_domain__ {
+        color: var(--ts-text-main);
+        opacity: .92;
+        font-size: 9px;
+      }
+      #__ts_territory_content__ {
+        margin-top: 6px;
+        display: none;
+      }
+      #__ts_territory_king__,
+      #__ts_territory_status__ {
+        font-size: 9px;
+        margin-bottom: 4px;
+        color: var(--ts-text-muted);
+      }
+      #__ts_territory_status__.__ts_status_ally__ { color: oklch(84% 0.13 154); }
+      #__ts_territory_status__.__ts_status_enemy__ { color: oklch(83% 0.13 24); }
+      #__ts_territory_actions__ { display: flex; justify-content: flex-end; }
+      #__ts_territory_action_btn__ { min-width: 94px; }
       .__ts_evo_badge__,
       .__ts_evo_badge {
         display:inline-flex;
@@ -1040,6 +1087,20 @@
           <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
           <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
+          <div id="__ts_territory_card__">
+            <div id="__ts_territory_toggle__">
+              <span id="__ts_territory_title__">🌐 Terytorium</span>
+              <span id="__ts_territory_domain__">${window.location && window.location.hostname ? window.location.hostname : 'unknown'}</span>
+              <span id="__ts_territory_arrow__" style="transition:transform .25s;">▼</span>
+            </div>
+            <div id="__ts_territory_content__">
+              <div id="__ts_territory_king__">Władca: —</div>
+              <div id="__ts_territory_status__">Status: skanowanie...</div>
+              <div id="__ts_territory_actions__">
+                <button id="__ts_territory_action_btn__" class="__ts_btn__" data-action="" disabled>Brak akcji</button>
+              </div>
+            </div>
+          </div>
           <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
           ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
           <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
@@ -1158,6 +1219,82 @@
 
     const coinsEl = R.getElById('__ts_coins__');
     if (coinsEl) coinsEl.textContent = String(state.coins);
+
+    const domainState = (R.multiplayer && typeof R.multiplayer.getCurrentDomainState === 'function')
+      ? R.multiplayer.getCurrentDomainState()
+      : null;
+
+    if (!domainState && R.multiplayer && typeof R.multiplayer.getDomainControl === 'function' && !R.__tsDomainFetchInFlight__) {
+      R.__tsDomainFetchInFlight__ = true;
+      R.multiplayer.getDomainControl({ force: false }).catch(() => {}).finally(() => {
+        R.__tsDomainFetchInFlight__ = false;
+      });
+    }
+
+    const toggleEl = R.getElById('__ts_toggle__');
+    const territoryDomainEl = R.getElById('__ts_territory_domain__');
+    const territoryKingEl = R.getElById('__ts_territory_king__');
+    const territoryStatusEl = R.getElById('__ts_territory_status__');
+    const territoryActionBtn = R.getElById('__ts_territory_action_btn__');
+
+    if (territoryDomainEl) {
+      territoryDomainEl.textContent = domainState && domainState.hostname
+        ? String(domainState.hostname)
+        : (window.location && window.location.hostname ? window.location.hostname : 'unknown');
+    }
+
+    let factionKey = 'neutral';
+    if (domainState && domainState.faction) {
+      factionKey = String(domainState.faction);
+    }
+
+    if (toggleEl) {
+      toggleEl.classList.remove('__ts_toggle_faction_neon__', '__ts_toggle_faction_toxic__', '__ts_toggle_faction_plasma__', '__ts_toggle_faction_neutral__');
+      toggleEl.classList.add(`__ts_toggle_faction_${factionKey === 'neon' || factionKey === 'toxic' || factionKey === 'plasma' ? factionKey : 'neutral'}__`);
+    }
+
+    const playerFaction = (R.multiplayer && typeof R.multiplayer.getPlayerFaction === 'function')
+      ? R.multiplayer.getPlayerFaction().id
+      : '';
+    const allied = Boolean(domainState && (domainState.kingUid === String(R.currentUid || '') || (domainState.faction && domainState.faction === playerFaction)));
+
+    if (territoryKingEl) {
+      if (domainState && domainState.kingUid) {
+        const factionEmoji = R.multiplayer && typeof R.multiplayer.getFactionTheme === 'function'
+          ? (R.multiplayer.getFactionTheme(domainState.faction).emoji || '⚑')
+          : '⚑';
+        territoryKingEl.textContent = `Władca: ${factionEmoji} ${domainState.kingName || domainState.kingUid} • DEF ${Math.round(Number(domainState.defensePoints) || 0)}`;
+      } else {
+        territoryKingEl.textContent = 'Władca: brak (domena wolna)';
+      }
+    }
+
+    if (territoryStatusEl) {
+      territoryStatusEl.classList.remove('__ts_status_ally__', '__ts_status_enemy__');
+      if (allied) {
+        territoryStatusEl.textContent = 'Terytorium Sojusznicze (+10% Drop)';
+        territoryStatusEl.classList.add('__ts_status_ally__');
+      } else {
+        territoryStatusEl.textContent = 'Strefa Wroga (Opłacasz podatek)';
+        territoryStatusEl.classList.add('__ts_status_enemy__');
+      }
+    }
+
+    if (territoryActionBtn) {
+      if (domainState && domainState.kingUid === String(R.currentUid || '')) {
+        territoryActionBtn.disabled = false;
+        territoryActionBtn.setAttribute('data-action', 'fortify');
+        territoryActionBtn.textContent = 'Fortyfikuj';
+      } else if (domainState && domainState.kingUid) {
+        territoryActionBtn.disabled = false;
+        territoryActionBtn.setAttribute('data-action', 'sabotage');
+        territoryActionBtn.textContent = 'Sabotuj';
+      } else {
+        territoryActionBtn.disabled = true;
+        territoryActionBtn.setAttribute('data-action', '');
+        territoryActionBtn.textContent = 'Brak akcji';
+      }
+    }
 
     const diagnostics = R.getLauncherDiagnostics();
     const diagModeEl = R.getElById('__ts_diag_mode__');

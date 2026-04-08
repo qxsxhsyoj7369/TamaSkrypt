@@ -29,6 +29,10 @@
     source: 'none',
     daily: [],
     allTime: [],
+    factionDominance: null,
+    factionKings: null,
+    lastFactionFetchAt: 0,
+    factionLoading: false,
   };
 
   R.computeScore = function computeScore() {
@@ -198,6 +202,33 @@
     }
   };
 
+  R.fetchFactionWarStats = async function fetchFactionWarStats(force = false) {
+    if (!R.multiplayer || typeof R.multiplayer.refreshWarStats !== 'function') return null;
+    const now = R.now();
+    if (!force && R.ranking.lastFactionFetchAt && now - R.ranking.lastFactionFetchAt < 30000) {
+      return {
+        dominance: R.ranking.factionDominance,
+        kings: R.ranking.factionKings,
+      };
+    }
+
+    try {
+      R.ranking.factionLoading = true;
+      const stats = await R.multiplayer.refreshWarStats(force);
+      R.ranking.factionDominance = stats && stats.dominance ? stats.dominance : null;
+      R.ranking.factionKings = stats && stats.kings ? stats.kings : null;
+      R.ranking.lastFactionFetchAt = now;
+      return stats;
+    } catch (_) {
+      return {
+        dominance: R.ranking.factionDominance,
+        kings: R.ranking.factionKings,
+      };
+    } finally {
+      R.ranking.factionLoading = false;
+    }
+  };
+
   R.renderRankingPanel = function renderRankingPanel() {
     const panel = R.getElById ? R.getElById('__ts_panel_ranking__') : document.getElementById('__ts_panel_ranking__');
     if (!panel || panel.style.display === 'none') return;
@@ -206,7 +237,38 @@
     const rows = scope === 'daily' ? R.ranking.daily : R.ranking.allTime;
     const myUid = R.currentUid;
 
+    const dominance = R.ranking.factionDominance;
+    const factionKings = R.ranking.factionKings || {};
+
+    const dominanceSegments = dominance && Array.isArray(dominance.factions)
+      ? dominance.factions.map((entry) => `<span style="height:100%;width:${Math.max(0, Math.min(100, Number(entry.percent) || 0))}%;background:${escapeHtml(entry.color || '#888')};display:inline-block;"></span>`).join('')
+      : '<span style="height:100%;width:100%;background:rgba(255,255,255,.15);display:inline-block;"></span>';
+
+    const dominanceLegend = dominance && Array.isArray(dominance.factions)
+      ? dominance.factions.map((entry) => `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.08);font-size:9px;">${escapeHtml(entry.emoji || '⚑')} ${escapeHtml(entry.name || entry.id)} ${Number(entry.percent || 0).toFixed(1)}%</span>`).join('')
+      : '<span style="font-size:9px;opacity:.75;">Brak danych dominacji</span>';
+
+    const factionRows = ['neon', 'toxic', 'plasma'].map((factionId) => {
+      const rowsForFaction = Array.isArray(factionKings[factionId]) ? factionKings[factionId] : [];
+      const title = factionId.charAt(0).toUpperCase() + factionId.slice(1);
+      const body = rowsForFaction.length
+        ? rowsForFaction.map((entry, index) => `
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:9px;margin-top:${index === 0 ? 0 : 3}px;">
+              <span>#${index + 1} ${escapeHtml(entry.kingName || entry.kingUid || 'unknown')}</span>
+              <span>${Math.max(0, Number(entry.defensePoints) || 0)} DEF</span>
+            </div>
+          `).join('')
+        : '<div style="font-size:9px;opacity:.72;">Brak króla</div>';
+      return `<div class="__ts_card__" style="padding:5px 6px;margin-bottom:4px;"><div style="font-size:10px;font-weight:700;margin-bottom:3px;">⚑ ${escapeHtml(title)}</div>${body}</div>`;
+    }).join('');
+
     const header = `
+      <div class="__ts_card__" style="padding:6px 7px;margin-bottom:6px;">
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;">🌐 Pasek Dominacji</div>
+        <div style="height:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);display:flex;">${dominanceSegments}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">${dominanceLegend}</div>
+      </div>
+      <div style="margin-bottom:6px;">${factionRows}</div>
       <div style="display:flex;gap:4px;margin-bottom:6px;align-items:center;">
         <button class="__ts_btn__" data-ranking-scope="daily" style="flex:1;opacity:${scope === 'daily' ? '1' : '.75'};">Dzienny</button>
         <button class="__ts_btn__" data-ranking-scope="allTime" style="flex:1;opacity:${scope === 'allTime' ? '1' : '.75'};">All-time</button>
@@ -248,9 +310,18 @@
 
     panel.querySelectorAll('[data-ranking-refresh]').forEach((btn) => {
       btn.addEventListener('click', async () => {
-        await R.fetchLeaderboard(true);
+        await Promise.all([
+          R.fetchLeaderboard(true),
+          R.fetchFactionWarStats ? R.fetchFactionWarStats(true) : Promise.resolve(),
+        ]);
         R.renderRankingPanel();
       });
     });
+
+    if (R.fetchFactionWarStats && !R.ranking.factionLoading) {
+      R.fetchFactionWarStats(false).then(() => {
+        if (panel.style.display !== 'none') R.renderRankingPanel();
+      }).catch(() => {});
+    }
   };
 })();

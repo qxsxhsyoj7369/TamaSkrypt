@@ -8,6 +8,9 @@
     if (!R.state || !R.state.alive) return;
     const gain = Math.max(0, Number(amount) || 0);
     R.state.xp += gain;
+    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && gain > 0) {
+      R.multiplayer.reportEarnings({ xp: gain }).catch(() => {});
+    }
     if (R.incrementHourlyGoalProgress) {
       R.incrementHourlyGoalProgress('gain_xp', gain);
     }
@@ -42,6 +45,9 @@
 
     R.state.dailyQuest.claimed = true;
     R.state.coins += rewards.coins;
+    if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && rewards.coins > 0) {
+      R.multiplayer.reportEarnings({ coins: rewards.coins }).catch(() => {});
+    }
     R.gainXP(rewards.xp);
     R.showMessage(`🎁 +${rewards.coins} monet, +${rewards.xp} XP`, 3500);
     R.persistState();
@@ -204,6 +210,43 @@
     const activeSkillBtn = R.getElById ? R.getElById('__ts_active_skill_btn__') : document.getElementById('__ts_active_skill_btn__');
     if (activeSkillBtn) activeSkillBtn.addEventListener('click', R.useActiveSkill);
 
+    const territoryToggle = R.getElById ? R.getElById('__ts_territory_toggle__') : document.getElementById('__ts_territory_toggle__');
+    const territoryContent = R.getElById ? R.getElById('__ts_territory_content__') : document.getElementById('__ts_territory_content__');
+    const territoryArrow = R.getElById ? R.getElById('__ts_territory_arrow__') : document.getElementById('__ts_territory_arrow__');
+    if (territoryToggle && territoryContent && territoryArrow && territoryToggle.dataset.tsBound !== '1') {
+      territoryToggle.dataset.tsBound = '1';
+      territoryToggle.addEventListener('click', () => {
+        const isOpen = territoryContent.style.display !== 'none';
+        territoryContent.style.display = isOpen ? 'none' : 'block';
+        territoryArrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
+      });
+    }
+
+    const territoryActionBtn = R.getElById ? R.getElById('__ts_territory_action_btn__') : document.getElementById('__ts_territory_action_btn__');
+    if (territoryActionBtn && territoryActionBtn.dataset.tsBound !== '1') {
+      territoryActionBtn.dataset.tsBound = '1';
+      territoryActionBtn.addEventListener('click', async () => {
+        if (!R.multiplayer) return;
+        const action = territoryActionBtn.getAttribute('data-action') || '';
+        try {
+          if (action === 'fortify' && typeof R.multiplayer.fortifyDomain === 'function') {
+            await R.multiplayer.fortifyDomain(12);
+            if (R.showMessage) R.showMessage('🛡️ Fortyfikacja udana', 2200);
+          } else if (action === 'sabotage' && typeof R.multiplayer.sabotageDomain === 'function') {
+            await R.multiplayer.sabotageDomain();
+            if (R.showMessage) R.showMessage('🧨 Sabotaż wykonany', 2200);
+          }
+          if (typeof R.multiplayer.getDomainControl === 'function') {
+            await R.multiplayer.getDomainControl({ force: true });
+          }
+          if (typeof R.updateUI === 'function') R.updateUI();
+        } catch (error) {
+          if (R.showMessage) R.showMessage(`⚠️ ${error && error.message ? error.message : 'Akcja nieudana'}`, 2800);
+        }
+      });
+    }
+
     if (R.bindPettingEvents) R.bindPettingEvents();
 
     const tabStatus = R.getElById ? R.getElById('__ts_tab_status__') : document.getElementById('__ts_tab_status__');
@@ -331,6 +374,11 @@
     }
 
     setInterval(R.mainLoop, 10000);
+    setInterval(() => {
+      if (R.multiplayer && typeof R.multiplayer.tickConquest === 'function') {
+        R.multiplayer.tickConquest(1).catch(() => {});
+      }
+    }, 60000);
     setInterval(R.hpRegenTick, R.CONFIG.HP_REGEN_INTERVAL);
     setInterval(R.trySpawnFood, R.CONFIG.FOOD_SPAWN_INTERVAL);
     setInterval(R.persistState, 30000);

@@ -1,7 +1,7 @@
 {
-  "version": "3.26.0",
+  "version": "3.27.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Nowy moduł multiplayer: URL stashes + King of the Domain (Firestore) z eventami i inicjalizacją runtime.",
+  "changelog": "Wojny o Internet: frakcje, conquest, podatek domenowy, dominacja frakcji w rankingu oraz dyskretna karta terytorium + ambient indicator.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.25.1",
-      "hash": "3fef5a209756a12e6497295cee2398bbfde5f2757e95b5fed262d55899883f31",
+      "version": "3.27.0",
+      "hash": "0ad8a07b9258b30ddfd0f72f4e9c63a1e8d2c500e749ed7bd481e2d0d2131884",
       "execute": "raw",
       "required": true
     },
@@ -89,24 +89,24 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.26.0",
-      "hash": "b2bd6070b5cc4ccbd096422c21b89239e3bc25fb4d45a5e4e96aa69ff2346325",
+      "version": "3.27.0",
+      "hash": "cc2be5004e54cfdc179bf702f22bb0024acde9e3d4b39c94d28c0fc006703ab3",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ranking",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
-      "version": "3.13.0",
-      "hash": "94350616d6d5328fc90972bcb6615e75dfecec8efa0142f1ef8d240604d9fe0a",
+      "version": "3.27.0",
+      "hash": "93388f404b73cec5359d0d13139ed71765782e35d37afabc3b7b834adc3766c3",
       "execute": "raw",
       "required": true
     },
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.26.0",
-      "hash": "57cf54d62d0227f4c623e27101626aa430f5324e7f35d941af735cd8d07a675d",
+      "version": "3.27.0",
+      "hash": "f2da2510287b4f88ef316a266ba46eddeddca33004175172573ef486516e2735",
       "execute": "raw",
       "required": true
     },
