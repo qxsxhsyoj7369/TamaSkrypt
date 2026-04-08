@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.0.3
+// @version      3.0.4
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -187,6 +187,7 @@
   async function executeModules(manifest, options = {}) {
     const moduleList = normalizeModuleManifest(manifest);
     if (!moduleList.length) return false;
+    const strictHashes = manifest && manifest.strictHashes === true;
 
     const allowNetwork = options.allowNetwork !== false;
     const progress = createProgressUI(moduleList.length);
@@ -226,11 +227,14 @@
 
         const validHash = await verifyHash(code, mod.hash);
         if (!validHash) {
-          if (mod.required) throw new Error(`Hash mismatch: ${mod.name}`);
-          console.warn('[TamaSkrypt Launcher] Pomijam opcjonalny moduł (hash mismatch):', mod.name);
-          completed += 1;
-          progress.update(completed, `Skip: ${mod.name}`);
-          continue;
+          if (strictHashes) {
+            if (mod.required) throw new Error(`Hash mismatch: ${mod.name}`);
+            console.warn('[TamaSkrypt Launcher] Pomijam opcjonalny moduł (hash mismatch):', mod.name);
+            completed += 1;
+            progress.update(completed, `Skip: ${mod.name}`);
+            continue;
+          }
+          console.warn('[TamaSkrypt Launcher] Hash mismatch (advisory):', mod.name);
         }
 
         resolvedCode[mod.name] = code;

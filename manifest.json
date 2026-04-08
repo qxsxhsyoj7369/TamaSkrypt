@@ -1,7 +1,8 @@
 {
-  "version": "3.1.3",
+  "version": "3.1.4",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix stabilności loadera: opcjonalne moduły nie blokują startu, preferowany fallback to cache modułów.",
+  "changelog": "Hotfix hash policy: walidacja hash jest advisory (nie blokuje startu modułów) przy strictHashes=false.",
+  "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "modules": [
