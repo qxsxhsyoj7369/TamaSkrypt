@@ -1,7 +1,7 @@
 {
-  "version": "3.8.0",
+  "version": "3.9.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI: kolorowe badge rzadkości przy celach misji godzinowej (common/uncommon/rare/epic).",
+  "changelog": "UI: level-up jako animowany napis wewnątrz GUI (bez pełnoekranowego popupu).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.8.0",
-      "hash": "100294e9e115e994a351c22270981fc9d9801f22b67726c00dd9906ce5361f1f",
+      "version": "3.9.0",
+      "hash": "d92b4b6e830dcce24870ac984d5734c7e2be9ea6eb88a3fbc1f9bb9b5374a5c9",
       "execute": "raw",
       "required": true
     },

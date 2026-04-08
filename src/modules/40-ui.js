@@ -82,6 +82,9 @@
       #__ts_toggle__ { cursor: pointer; font-size: 10px; }
       #__ts_body__ { background: rgba(255,255,255,0.97); border: 2px solid #764ba2; border-top: none; border-radius: 0 0 12px 12px; padding: 8px; min-width: 230px; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
       #__ts_body__.hidden { display: none; }
+      #__ts_levelup_inline__ { margin:0 0 6px 0; padding:6px 8px; border-radius:10px; font-size:11px; font-weight:800; text-align:center; letter-spacing:.02em; background:linear-gradient(135deg,#fef3c7,#fde68a,#fef9c3); color:#7c2d12; border:1px solid #f59e0b; box-shadow:0 2px 10px rgba(245,158,11,.22); opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; max-height:0; overflow:hidden; transition:opacity .25s ease, transform .25s ease, max-height .25s ease, margin .25s ease, padding .25s ease; }
+      #__ts_levelup_inline__.show { opacity:1; transform:translateY(0) scale(1); max-height:52px; margin:0 0 8px 0; animation:__ts_levelup_pulse__ 1.3s ease-in-out; }
+      @keyframes __ts_levelup_pulse__ { 0%{ box-shadow:0 0 0 0 rgba(245,158,11,.35);} 70%{ box-shadow:0 0 0 10px rgba(245,158,11,0);} 100%{ box-shadow:0 0 0 0 rgba(245,158,11,0);} }
       #__ts_zelek__ { display:flex; flex-direction:column; align-items:center; margin-bottom:6px; }
       #__ts_mood__ { font-size:18px; margin-top:-4px; }
       .__ts_stat_row__ { display:flex; align-items:center; gap:4px; margin-bottom:4px; }
@@ -151,6 +154,7 @@
         <button id="__ts_logout__" style="background:none;border:none;color:#fff;cursor:pointer;">⏏</button>
       </div>
       <div id="__ts_body__">
+        <div id="__ts_levelup_inline__"></div>
         <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${R.CONFIG.HP_MAX}</span></div>
         <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
@@ -203,18 +207,22 @@
   };
 
   R.showLevelUp = function showLevelUp() {
-    const id = '__ts_levelup__';
-    const old = document.getElementById(id);
-    if (old) old.remove();
-    const el = document.createElement('div');
-    el.id = id;
-    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px 28px;border-radius:16px;font-size:20px;font-weight:bold;z-index:2147483647;';
-    el.innerHTML = `🎉 POZIOM ${R.state.level}! 🎉`;
-    const target = document.body || document.documentElement;
-    if (target) {
-      target.appendChild(el);
-      setTimeout(() => { if (el.parentNode) el.remove(); }, 2500);
+    const level = R.state && Number.isFinite(R.state.level) ? R.state.level : '?';
+    const inline = document.getElementById('__ts_levelup_inline__');
+    if (!inline) {
+      R.showMessage(`🎉 Poziom ${level}!`, 2600);
+      return;
     }
+
+    inline.textContent = `🎉 LEVEL UP! Poziom ${level}`;
+    inline.classList.remove('show');
+    void inline.offsetWidth;
+    inline.classList.add('show');
+
+    clearTimeout(R.levelUpInlineTimer);
+    R.levelUpInlineTimer = setTimeout(() => {
+      if (inline) inline.classList.remove('show');
+    }, 2600);
   };
 
   R.updateUI = function updateUI() {
