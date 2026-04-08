@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.0.2
+// @version      3.0.3
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -213,9 +213,25 @@
 
         if (!allowNetwork) throw new Error(`Brak cache dla modułu ${mod.name}`);
 
-        const code = await requestText(mod.url, 15000);
+        let code = '';
+        try {
+          code = await requestText(mod.url, 15000);
+        } catch (downloadError) {
+          if (mod.required) throw downloadError;
+          console.warn('[TamaSkrypt Launcher] Pomijam opcjonalny moduł (download):', mod.name, downloadError.message);
+          completed += 1;
+          progress.update(completed, `Skip: ${mod.name}`);
+          continue;
+        }
+
         const validHash = await verifyHash(code, mod.hash);
-        if (!validHash) throw new Error(`Hash mismatch: ${mod.name}`);
+        if (!validHash) {
+          if (mod.required) throw new Error(`Hash mismatch: ${mod.name}`);
+          console.warn('[TamaSkrypt Launcher] Pomijam opcjonalny moduł (hash mismatch):', mod.name);
+          completed += 1;
+          progress.update(completed, `Skip: ${mod.name}`);
+          continue;
+        }
 
         resolvedCode[mod.name] = code;
         moduleMeta[mod.name] = {
@@ -327,9 +343,13 @@
       let ok = false;
       if (hasModules) {
         ok = await executeModules(manifest, { allowNetwork: true });
-      }
-
-      if (!ok) {
+        if (!ok) {
+          ok = await executeCachedModules();
+        }
+        if (!ok) {
+          ok = await executeLegacyScript(manifest, true);
+        }
+      } else {
         ok = await executeLegacyScript(manifest, true);
       }
 
