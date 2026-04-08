@@ -234,6 +234,14 @@
       emoji: '🟢',
       minLevel: 1,
       color: '#A8EB12',
+      activeSkill: {
+        id: 'seed-heal',
+        name: 'Słodka Regeneracja',
+        emoji: '💚',
+        description: 'Natychmiast leczy +16 HP.',
+        cooldownMs: 90 * 1000,
+        instantHeal: 16,
+      },
       bonuses: {
         hpMax: 0,
         regenMultiplier: 1,
@@ -247,6 +255,14 @@
       emoji: '🟡',
       minLevel: 5,
       color: '#facc15',
+      activeSkill: {
+        id: 'spark-xp',
+        name: 'Iskrzący Zgryz',
+        emoji: '⚡',
+        description: '2x XP z jedzenia przez 45s.',
+        cooldownMs: 120 * 1000,
+        effectKeys: [{ key: 'xp_boost', durationMs: 45 * 1000 }],
+      },
       bonuses: {
         hpMax: 8,
         regenMultiplier: 1.08,
@@ -260,6 +276,14 @@
       emoji: '🟣',
       minLevel: 10,
       color: '#c084fc',
+      activeSkill: {
+        id: 'bloom-guard',
+        name: 'Kwiatowa Aura',
+        emoji: '🌸',
+        description: 'Wolniejsza utrata głodu przez 60s.',
+        cooldownMs: 140 * 1000,
+        effectKeys: [{ key: 'slow_hunger', durationMs: 60 * 1000 }],
+      },
       bonuses: {
         hpMax: 16,
         regenMultiplier: 1.15,
@@ -273,6 +297,14 @@
       emoji: '🔵',
       minLevel: 15,
       color: '#38bdf8',
+      activeSkill: {
+        id: 'nova-regen',
+        name: 'Nova Regen',
+        emoji: '🛡️',
+        description: 'Mocna regeneracja HP przez 45s.',
+        cooldownMs: 160 * 1000,
+        effectKeys: [{ key: 'regen_boost', durationMs: 45 * 1000 }],
+      },
       bonuses: {
         hpMax: 24,
         regenMultiplier: 1.23,
@@ -286,6 +318,18 @@
       emoji: '🌈',
       minLevel: 25,
       color: '#fb7185',
+      activeSkill: {
+        id: 'legend-overdrive',
+        name: 'Pryzmatyczny Overdrive',
+        emoji: '🌟',
+        description: 'XP x2 + regen + osłona głodu przez 60s.',
+        cooldownMs: 200 * 1000,
+        effectKeys: [
+          { key: 'xp_boost', durationMs: 60 * 1000 },
+          { key: 'regen_boost', durationMs: 60 * 1000 },
+          { key: 'slow_hunger', durationMs: 60 * 1000 },
+        ],
+      },
       bonuses: {
         hpMax: 36,
         regenMultiplier: 1.32,
@@ -386,6 +430,97 @@
     const evo = runtime.getCurrentEvolution();
     runtime.state.evolutionId = evo.id;
     runtime.state.evolutionName = evo.name;
+  };
+
+  runtime.getCurrentActiveSkill = function getCurrentActiveSkill() {
+    const evolution = runtime.getCurrentEvolution();
+    return evolution && evolution.activeSkill ? evolution.activeSkill : null;
+  };
+
+  runtime.getSkillStateStore = function getSkillStateStore() {
+    if (!runtime.state) return {};
+    if (!runtime.state.activeSkillState || typeof runtime.state.activeSkillState !== 'object') {
+      runtime.state.activeSkillState = {};
+    }
+    return runtime.state.activeSkillState;
+  };
+
+  runtime.getActiveSkillCooldownRemaining = function getActiveSkillCooldownRemaining(skill) {
+    if (!skill || !runtime.state) return 0;
+    const store = runtime.getSkillStateStore();
+    const entry = store[skill.id] || {};
+    const lastUsedAt = Number(entry.lastUsedAt) || 0;
+    const cooldownMs = Math.max(0, Number(skill.cooldownMs) || 0);
+    if (!lastUsedAt || !cooldownMs) return 0;
+    return Math.max(0, (lastUsedAt + cooldownMs) - runtime.now());
+  };
+
+  runtime.getActiveSkillEffectRemaining = function getActiveSkillEffectRemaining(skill) {
+    if (!skill || !runtime.state || !runtime.state.activeEffects) return 0;
+    const effects = Array.isArray(skill.effectKeys) ? skill.effectKeys : [];
+    if (!effects.length) return 0;
+    let maxRemaining = 0;
+    effects.forEach((item) => {
+      const key = item && item.key ? String(item.key) : '';
+      if (!key) return;
+      const expiresAt = Number(runtime.state.activeEffects[key]) || 0;
+      maxRemaining = Math.max(maxRemaining, Math.max(0, expiresAt - runtime.now()));
+    });
+    return maxRemaining;
+  };
+
+  runtime.canUseCurrentActiveSkill = function canUseCurrentActiveSkill() {
+    if (!runtime.state || !runtime.state.alive) {
+      return { ok: false, reason: '💀 Umiejętność niedostępna gdy Gelek nie żyje.' };
+    }
+    const skill = runtime.getCurrentActiveSkill();
+    if (!skill) {
+      return { ok: false, reason: 'Brak aktywnej umiejętności dla tej formy.' };
+    }
+    const cooldownRemaining = runtime.getActiveSkillCooldownRemaining(skill);
+    if (cooldownRemaining > 0) {
+      return { ok: false, reason: `⏳ Cooldown: ${runtime.formatTime(cooldownRemaining)}` };
+    }
+    return { ok: true, skill };
+  };
+
+  runtime.activateCurrentActiveSkill = function activateCurrentActiveSkill() {
+    const check = runtime.canUseCurrentActiveSkill();
+    if (!check.ok) return check;
+
+    const skill = check.skill;
+    const now = runtime.now();
+    const store = runtime.getSkillStateStore();
+    store[skill.id] = { lastUsedAt: now };
+
+    if (!runtime.state.activeEffects || typeof runtime.state.activeEffects !== 'object') {
+      runtime.state.activeEffects = {};
+    }
+
+    let healed = 0;
+    if (Number(skill.instantHeal) > 0) {
+      const hpMax = runtime.getEffectiveHpMax();
+      const before = Number(runtime.state.hp) || 0;
+      runtime.state.hp = runtime.clamp(before + Number(skill.instantHeal), 0, hpMax);
+      healed = Math.max(0, runtime.state.hp - before);
+    }
+
+    const activatedEffects = [];
+    const effects = Array.isArray(skill.effectKeys) ? skill.effectKeys : [];
+    effects.forEach((item) => {
+      const key = item && item.key ? String(item.key) : '';
+      const durationMs = Math.max(1000, Number(item && item.durationMs) || 1000);
+      if (!key) return;
+      runtime.state.activeEffects[key] = now + durationMs;
+      activatedEffects.push({ key, durationMs });
+    });
+
+    return {
+      ok: true,
+      skill,
+      healed,
+      activatedEffects,
+    };
   };
 
   runtime.getDayKey = function getDayKey(ts = Date.now()) {

@@ -43,6 +43,69 @@
     return `<span class="__ts_evo_badge__">${evolution.emoji || '🧬'} ${evolution.name}</span><span class="__ts_evo_meta__">+${hpBonus} HP • +${foodBonusPct}% XP z jedzenia • -${drainReductionPct}% głodu</span>`;
   };
 
+  R.renderActiveSkillCard = function renderActiveSkillCard() {
+    return `
+      <div id="__ts_skill_card__" class="__ts_skill_card__">
+        <div id="__ts_skill_title__" class="__ts_skill_title__">✨ Umiejętność formy</div>
+        <div id="__ts_skill_desc__" class="__ts_skill_desc__">Brak aktywnej umiejętności.</div>
+        <div id="__ts_skill_meta__" class="__ts_skill_meta__">—</div>
+        <button id="__ts_active_skill_btn__" class="__ts_btn__ __ts_skill_btn__" disabled>Brak</button>
+      </div>
+    `;
+  };
+
+  R.refreshActiveSkillUI = function refreshActiveSkillUI() {
+    const card = document.getElementById('__ts_skill_card__');
+    const titleEl = document.getElementById('__ts_skill_title__');
+    const descEl = document.getElementById('__ts_skill_desc__');
+    const metaEl = document.getElementById('__ts_skill_meta__');
+    const buttonEl = document.getElementById('__ts_active_skill_btn__');
+    if (!card || !titleEl || !descEl || !metaEl || !buttonEl) return;
+
+    const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
+    if (!skill) {
+      titleEl.textContent = '✨ Umiejętność formy';
+      descEl.textContent = 'Brak aktywnej umiejętności dla tej formy.';
+      metaEl.textContent = 'Odblokuj wyższą formę Gelka.';
+      buttonEl.textContent = 'Brak';
+      buttonEl.disabled = true;
+      buttonEl.classList.remove('__ts_skill_ready__');
+      return;
+    }
+
+    titleEl.textContent = `${skill.emoji || '✨'} ${skill.name}`;
+    descEl.textContent = skill.description || 'Aktywna umiejętność formy.';
+
+    const cooldownRemaining = R.getActiveSkillCooldownRemaining ? R.getActiveSkillCooldownRemaining(skill) : 0;
+    const effectRemaining = R.getActiveSkillEffectRemaining ? R.getActiveSkillEffectRemaining(skill) : 0;
+    const alive = R.state ? R.state.alive !== false : true;
+
+    if (!alive) {
+      metaEl.textContent = 'Umiejętność niedostępna gdy Gelek nie żyje.';
+      buttonEl.textContent = '💀 Niedostępna';
+      buttonEl.disabled = true;
+      buttonEl.classList.remove('__ts_skill_ready__');
+      return;
+    }
+
+    if (cooldownRemaining > 0) {
+      metaEl.textContent = effectRemaining > 0
+        ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Cooldown: ${R.formatTime(cooldownRemaining)}`
+        : `Cooldown: ${R.formatTime(cooldownRemaining)}`;
+      buttonEl.textContent = `⏳ ${R.formatTime(cooldownRemaining)}`;
+      buttonEl.disabled = true;
+      buttonEl.classList.remove('__ts_skill_ready__');
+      return;
+    }
+
+    metaEl.textContent = effectRemaining > 0
+      ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Umiejętność gotowa`
+      : 'Gotowe do użycia';
+    buttonEl.textContent = '✨ Użyj umiejętności';
+    buttonEl.disabled = false;
+    buttonEl.classList.add('__ts_skill_ready__');
+  };
+
   R.renderHourlyGoalRows = function renderHourlyGoalRows() {
     const quest = R.state && R.state.dailyQuest ? R.state.dailyQuest : null;
     const goals = quest && Array.isArray(quest.goals) ? quest.goals : [];
@@ -125,6 +188,12 @@
       #__ts_evolution_line__ { margin-top:5px; display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:9px; color:#574085; }
       .__ts_evo_badge__ { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:999px; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; font-weight:700; }
       .__ts_evo_meta__ { color:#6f5f95; font-size:9px; text-align:right; }
+      .__ts_skill_card__ { margin-top:6px; border:1px solid #ddd2f4; background:#f6f1ff; border-radius:10px; padding:6px; }
+      .__ts_skill_title__ { font-size:10px; color:#4e3588; font-weight:700; margin-bottom:2px; }
+      .__ts_skill_desc__ { font-size:9px; color:#5d4a88; margin-bottom:3px; }
+      .__ts_skill_meta__ { font-size:9px; color:#7b6ca1; margin-bottom:5px; }
+      .__ts_skill_btn__ { width:100%; background:#8f7bbf; }
+      .__ts_skill_btn__.__ts_skill_ready__ { background:linear-gradient(135deg,#7c3aed,#06b6d4); }
       #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
       #__ts_diag_badge__ { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; letter-spacing:.02em; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; }
       #__ts_diag_mode__ { text-transform:uppercase; }
@@ -177,6 +246,7 @@
         <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
         <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
         <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
+        ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
         <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
         <div style="margin-top:8px;border:1px dashed #b8a6d9;border-radius:10px;padding:6px;background:#faf8ff;">
           <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
@@ -266,6 +336,9 @@
     const evolutionLine = document.getElementById('__ts_evolution_line__');
     if (evolutionLine && R.renderEvolutionSummary) {
       evolutionLine.innerHTML = R.renderEvolutionSummary();
+    }
+    if (R.refreshActiveSkillUI) {
+      R.refreshActiveSkillUI();
     }
 
     const goals = state.dailyQuest && Array.isArray(state.dailyQuest.goals) ? state.dailyQuest.goals : [];

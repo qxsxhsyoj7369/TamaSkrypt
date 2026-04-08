@@ -41,6 +41,7 @@
       dailyQuest: R.normalizeDailyQuest(progress?.dailyQuest),
       inventory: (progress && progress.inventory && typeof progress.inventory === 'object') ? progress.inventory : {},
       activeEffects: (progress && progress.activeEffects && typeof progress.activeEffects === 'object') ? progress.activeEffects : {},
+      activeSkillState: (progress && progress.activeSkillState && typeof progress.activeSkillState === 'object') ? progress.activeSkillState : {},
       progressSettings,
       lastDailyTick: R.now(),
       profileCreatedAt: Number(profile?.createdAt) || R.now(),
@@ -52,7 +53,8 @@
 
     const offlineMs = Math.min(R.now() - (R.state.lastSave || R.now()), R.CONFIG.OFFLINE_CATCHUP_MAX);
     const offlineMins = offlineMs / 60000;
-    const hungerLost = Math.floor(offlineMins * R.CONFIG.HUNGER_DRAIN_RATE);
+    const effectiveDrainRate = R.getEffectiveHungerDrainRate ? R.getEffectiveHungerDrainRate() : R.CONFIG.HUNGER_DRAIN_RATE;
+    const hungerLost = Math.floor(offlineMins * effectiveDrainRate);
     if (R.state.alive) {
       R.state.hunger = Math.max(0, R.state.hunger - hungerLost);
       if (R.state.hunger === 0) {
@@ -104,6 +106,7 @@
         coins: R.state.coins,
         inventory: R.state.inventory || {},
         activeEffects: R.state.activeEffects || {},
+        activeSkillState: R.state.activeSkillState || {},
         dailyQuest: R.state.dailyQuest,
         settings: (R.state.progressSettings && typeof R.state.progressSettings === 'object')
           ? R.state.progressSettings

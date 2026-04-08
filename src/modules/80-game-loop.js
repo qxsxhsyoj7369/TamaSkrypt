@@ -48,6 +48,24 @@
     R.updateUI();
   };
 
+  R.useActiveSkill = function useActiveSkill() {
+    if (!R.activateCurrentActiveSkill) return;
+    const result = R.activateCurrentActiveSkill();
+    if (!result || !result.ok) {
+      if (R.showMessage) R.showMessage((result && result.reason) || 'Umiejętność niedostępna', 2400);
+      return;
+    }
+
+    const skill = result.skill;
+    const effectLabel = result.activatedEffects && result.activatedEffects.length
+      ? ` (${result.activatedEffects.length} efekt${result.activatedEffects.length > 1 ? 'y' : ''})`
+      : '';
+    const healLabel = result.healed > 0 ? ` +${Math.round(result.healed)} HP` : '';
+    R.showMessage(`${skill.emoji || '✨'} ${skill.name}${healLabel}${effectLabel}`, 3200);
+    R.persistState();
+    R.updateUI();
+  };
+
   R.hungerTick = function hungerTick() {
     if (!R.state || !R.state.alive) return;
 
@@ -156,6 +174,10 @@
 
     const claimBtn = document.getElementById('__ts_claim_daily__');
     if (claimBtn) claimBtn.addEventListener('click', R.claimDailyReward);
+
+    const activeSkillBtn = document.getElementById('__ts_active_skill_btn__');
+    if (activeSkillBtn) activeSkillBtn.addEventListener('click', R.useActiveSkill);
+
     if (R.bindPettingEvents) R.bindPettingEvents();
 
     const tabStatus = document.getElementById('__ts_tab_status__');
@@ -268,6 +290,9 @@
       if (el && R.state) {
         const ms = R.state.totalOnline + (R.now() - R.state.sessionStart);
         el.textContent = R.formatTime(ms);
+      }
+      if (R.refreshActiveSkillUI) {
+        R.refreshActiveSkillUI();
       }
     }, 1000);
 
