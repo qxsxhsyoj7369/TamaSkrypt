@@ -355,11 +355,11 @@
 
       #__ts_body__ {
         min-width: 258px;
-        padding: 10px;
+        padding: 10px 8px 10px 10px;
         border-radius: 0 0 18px 18px;
         display: grid;
         gap: 8px;
-        max-height: 85vh;
+        max-height: min(85vh, calc(100vh - 86px));
         overflow-y: auto;
         overflow-x: hidden;
         background:
@@ -373,18 +373,72 @@
         box-shadow: var(--ts-shadow), inset 0 1px 0 oklch(100% 0 0 / 0.18);
         animation: __ts_panel_flow__ 26s ease-in-out infinite alternate;
       }
-      #__ts_body__::-webkit-scrollbar {
-        width: 4px;
+
+      #__ts_body__,
+      #__ts_panel_shop__,
+      #__ts_panel_inventory__,
+      #__ts_panel_ranking__ {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
       }
-      #__ts_body__::-webkit-scrollbar-track {
+
+      #__ts_body__:hover,
+      #__ts_body__:focus-within,
+      #__ts_panel_shop__:hover,
+      #__ts_panel_shop__:focus-within,
+      #__ts_panel_inventory__:hover,
+      #__ts_panel_inventory__:focus-within,
+      #__ts_panel_ranking__:hover,
+      #__ts_panel_ranking__:focus-within {
+        scrollbar-color: oklch(92% 0.01 300 / 0.46) transparent;
+      }
+
+      #__ts_body__::-webkit-scrollbar,
+      #__ts_panel_shop__::-webkit-scrollbar,
+      #__ts_panel_inventory__::-webkit-scrollbar,
+      #__ts_panel_ranking__::-webkit-scrollbar {
+        width: 8px;
+      }
+      #__ts_body__::-webkit-scrollbar-track,
+      #__ts_panel_shop__::-webkit-scrollbar-track,
+      #__ts_panel_inventory__::-webkit-scrollbar-track,
+      #__ts_panel_ranking__::-webkit-scrollbar-track {
         background: transparent;
       }
-      #__ts_body__::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
+      #__ts_body__::-webkit-scrollbar-thumb,
+      #__ts_panel_shop__::-webkit-scrollbar-thumb,
+      #__ts_panel_inventory__::-webkit-scrollbar-thumb,
+      #__ts_panel_ranking__::-webkit-scrollbar-thumb {
+        background: oklch(100% 0 0 / 0);
+        border: 2px solid transparent;
+        border-radius: 999px;
+        background-clip: padding-box;
+        transition: background-color .22s ease;
       }
-      #__ts_body__::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.4);
+
+      #__ts_body__:hover::-webkit-scrollbar-thumb,
+      #__ts_body__:focus-within::-webkit-scrollbar-thumb,
+      #__ts_panel_shop__:hover::-webkit-scrollbar-thumb,
+      #__ts_panel_shop__:focus-within::-webkit-scrollbar-thumb,
+      #__ts_panel_inventory__:hover::-webkit-scrollbar-thumb,
+      #__ts_panel_inventory__:focus-within::-webkit-scrollbar-thumb,
+      #__ts_panel_ranking__:hover::-webkit-scrollbar-thumb,
+      #__ts_panel_ranking__:focus-within::-webkit-scrollbar-thumb {
+        background: oklch(92% 0.01 300 / 0.46);
+      }
+      #__ts_body__::-webkit-scrollbar-thumb:hover,
+      #__ts_panel_shop__::-webkit-scrollbar-thumb:hover,
+      #__ts_panel_inventory__::-webkit-scrollbar-thumb:hover,
+      #__ts_panel_ranking__::-webkit-scrollbar-thumb:hover {
+        background: oklch(96% 0.01 300 / 0.66);
       }
       @keyframes __ts_panel_flow__ {
         0% { background-position: 0% 10%, 100% 25%, 42% 100%, 50% 50%; }
@@ -824,9 +878,10 @@
 
       #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ {
         margin-top:6px;
-        max-height:168px;
-        overflow:auto;
-        padding:6px;
+        max-height: clamp(136px, 24vh, 206px);
+        overflow-y:auto;
+        overflow-x:hidden;
+        padding: 7px 8px 10px 7px;
       }
       .__ts_card__ { padding:6px; margin-bottom:6px; font-size:10px; }
       .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; letter-spacing:-0.02em; }
