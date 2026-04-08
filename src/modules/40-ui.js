@@ -25,6 +25,13 @@
     return '__ts_goal_bar_default__';
   };
 
+  R.getGoalRarityClass = function getGoalRarityClass(rarity) {
+    if (rarity === 'uncommon') return '__ts_goal_badge_uncommon__';
+    if (rarity === 'rare') return '__ts_goal_badge_rare__';
+    if (rarity === 'epic') return '__ts_goal_badge_epic__';
+    return '__ts_goal_badge_common__';
+  };
+
   R.renderHourlyGoalRows = function renderHourlyGoalRows() {
     const quest = R.state && R.state.dailyQuest ? R.state.dailyQuest : null;
     const goals = quest && Array.isArray(quest.goals) ? quest.goals : [];
@@ -37,10 +44,13 @@
       const progressLabel = R.formatGoalProgress ? R.formatGoalProgress(goal) : '0/0';
       const barClass = R.getGoalBarClass(goal.id);
       const goalLabel = goal.displayLabel || goal.label || goal.id;
+      const rarity = String(goal.rarity || 'common').toLowerCase();
+      const rarityLabel = goal.rarityLabel || 'Pospolite';
+      const rarityClass = R.getGoalRarityClass(rarity);
       return `
         <div class="__ts_goal_block__">
           <div class="__ts_stat_row__"><span class="__ts_label__">${goal.icon || '🎯'} ${goalLabel}</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ ${barClass}" id="__ts_goal_bar_${goal.id}__" style="width:${R.clamp(pct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_goal_val_${goal.id}__">${progressLabel}</span></div>
-          <div class="__ts_goal_reward__">Nagroda: +${goal.rewardCoins || 0} 🪙, +${goal.rewardXp || 0} XP</div>
+          <div class="__ts_goal_reward__"><span class="__ts_goal_badge__ ${rarityClass}">${rarityLabel}</span>Nagroda: +${goal.rewardCoins || 0} 🪙, +${goal.rewardXp || 0} XP</div>
         </div>
       `;
     }).join('');
@@ -90,6 +100,11 @@
       .__ts_goal_bar_hunger__ { background: linear-gradient(90deg,#4facfe,#00f2fe); }
       .__ts_goal_bar_survive__ { background: linear-gradient(90deg,#43e97b,#38f9d7); }
       .__ts_goal_reward__ { margin:0 0 5px 68px; font-size:9px; color:#6b5a8f; }
+      .__ts_goal_badge__ { display:inline-flex; align-items:center; padding:1px 6px; border-radius:999px; font-size:8px; font-weight:700; letter-spacing:.01em; margin-right:5px; border:1px solid transparent; }
+      .__ts_goal_badge_common__ { background:#f3f4f6; color:#4b5563; border-color:#d1d5db; }
+      .__ts_goal_badge_uncommon__ { background:#dcfce7; color:#166534; border-color:#86efac; }
+      .__ts_goal_badge_rare__ { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+      .__ts_goal_badge_epic__ { background:#f3e8ff; color:#7e22ce; border-color:#d8b4fe; }
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
       #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
