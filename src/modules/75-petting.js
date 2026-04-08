@@ -88,9 +88,20 @@
     const x = pointX - widgetRect.left;
     const y = pointY - widgetRect.top;
     const randomParticle = PET_PARTICLES[Math.floor(Math.random() * PET_PARTICLES.length)] || PET_PARTICLES[0];
+    const horizontalSide = Math.random() < 0.5 ? -1 : 1;
+    const primaryXOffset = horizontalSide * (14 + Math.random() * 14);
+    const primaryYOffset = -(8 + Math.random() * 14);
+    const xpXOffset = -horizontalSide * (10 + Math.random() * 16);
+    const xpYOffset = -(16 + Math.random() * 14);
+    const bonusXOffset = horizontalSide * (18 + Math.random() * 14);
+    const bonusYOffset = -(20 + Math.random() * 16);
 
-    R.spawnParticle(x, y, randomParticle.content, randomParticle.type);
-    R.spawnParticle(x + ((Math.random() * 16) - 8), y + 2, '+1 XP', 'xp');
+    R.spawnParticle(x + primaryXOffset, y + primaryYOffset, randomParticle.content, randomParticle.type);
+    R.spawnParticle(x + xpXOffset, y + xpYOffset, '+1 XP', 'xp');
+    if (Math.random() > 0.35) {
+      const extraParticle = PET_PARTICLES[Math.floor(Math.random() * PET_PARTICLES.length)] || PET_PARTICLES[0];
+      R.spawnParticle(x + bonusXOffset, y + bonusYOffset, extraParticle.content, extraParticle.type);
+    }
   }
 
   R.handlePetting = function handlePetting(evt) {

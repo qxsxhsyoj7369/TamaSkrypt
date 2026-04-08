@@ -1,7 +1,7 @@
 {
-  "version": "3.25.0",
+  "version": "3.25.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Petting juice FX: floating particles przy głaskaniu, natychmiastowy feedback, debounce zapisu i opcjonalny dźwięk slip.",
+  "changelog": "Petting particle tuning: większa widoczność, dalszy spawn od kursora i dłuższa animacja unoszenia.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.25.0",
-      "hash": "b94c99963d245949a97ea534e6ab7446bcdd4325bfc5f8be7bd2b7be5d0aac19",
+      "version": "3.25.1",
+      "hash": "3fef5a209756a12e6497295cee2398bbfde5f2757e95b5fed262d55899883f31",
       "execute": "raw",
       "required": true
     },
@@ -81,8 +81,8 @@
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.25.0",
-      "hash": "ce411a0440039eb832b8add2fd4a2769a8cc468542afe6d48276cf4479eac221",
+      "version": "3.25.1",
+      "hash": "26b63bf3773058a51e4e21b9d0a7a89b61f6ac0064cfa2437a0298b93bcae98e",
       "execute": "raw",
       "required": true
     },

@@ -323,7 +323,7 @@
       if (particle.parentNode) particle.remove();
     };
     particle.addEventListener('animationend', removeParticle, { once: true });
-    setTimeout(removeParticle, 1600);
+    setTimeout(removeParticle, 2300);
   };
 
   R.applyWidgetStyles = function applyWidgetStyles() {
@@ -536,24 +536,30 @@
         top: 0;
         transform: translate(-50%, 0) scale(0.5);
         opacity: 0;
-        font-size: 14px;
+        font-size: 18px;
         line-height: 1;
         font-weight: 700;
         letter-spacing: -0.02em;
-        text-shadow: 0 2px 6px oklch(4% 0.02 280 / 0.35), 0 0 10px oklch(100% 0 0 / 0.42);
-        filter: saturate(1.15);
-        animation: floatUp 1.5s cubic-bezier(.18,.72,.22,1) forwards;
+        text-shadow: 0 2px 8px oklch(4% 0.02 280 / 0.45), 0 0 14px oklch(100% 0 0 / 0.52);
+        filter: saturate(1.2) brightness(1.08);
+        animation: floatUp 2.15s cubic-bezier(.16,.72,.24,1) forwards;
         will-change: transform, opacity;
       }
       .__ts_particle_heart__ { color: oklch(82% 0.22 8); }
       .__ts_particle_spark__ { color: oklch(92% 0.08 90); }
       .__ts_particle_music__ { color: oklch(84% 0.13 238); }
-      .__ts_particle_xp__ { color: oklch(82% 0.18 154); font-size: 11px; }
+      .__ts_particle_xp__ {
+        color: oklch(85% 0.2 154);
+        font-size: 13px;
+        font-weight: 800;
+        text-shadow: 0 1px 0 oklch(0% 0 0 / 0.55), 0 0 12px oklch(80% 0.2 154 / 0.58);
+      }
 
       @keyframes floatUp {
         0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); }
-        22% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
-        100% { opacity: 0; transform: translate(-50%, -46px) scale(1); }
+        24% { opacity: 1; transform: translate(-50%, -14px) scale(1.22); }
+        72% { opacity: .82; transform: translate(-50%, -44px) scale(1.08); }
+        100% { opacity: 0; transform: translate(-50%, -74px) scale(0.98); }
       }
 
       #__ts_zelek__ {
