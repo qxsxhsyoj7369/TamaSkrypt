@@ -358,6 +358,9 @@
         border-radius: 0 0 18px 18px;
         display: grid;
         gap: 8px;
+        max-height: min(76vh, calc(100vh - 84px));
+        overflow-y: auto;
+        overflow-x: hidden;
         background:
           radial-gradient(115% 90% at 8% 6%, oklch(65% 0.25 310 / 0.23), transparent 62%),
           radial-gradient(120% 100% at 95% 16%, oklch(76% 0.13 232 / 0.15), transparent 66%),
@@ -987,6 +990,37 @@
     if (R.renderShopPanel) R.renderShopPanel();
     if (R.renderInventoryPanel) R.renderInventoryPanel();
     if (R.renderRankingPanel) R.renderRankingPanel();
+
+    if (R.clampWidgetToViewport) {
+      requestAnimationFrame(() => R.clampWidgetToViewport());
+    }
+  };
+
+  R.clampWidgetToViewport = function clampWidgetToViewport() {
+    if (!R.widgetEl) return;
+
+    const padding = 8;
+    const rect = R.widgetEl.getBoundingClientRect();
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+
+    let nextX = rect.left;
+    let nextY = rect.top;
+
+    const maxX = Math.max(padding, viewportW - rect.width - padding);
+    const maxY = Math.max(padding, viewportH - rect.height - padding);
+
+    nextX = Math.min(Math.max(nextX, padding), maxX);
+    nextY = Math.min(Math.max(nextY, padding), maxY);
+
+    if (Math.abs(nextX - rect.left) < 0.5 && Math.abs(nextY - rect.top) < 0.5) {
+      return;
+    }
+
+    R.widgetEl.style.right = 'auto';
+    R.widgetEl.style.bottom = 'auto';
+    R.widgetEl.style.left = `${Math.round(nextX)}px`;
+    R.widgetEl.style.top = `${Math.round(nextY)}px`;
   };
 
   R.mountWidget = function mountWidget() {
@@ -1006,6 +1040,9 @@
     R.applyWidgetStyles();
     target.appendChild(widget);
     R.widgetEl = widget;
+    requestAnimationFrame(() => {
+      if (R.clampWidgetToViewport) R.clampWidgetToViewport();
+    });
   };
 
   R.buildAuthHTML = function buildAuthHTML() {

@@ -199,6 +199,7 @@
       if (panelShop) panelShop.style.display = 'none';
       if (panelInventory) panelInventory.style.display = 'none';
       if (panelRanking) panelRanking.style.display = 'none';
+      if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
     }
 
     if (tabStatus) tabStatus.addEventListener('click', () => {
@@ -210,12 +211,14 @@
       setActiveTab(tabShop);
       if (panelShop) panelShop.style.display = 'block';
       if (R.renderShopPanel) R.renderShopPanel();
+      if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
     });
     if (tabInventory) tabInventory.addEventListener('click', () => {
       hidePanels();
       setActiveTab(tabInventory);
       if (panelInventory) panelInventory.style.display = 'block';
       if (R.renderInventoryPanel) R.renderInventoryPanel();
+      if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
     });
     if (tabRanking) tabRanking.addEventListener('click', async () => {
       hidePanels();
@@ -227,9 +230,17 @@
       }
       if (R.fetchLeaderboard) await R.fetchLeaderboard(true);
       if (R.renderRankingPanel) R.renderRankingPanel();
+      if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
     });
 
     if (tabStatus) setActiveTab(tabStatus);
+
+    if (!window.__tsWidgetResizeClampBound__) {
+      window.__tsWidgetResizeClampBound__ = true;
+      window.addEventListener('resize', () => {
+        if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
+      });
+    }
 
     const header = R.getElById ? R.getElById('__ts_header__') : document.getElementById('__ts_header__');
     if (header && R.widgetEl) {

@@ -1,7 +1,7 @@
 {
-  "version": "3.20.2",
+  "version": "3.21.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI tabs hotfix: poprawiony selektor `#__ts_tabs__`, aby styl Pill Dock faktycznie stosował się do dolnych zakładek.",
+  "changelog": "Viewport safety: widget nie wychodzi poza ekran (clamp pozycji + max-height i scroll w treści przy rozwiniętych panelach).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.20.2",
-      "hash": "bbe32ebe58154ac90594371a10face1e61590ccfe8968bca0acac2654a34ffd3",
+      "version": "3.21.0",
+      "hash": "bee41d05909a965b9211073a2fa1fbf2e1dedfdfd837f0f12b7da7d6199e1f43",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.13.0",
-      "hash": "33f5837da9195768ca0fb671c18b6168f7d7eca66fc125d57e97c391b86d92b7",
+      "version": "3.21.0",
+      "hash": "b87da793331426317cb87137f8b47c453c7358d778be4f063122027ab26b0695",
       "execute": "raw",
       "required": true
     },
