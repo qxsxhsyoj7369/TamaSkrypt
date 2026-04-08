@@ -127,11 +127,38 @@
     }
   }
 
+  function isPointInsideRect(clientX, clientY, rect) {
+    if (!rect) return true;
+    return clientX >= rect.left
+      && clientX <= rect.right
+      && clientY >= rect.top
+      && clientY <= rect.bottom;
+  }
+
+  function isPettingHit(evt, petBody, petRoot) {
+    if (!evt) return true;
+    if (petBody && evt.target && typeof petBody.contains === 'function' && petBody.contains(evt.target)) {
+      return true;
+    }
+
+    const hasCoords = Number.isFinite(evt.clientX) && Number.isFinite(evt.clientY);
+    if (!hasCoords) return true;
+
+    const bodyRect = petBody && petBody.getBoundingClientRect ? petBody.getBoundingClientRect() : null;
+    const rootRect = petRoot && petRoot.getBoundingClientRect ? petRoot.getBoundingClientRect() : null;
+    return isPointInsideRect(evt.clientX, evt.clientY, bodyRect || rootRect);
+  }
+
   R.handlePetting = function handlePetting(evt) {
     if (!R.state || !R.state.alive) return;
 
-    const petEl = evt && evt.currentTarget ? evt.currentTarget : (R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__'));
-    spawnPetParticles(evt, petEl);
+    const petRoot = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
+    const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
+    if (!petRoot) return;
+    if (!isPettingHit(evt, petBody, petRoot)) return;
+
+    const particleOrigin = petBody || petRoot;
+    spawnPetParticles(evt, particleOrigin);
     playPettingSound();
 
     const previousHp = Number(R.state.hp) || 0;
@@ -149,8 +176,7 @@
       R.incrementHourlyGoalProgress('pet', 1);
     }
 
-    const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
-    playPettingAnimation(petBody || petEl);
+    playPettingAnimation(petBody || petRoot);
 
     schedulePersistState();
     if (typeof R.updateUI === 'function') R.updateUI();
@@ -159,24 +185,17 @@
   R.bindPettingEvents = function bindPettingEvents() {
     ensureStyles();
     const petEl = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
-    const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
-    const slimeSvg = root && typeof root.querySelector === 'function'
-      ? root.querySelector('#__ts_body_svg__ .__ts_slime_svg__')
-      : document.querySelector('#__ts_body_svg__ .__ts_slime_svg__');
-    const interactEl = slimeSvg || petBody;
+    if (!petEl || petEl.dataset.tsPettingBound === '1') return;
 
-    if (!petEl || !interactEl || interactEl.dataset.tsPettingBound === '1') return;
-
-    interactEl.dataset.tsPettingBound = '1';
-    interactEl.addEventListener('click', (evt) => {
+    petEl.dataset.tsPettingBound = '1';
+    petEl.addEventListener('click', (evt) => {
       R.handlePetting(evt);
     });
-    interactEl.addEventListener('touchstart', (evt) => {
+    petEl.addEventListener('touchstart', (evt) => {
       const touch = evt.touches && evt.touches[0] ? evt.touches[0] : null;
       const syntheticEvt = touch
-        ? { currentTarget: interactEl, clientX: touch.clientX, clientY: touch.clientY }
-        : { currentTarget: interactEl };
+        ? { currentTarget: petEl, clientX: touch.clientX, clientY: touch.clientY }
+        : { currentTarget: petEl };
       R.handlePetting(syntheticEvt);
     }, { passive: true });
   };

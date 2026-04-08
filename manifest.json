@@ -1,7 +1,7 @@
 {
-  "version": "3.25.2",
+  "version": "3.25.3",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Petting precision update: klik działa na samego Gelka (nie całą płytkę) + smart spread particle względem środka kliknięcia.",
+  "changelog": "Petting hotfix: przywrócone stabilne kliknięcia po rerenderze + filtr interakcji tylko do obszaru Gelka.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -81,8 +81,8 @@
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.25.2",
-      "hash": "1a035d18684eb5091ef9a55bd4203ad7effff358398a1a441cafdf106d592862",
+      "version": "3.25.3",
+      "hash": "f7650efb3d1a7c2a34041b5e670b0e5acf40919e30c23c9e43fe11d906e5824e",
       "execute": "raw",
       "required": true
     },
