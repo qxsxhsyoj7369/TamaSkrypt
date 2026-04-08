@@ -199,7 +199,7 @@
   };
 
   R.renderRankingPanel = function renderRankingPanel() {
-    const panel = document.getElementById('__ts_panel_ranking__');
+    const panel = R.getElById ? R.getElById('__ts_panel_ranking__') : document.getElementById('__ts_panel_ranking__');
     if (!panel || panel.style.display === 'none') return;
 
     const scope = R.ranking.scope || 'allTime';

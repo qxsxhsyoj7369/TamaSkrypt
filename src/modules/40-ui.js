@@ -13,6 +13,29 @@
     };
   };
 
+  R.getWidgetRoot = function getWidgetRoot() {
+    if (R.widgetShadowRoot) return R.widgetShadowRoot;
+    if (R.widgetEl && R.widgetEl.shadowRoot) return R.widgetEl.shadowRoot;
+    return null;
+  };
+
+  R.getElById = function getElById(id) {
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (root && typeof root.getElementById === 'function') {
+      const node = root.getElementById(id);
+      if (node) return node;
+    }
+    return document.getElementById(id);
+  };
+
+  R.queryAllInWidget = function queryAllInWidget(selector) {
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (root && typeof root.querySelectorAll === 'function') {
+      return root.querySelectorAll(selector);
+    }
+    return document.querySelectorAll(selector);
+  };
+
   R.getGoalBarClass = function getGoalBarClass(goalId) {
     if (goalId === 'feed') return '__ts_goal_bar_feed__';
     if (goalId === 'online') return '__ts_goal_bar_online__';
@@ -55,11 +78,11 @@
   };
 
   R.refreshActiveSkillUI = function refreshActiveSkillUI() {
-    const card = document.getElementById('__ts_skill_card__');
-    const titleEl = document.getElementById('__ts_skill_title__');
-    const descEl = document.getElementById('__ts_skill_desc__');
-    const metaEl = document.getElementById('__ts_skill_meta__');
-    const buttonEl = document.getElementById('__ts_active_skill_btn__');
+    const card = R.getElById('__ts_skill_card__');
+    const titleEl = R.getElById('__ts_skill_title__');
+    const descEl = R.getElById('__ts_skill_desc__');
+    const metaEl = R.getElById('__ts_skill_meta__');
+    const buttonEl = R.getElById('__ts_active_skill_btn__');
     if (!card || !titleEl || !descEl || !metaEl || !buttonEl) return;
 
     const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
@@ -137,73 +160,249 @@
     const colors = ['#FF6B9D', '#FF8E53', '#A8EB12', '#12C2E9', '#F64F59', '#C471ED'];
     const color = (evolution && evolution.color) || colors[(level - 1) % colors.length];
     return `
-      <svg width="60" height="72" viewBox="0 0 60 72" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="30" cy="42" rx="22" ry="26" fill="${color}" opacity="0.9"/>
-        <ellipse cx="30" cy="20" rx="18" ry="17" fill="${color}"/>
-        <ellipse cx="22" cy="13" rx="6" ry="4" fill="white" opacity="0.45"/>
-        <circle cx="23" cy="20" r="3.5" fill="#1a1a2e"/>
-        <circle cx="37" cy="20" r="3.5" fill="#1a1a2e"/>
-        <path d="M24 27 Q30 32 36 27" stroke="#1a1a2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg" aria-label="Gelek">
+        <defs>
+          <radialGradient id="__ts_blob_grad__" cx="34%" cy="24%" r="74%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.78" />
+            <stop offset="24%" stop-color="${color}" stop-opacity="0.96" />
+            <stop offset="78%" stop-color="${color}" stop-opacity="0.88" />
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.25" />
+          </radialGradient>
+          <radialGradient id="__ts_head_grad__" cx="40%" cy="22%" r="80%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.82" />
+            <stop offset="30%" stop-color="${color}" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#111827" stop-opacity="0.2" />
+          </radialGradient>
+          <filter id="__ts_soft_shadow__" x="-30%" y="-30%" width="160%" height="180%">
+            <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.24" />
+            <feGaussianBlur stdDeviation="0.2" />
+          </filter>
+          <filter id="__ts_blob_glow__" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.6" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .32 0" />
+          </filter>
+        </defs>
+
+        <ellipse cx="32" cy="66" rx="19" ry="5" fill="#0f172a" opacity="0.2" />
+        <g filter="url(#__ts_soft_shadow__)" class="__ts_blob_body__">
+          <ellipse cx="32" cy="44" rx="23" ry="27" fill="url(#__ts_blob_grad__)" />
+          <ellipse cx="32" cy="22" rx="19" ry="17" fill="url(#__ts_head_grad__)" />
+          <ellipse cx="23" cy="14" rx="7" ry="4.6" fill="#ffffff" opacity="0.58" filter="url(#__ts_blob_glow__)" />
+          <ellipse cx="36" cy="39" rx="6" ry="4" fill="#ffffff" opacity="0.16" />
+        </g>
+
+        <circle cx="25" cy="22" r="3.7" fill="#111827" />
+        <circle cx="39" cy="22" r="3.7" fill="#111827" />
+        <circle cx="24.1" cy="20.9" r="1" fill="#ffffff" opacity="0.45" />
+        <circle cx="38.1" cy="20.9" r="1" fill="#ffffff" opacity="0.45" />
+        <path d="M25 30 Q32 36 39 30" stroke="#1f2937" stroke-width="2.3" fill="none" stroke-linecap="round" />
       </svg>`;
   };
 
   R.applyWidgetStyles = function applyWidgetStyles() {
-    if (document.getElementById('__tamaskrypt_styles__')) return;
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    const styleHost = root || document.head || document.documentElement || document.body;
+    if (!styleHost) return;
+    if (styleHost.getElementById && styleHost.getElementById('__tamaskrypt_styles__')) return;
+    if (!styleHost.getElementById && document.getElementById('__tamaskrypt_styles__')) return;
+
     const style = document.createElement('style');
     style.id = '__tamaskrypt_styles__';
     style.textContent = `
-      #__tamaskrypt_widget__ { position: fixed; bottom: 16px; right: 16px; z-index: 2147483647; font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; user-select: none; }
-      #__ts_header__ { background: linear-gradient(135deg,#667eea,#764ba2); color: white; padding: 6px 10px; border-radius: 12px 12px 0 0; display: flex; align-items: center; gap: 6px; font-weight: bold; cursor: move; font-size: 13px; }
-      #__ts_toggle__ { cursor: pointer; font-size: 10px; }
-      #__ts_body__ { background: rgba(255,255,255,0.97); border: 2px solid #764ba2; border-top: none; border-radius: 0 0 12px 12px; padding: 8px; min-width: 230px; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+      :host {
+        --ts-bg-ink: oklch(27% .04 279);
+        --ts-violet-1: oklch(64% .22 308);
+        --ts-violet-2: oklch(54% .19 292);
+        --ts-green-1: oklch(78% .21 145);
+        --ts-green-2: oklch(64% .18 156);
+        --ts-cyan: oklch(79% .15 220);
+        --ts-glass: color-mix(in oklab, white 68%, transparent);
+        --ts-glass-border: color-mix(in oklab, white 46%, oklch(45% .1 280) 54%);
+        --ts-soft-shadow: 0 10px 32px rgba(20, 10, 40, .24);
+        --ts-font: InterVariable, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 2147483647;
+        display: block;
+      }
+
+      #__tamaskrypt_widget__ {
+        font-family: var(--ts-font);
+        font-variation-settings: "wght" 520;
+        font-size: 12px;
+        user-select: none;
+      }
+
+      #__ts_header__ {
+        background: linear-gradient(135deg, var(--ts-violet-1), var(--ts-violet-2));
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        cursor: move;
+        letter-spacing: .01em;
+      }
+
+      #__ts_body__ {
+        min-width: 248px;
+        padding: 10px;
+        border-radius: 0 0 16px 16px;
+        background: color-mix(in oklab, var(--ts-glass) 90%, #f4edff 10%);
+        border: 0.5px solid var(--ts-glass-border);
+        backdrop-filter: blur(16px) saturate(1.2);
+        box-shadow: var(--ts-soft-shadow), inset 0 1px 0 rgba(255,255,255,.55);
+      }
+
       #__ts_body__.hidden { display: none; }
-      #__ts_levelup_inline__ { margin:0 0 6px 0; padding:6px 8px; border-radius:10px; font-size:11px; font-weight:800; text-align:center; letter-spacing:.02em; background:linear-gradient(135deg,#fef3c7,#fde68a,#fef9c3); color:#7c2d12; border:1px solid #f59e0b; box-shadow:0 2px 10px rgba(245,158,11,.22); opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; max-height:0; overflow:hidden; transition:opacity .25s ease, transform .25s ease, max-height .25s ease, margin .25s ease, padding .25s ease; }
-      #__ts_levelup_inline__.show { opacity:1; transform:translateY(0) scale(1); max-height:52px; margin:0 0 8px 0; animation:__ts_levelup_pulse__ 1.3s ease-in-out; }
-      @keyframes __ts_levelup_pulse__ { 0%{ box-shadow:0 0 0 0 rgba(245,158,11,.35);} 70%{ box-shadow:0 0 0 10px rgba(245,158,11,0);} 100%{ box-shadow:0 0 0 0 rgba(245,158,11,0);} }
-      #__ts_zelek__ { display:flex; flex-direction:column; align-items:center; margin-bottom:6px; }
-      #__ts_mood__ { font-size:18px; margin-top:-4px; }
-      .__ts_stat_row__ { display:flex; align-items:center; gap:4px; margin-bottom:4px; }
-      .__ts_label__ { width:64px; font-size:10px; }
-      .__ts_bar_wrap__ { flex:1; height:8px; background:#e0e0e0; border-radius:4px; overflow:hidden; }
-      .__ts_bar__ { height:100%; border-radius:4px; transition: width .4s ease; }
-      .__ts_hp_bar__ { background: linear-gradient(90deg,#f093fb,#f5576c); }
-      .__ts_hunger_bar__ { background: linear-gradient(90deg,#4facfe,#00f2fe); }
-      .__ts_xp_bar__ { background: linear-gradient(90deg,#43e97b,#38f9d7); }
-      .__ts_goal_bar_default__ { background: linear-gradient(90deg,#9aa5b1,#7b8794); }
-      .__ts_goal_bar_feed__ { background: linear-gradient(90deg,#ffd166,#fca311); }
-      .__ts_goal_bar_online__ { background: linear-gradient(90deg,#06d6a0,#118ab2); }
-      .__ts_goal_bar_pet__ { background: linear-gradient(90deg,#ff7eb3,#ff4d6d); }
-      .__ts_goal_bar_xp__ { background: linear-gradient(90deg,#7f7fd5,#86a8e7); }
-      .__ts_goal_bar_hp__ { background: linear-gradient(90deg,#f093fb,#f5576c); }
-      .__ts_goal_bar_hunger__ { background: linear-gradient(90deg,#4facfe,#00f2fe); }
-      .__ts_goal_bar_survive__ { background: linear-gradient(90deg,#43e97b,#38f9d7); }
-      .__ts_goal_reward__ { margin:0 0 5px 68px; font-size:9px; color:#6b5a8f; }
-      .__ts_goal_badge__ { display:inline-flex; align-items:center; padding:1px 6px; border-radius:999px; font-size:8px; font-weight:700; letter-spacing:.01em; margin-right:5px; border:1px solid transparent; }
+      #__ts_toggle__ { cursor: pointer; font-size: 10px; }
+
+      #__ts_zelek__ { display:flex; flex-direction:column; align-items:center; margin-bottom:8px; }
+      #__ts_body_svg__ svg { animation: __ts_blob_breathe__ 3.8s ease-in-out infinite; transform-origin: 50% 58%; }
+      #__ts_mood__ { font-size:19px; margin-top:-2px; }
+      @keyframes __ts_blob_breathe__ {
+        0%,100% { transform: scale(1, 1); }
+        50% { transform: scale(1.018, 0.986); }
+      }
+
+      #__ts_levelup_inline__ {
+        margin: 0 0 8px;
+        padding: 7px 8px;
+        border-radius: 12px;
+        text-align:center;
+        font-size:11px;
+        font-weight:700;
+        color: oklch(42% .13 40);
+        background: linear-gradient(135deg, oklch(90% .08 94), oklch(94% .06 110));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 16px rgba(240, 180, 45, .18);
+        opacity:0;
+        max-height:0;
+        overflow:hidden;
+        transform: translateY(-8px) scale(.98);
+        transition: opacity .25s ease, transform .25s ease, max-height .25s ease;
+      }
+      #__ts_levelup_inline__.show { opacity:1; max-height:52px; transform:translateY(0) scale(1); }
+
+      .__ts_stat_row__ { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+      .__ts_label__ { width:66px; font-size:10px; color: oklch(42% .05 278); }
+      .__ts_val__ { width:54px; text-align:right; font-size:9px; color: oklch(40% .04 278); }
+
+      .__ts_bar_wrap__ {
+        flex:1;
+        height:10px;
+        border-radius:999px;
+        background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(220,215,240,.52));
+        border: 1px solid rgba(255,255,255,.66);
+        box-shadow: inset 0 1px 2px rgba(255,255,255,.55), inset 0 -1px 2px rgba(88,70,136,.15);
+        overflow:hidden;
+      }
+      .__ts_bar__ {
+        height:100%;
+        border-radius:999px;
+        transition: width .42s cubic-bezier(.2,.8,.2,1);
+      }
+      .__ts_hp_bar__ { background: linear-gradient(90deg, oklch(73% .19 350), oklch(66% .21 18)); filter: drop-shadow(0 0 4px oklch(67% .2 354)); }
+      .__ts_hunger_bar__ { background: linear-gradient(90deg, oklch(77% .16 229), oklch(73% .14 198)); filter: drop-shadow(0 0 4px oklch(72% .14 220)); }
+      .__ts_xp_bar__ { background: linear-gradient(90deg, var(--ts-green-1), var(--ts-green-2)); filter: drop-shadow(0 0 4px oklch(71% .17 150)); }
+      .__ts_goal_bar_default__ { background: linear-gradient(90deg, oklch(70% .02 260), oklch(61% .03 260)); }
+      .__ts_goal_bar_feed__ { background: linear-gradient(90deg, oklch(85% .12 90), oklch(76% .15 70)); filter: drop-shadow(0 0 3px oklch(76% .14 78)); }
+      .__ts_goal_bar_online__ { background: linear-gradient(90deg, oklch(76% .13 180), oklch(69% .13 220)); filter: drop-shadow(0 0 3px oklch(71% .12 210)); }
+      .__ts_goal_bar_pet__ { background: linear-gradient(90deg, oklch(78% .18 344), oklch(69% .2 8)); filter: drop-shadow(0 0 3px oklch(72% .18 350)); }
+      .__ts_goal_bar_xp__ { background: linear-gradient(90deg, oklch(75% .13 280), oklch(73% .12 235)); }
+      .__ts_goal_bar_hp__ { background: linear-gradient(90deg, oklch(73% .19 350), oklch(66% .21 18)); }
+      .__ts_goal_bar_hunger__ { background: linear-gradient(90deg, oklch(77% .16 229), oklch(73% .14 198)); }
+      .__ts_goal_bar_survive__ { background: linear-gradient(90deg, var(--ts-green-1), var(--ts-green-2)); }
+
+      #__ts_info { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color: oklch(37% .05 280); }
+      #__ts_evolution_line__ { margin-top:6px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .__ts_evo_badge {
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:3px 8px;
+        border-radius:999px;
+        font-size:9px;
+        font-weight:700;
+        background: linear-gradient(135deg, oklch(90% .04 300), oklch(85% .06 290));
+        border: 0.5px solid rgba(255,255,255,.75);
+      }
+      .__ts_evo_meta { font-size:9px; color: oklch(45% .04 284); text-align:right; }
+
+      .__ts_skill_card__,
+      #__ts_hourly_box__,
+      #__ts_panel_shop__,
+      #__ts_panel_inventory__,
+      #__ts_panel_ranking__,
+      .__ts_goal_block__,
+      .__ts_card__ {
+        border-radius: 18px;
+        border: 0.5px solid rgba(255,255,255,.66);
+        background: linear-gradient(160deg, rgba(255,255,255,.78), rgba(244,236,255,.62));
+        box-shadow: 0 10px 20px rgba(49, 35, 86, .12), inset 0 1px 0 rgba(255,255,255,.7);
+      }
+
+      .__ts_goal_block__ { padding: 6px 7px; margin-bottom: 5px; }
+      .__ts_goal_reward__ { margin:0 0 2px 68px; font-size:9px; color: oklch(43% .06 300); }
+      .__ts_goal_badge__ { display:inline-flex; align-items:center; padding:1px 7px; border-radius:999px; font-size:8px; font-weight:700; margin-right:5px; border:1px solid transparent; }
       .__ts_goal_badge_common__ { background:#f3f4f6; color:#4b5563; border-color:#d1d5db; }
       .__ts_goal_badge_uncommon__ { background:#dcfce7; color:#166534; border-color:#86efac; }
       .__ts_goal_badge_rare__ { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
       .__ts_goal_badge_epic__ { background:#f3e8ff; color:#7e22ce; border-color:#d8b4fe; }
-      .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
-      #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
-      #__ts_evolution_line__ { margin-top:5px; display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:9px; color:#574085; }
-      .__ts_evo_badge__ { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:999px; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; font-weight:700; }
-      .__ts_evo_meta__ { color:#6f5f95; font-size:9px; text-align:right; }
-      .__ts_skill_card__ { margin-top:6px; border:1px solid #ddd2f4; background:#f6f1ff; border-radius:10px; padding:6px; }
-      .__ts_skill_title__ { font-size:10px; color:#4e3588; font-weight:700; margin-bottom:2px; }
-      .__ts_skill_desc__ { font-size:9px; color:#5d4a88; margin-bottom:3px; }
-      .__ts_skill_meta__ { font-size:9px; color:#7b6ca1; margin-bottom:5px; }
-      .__ts_skill_btn__ { width:100%; background:#8f7bbf; }
-      .__ts_skill_btn__.__ts_skill_ready__ { background:linear-gradient(135deg,#7c3aed,#06b6d4); }
-      #__ts_diag__ { margin-top:6px; display:flex; justify-content:flex-end; }
-      #__ts_diag_badge__ { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; letter-spacing:.02em; background:#efe9ff; color:#5f4692; border:1px solid #d7caf5; }
-      #__ts_diag_mode__ { text-transform:uppercase; }
-      #__ts_msg__ { text-align:center; font-size:11px; color:#764ba2; min-height:14px; font-weight:bold; margin-top:4px; }
-      #__ts_tabs__ { display:grid; grid-template-columns: repeat(4,1fr); gap:4px; margin-top:8px; }
-      #__ts_tabs__ button { border:none; border-radius:6px; padding:5px; font-size:10px; cursor:pointer; background:#ece8f8; color:#49327a; }
-      #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ { margin-top:6px; max-height:160px; overflow:auto; border:1px solid #d9d0ef; border-radius:8px; padding:5px; background:#faf8ff; }
-      .__ts_card__ { border:1px solid #e1daf3; border-radius:8px; padding:5px; margin-bottom:5px; font-size:10px; }
+
+      .__ts_skill_card__ { margin-top:8px; padding:8px; }
+      #__ts_hourly_box__ { margin-top:8px; padding:8px; }
+      .__ts_skill_title__ { font-size:10px; font-weight:730; color: oklch(42% .09 297); margin-bottom:2px; }
+      .__ts_skill_desc__ { font-size:9px; color: oklch(46% .05 286); margin-bottom:3px; }
+      .__ts_skill_meta__ { font-size:9px; color: oklch(45% .04 282); margin-bottom:6px; }
+
+      .__ts_btn__ {
+        border: none;
+        border-radius: 12px;
+        padding: 6px 8px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(135deg, var(--ts-violet-1), var(--ts-violet-2));
+        box-shadow: 0 8px 16px rgba(89, 52, 155, .24);
+      }
+      .__ts_skill_btn__ { width:100%; }
+      .__ts_skill_btn__.__ts_skill_ready__ { background: linear-gradient(135deg, oklch(63% .22 297), oklch(68% .14 220)); }
+
+      #__ts_diag__ { margin-top:7px; display:flex; justify-content:flex-end; }
+      #__ts_diag_badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; background:rgba(255,255,255,.68); border:0.5px solid rgba(255,255,255,.72); color: oklch(41% .06 290); }
+      #__ts_msg__ { text-align:center; font-size:11px; color: oklch(45% .12 300); min-height:14px; font-weight:700; margin-top:5px; }
+
+      #__ts_tabs {
+        display:grid;
+        grid-template-columns: repeat(4,1fr);
+        gap:6px;
+        margin-top:8px;
+
+        & button {
+          border:none;
+          border-radius:12px;
+          padding:6px;
+          font-size:10px;
+          font-weight:680;
+          cursor:pointer;
+          color: oklch(35% .08 285);
+          background: rgba(255,255,255,.7);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px rgba(87, 70, 130, .12);
+        }
+      }
+
+      #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ {
+        margin-top:6px;
+        max-height:168px;
+        overflow:auto;
+        padding:6px;
+      }
+      .__ts_card__ { padding:6px; margin-bottom:6px; font-size:10px; }
       .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; }
-      .__ts_btn__ { border:none; border-radius:6px; padding:4px 6px; font-size:10px; cursor:pointer; background:#6b46c1; color:#fff; }
       .ts_food_item { position: fixed; font-size: 28px; z-index: 2147483646; cursor: pointer; }
       #__ts_auth_modal__ { position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:2147483647; display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',Arial,sans-serif; }
       #__ts_auth_card__ { background:#fff; border-radius:20px; padding:28px 24px 24px; width:min(340px, 92vw); box-shadow:0 12px 40px rgba(0,0,0,0.45); text-align:center; }
@@ -215,7 +414,7 @@
       #__ts_auth_err__ { color:#e74c3c; font-size:12px; min-height:18px; margin-bottom:8px; font-weight:bold; }
       #__ts_auth_submit__ { width:100%; padding:12px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer; }
     `;
-    (document.head || document.documentElement || document.body).appendChild(style);
+    styleHost.appendChild(style);
   };
 
   R.buildWidgetHTML = function buildWidgetHTML() {
@@ -232,49 +431,51 @@
     const questRewards = R.getHourlyQuestRewards ? R.getHourlyQuestRewards(state.dailyQuest) : { coins: 0, xp: 0 };
 
     return `
-      <div id="__ts_header__">
-        <span id="__ts_toggle__">🟢</span>
-        <span>TamaSkrypt</span>
-        <span style="margin-left:auto;font-size:10px;opacity:.85;">👤 ${R.currentUser}</span>
-        <button id="__ts_logout__" style="background:none;border:none;color:#fff;cursor:pointer;">⏏</button>
-      </div>
-      <div id="__ts_body__">
-        <div id="__ts_levelup_inline__"></div>
-        <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
-        <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
-        <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
-        <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
-        <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
-        <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
-        ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
-        <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
-        <div style="margin-top:8px;border:1px dashed #b8a6d9;border-radius:10px;padding:6px;background:#faf8ff;">
-          <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
-          ${R.renderHourlyGoalRows()}
-          <div id="__ts_hourly_reward_total__" style="font-size:10px;color:#6b5a8f;margin:4px 0 6px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
-          <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+      <div id="__tamaskrypt_widget__">
+        <div id="__ts_header__">
+          <span id="__ts_toggle__">🟢</span>
+          <span>TamaSkrypt</span>
+          <span style="margin-left:auto;font-size:10px;opacity:.85;">👤 ${R.currentUser}</span>
+          <button id="__ts_logout__" style="background:none;border:none;color:#fff;cursor:pointer;">⏏</button>
         </div>
-        <div id="__ts_tabs__">
-          <button id="__ts_tab_status__">Status</button>
-          <button id="__ts_tab_shop__">Sklep</button>
-          <button id="__ts_tab_inventory__">Ekwipunek</button>
-          <button id="__ts_tab_ranking__">Ranking</button>
+        <div id="__ts_body__">
+          <div id="__ts_levelup_inline__"></div>
+          <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div><div id="__ts_mood__">${mood.emoji}</div></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
+          <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
+          <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
+          ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
+          <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
+          <div id="__ts_hourly_box__">
+            <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
+            ${R.renderHourlyGoalRows()}
+            <div id="__ts_hourly_reward_total__" style="font-size:10px;color:#6b5a8f;margin:4px 0 6px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
+            <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+          </div>
+          <div id="__ts_tabs__">
+            <button id="__ts_tab_status__">Status</button>
+            <button id="__ts_tab_shop__">Sklep</button>
+            <button id="__ts_tab_inventory__">Ekwipunek</button>
+            <button id="__ts_tab_ranking__">Ranking</button>
+          </div>
+          <div id="__ts_panel_shop__" style="display:none"></div>
+          <div id="__ts_panel_inventory__" style="display:none"></div>
+          <div id="__ts_panel_ranking__" style="display:none"></div>
+          <div id="__ts_msg__"></div>
         </div>
-        <div id="__ts_panel_shop__" style="display:none"></div>
-        <div id="__ts_panel_inventory__" style="display:none"></div>
-        <div id="__ts_panel_ranking__" style="display:none"></div>
-        <div id="__ts_msg__"></div>
       </div>
     `;
   };
 
   R.updateBar = function updateBar(cls, val, max, label) {
-    const bars = document.querySelectorAll('.' + cls);
+    const bars = R.queryAllInWidget('.' + cls);
     bars.forEach(bar => {
       const pct = R.clamp(Math.round((val / max) * 100), 0, 100);
       bar.style.width = pct + '%';
     });
-    const rows = document.querySelectorAll('.__ts_stat_row__');
+    const rows = R.queryAllInWidget('.__ts_stat_row__');
     rows.forEach(row => {
       const barEl = row.querySelector('.' + cls);
       if (!barEl) return;
@@ -284,7 +485,7 @@
   };
 
   R.showMessage = function showMessage(text, duration = 3000) {
-    const msgEl = document.getElementById('__ts_msg__');
+    const msgEl = R.getElById('__ts_msg__');
     if (!msgEl) return;
     msgEl.textContent = text;
     clearTimeout(R.showMessageTimer);
@@ -295,7 +496,7 @@
 
   R.showLevelUp = function showLevelUp() {
     const level = R.state && Number.isFinite(R.state.level) ? R.state.level : '?';
-    const inline = document.getElementById('__ts_levelup_inline__');
+    const inline = R.getElById('__ts_levelup_inline__');
     if (!inline) {
       R.showMessage(`🎉 Poziom ${level}!`, 2600);
       return;
@@ -317,10 +518,10 @@
     const state = R.state;
     const mood = R.getMood();
 
-    const moodEl = document.getElementById('__ts_mood__');
-    const onlineEl = document.getElementById('__ts_online__');
-    const svgEl = document.getElementById('__ts_body_svg__');
-    const zelekEl = document.getElementById('__ts_zelek__');
+    const moodEl = R.getElById('__ts_mood__');
+    const onlineEl = R.getElById('__ts_online__');
+    const svgEl = R.getElById('__ts_body_svg__');
+    const zelekEl = R.getElById('__ts_zelek__');
 
     if (moodEl) moodEl.textContent = mood.emoji;
     if (onlineEl) onlineEl.textContent = R.formatTime(state.totalOnline + (R.now() - state.sessionStart));
@@ -333,7 +534,7 @@
     R.updateBar('__ts_hunger_bar__', state.hunger, 100, `${state.hunger}/100`);
     R.updateBar('__ts_xp_bar__', state.xp, R.CONFIG.XP_PER_LEVEL, `${state.xp}/${R.CONFIG.XP_PER_LEVEL}`);
 
-    const evolutionLine = document.getElementById('__ts_evolution_line__');
+    const evolutionLine = R.getElById('__ts_evolution_line__');
     if (evolutionLine && R.renderEvolutionSummary) {
       evolutionLine.innerHTML = R.renderEvolutionSummary();
     }
@@ -345,30 +546,30 @@
     goals.forEach((goal) => {
       const pct = R.getHourlyGoalPercent ? R.getHourlyGoalPercent(goal) : 0;
       const label = R.formatGoalProgress ? R.formatGoalProgress(goal) : '0/0';
-      const bar = document.getElementById(`__ts_goal_bar_${goal.id}__`);
-      const val = document.getElementById(`__ts_goal_val_${goal.id}__`);
+      const bar = R.getElById(`__ts_goal_bar_${goal.id}__`);
+      const val = R.getElById(`__ts_goal_val_${goal.id}__`);
       if (bar) bar.style.width = `${R.clamp(pct, 0, 100)}%`;
       if (val) val.textContent = label;
     });
 
-    const rewardTotalEl = document.getElementById('__ts_hourly_reward_total__');
+    const rewardTotalEl = R.getElById('__ts_hourly_reward_total__');
     if (rewardTotalEl && R.getHourlyQuestRewards) {
       const rewards = R.getHourlyQuestRewards(state.dailyQuest);
       rewardTotalEl.textContent = `Suma nagrody: +${rewards.coins} 🪙, +${rewards.xp} XP`;
     }
 
-    const coinsEl = document.getElementById('__ts_coins__');
+    const coinsEl = R.getElById('__ts_coins__');
     if (coinsEl) coinsEl.textContent = String(state.coins);
 
     const diagnostics = R.getLauncherDiagnostics();
-    const diagModeEl = document.getElementById('__ts_diag_mode__');
-    const diagVersionEl = document.getElementById('__ts_diag_version__');
-    const diagBadgeEl = document.getElementById('__ts_diag_badge__');
+    const diagModeEl = R.getElById('__ts_diag_mode__');
+    const diagVersionEl = R.getElById('__ts_diag_version__');
+    const diagBadgeEl = R.getElById('__ts_diag_badge__');
     if (diagModeEl) diagModeEl.textContent = diagnostics.mode;
     if (diagVersionEl) diagVersionEl.textContent = `v${diagnostics.manifestVersion}`;
     if (diagBadgeEl) diagBadgeEl.title = `source: ${diagnostics.source}`;
 
-    const claimBtn = document.getElementById('__ts_claim_daily__');
+    const claimBtn = R.getElById('__ts_claim_daily__');
     if (claimBtn) {
       const canClaim = R.isDailyQuestCompleted() && !state.dailyQuest.claimed;
       claimBtn.disabled = !canClaim;
@@ -391,7 +592,9 @@
 
     const widget = document.createElement('div');
     widget.id = R.ids.WIDGET_ID;
-    widget.innerHTML = R.buildWidgetHTML();
+    const shadowRoot = widget.attachShadow({ mode: 'open' });
+    R.widgetShadowRoot = shadowRoot;
+    shadowRoot.innerHTML = R.buildWidgetHTML();
     R.applyWidgetStyles();
     target.appendChild(widget);
     R.widgetEl = widget;

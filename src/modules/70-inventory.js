@@ -54,7 +54,7 @@
   };
 
   R.renderInventoryPanel = function renderInventoryPanel() {
-    const panel = document.getElementById('__ts_panel_inventory__');
+    const panel = R.getElById ? R.getElById('__ts_panel_inventory__') : document.getElementById('__ts_panel_inventory__');
     if (!panel || panel.style.display === 'none') return;
 
     const inv = R.state && R.state.inventory ? R.state.inventory : {};

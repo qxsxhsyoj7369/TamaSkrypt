@@ -149,8 +149,8 @@
   };
 
   R.bindUIEvents = function bindUIEvents() {
-    const toggle = document.getElementById('__ts_toggle__');
-    const body = document.getElementById('__ts_body__');
+    const toggle = R.getElById ? R.getElById('__ts_toggle__') : document.getElementById('__ts_toggle__');
+    const body = R.getElById ? R.getElById('__ts_body__') : document.getElementById('__ts_body__');
     if (toggle && body) {
       toggle.addEventListener('click', () => {
         body.classList.toggle('hidden');
@@ -158,7 +158,7 @@
       });
     }
 
-    const logoutBtn = document.getElementById('__ts_logout__');
+    const logoutBtn = R.getElById ? R.getElById('__ts_logout__') : document.getElementById('__ts_logout__');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         R.persistState();
@@ -172,21 +172,21 @@
       });
     }
 
-    const claimBtn = document.getElementById('__ts_claim_daily__');
+    const claimBtn = R.getElById ? R.getElById('__ts_claim_daily__') : document.getElementById('__ts_claim_daily__');
     if (claimBtn) claimBtn.addEventListener('click', R.claimDailyReward);
 
-    const activeSkillBtn = document.getElementById('__ts_active_skill_btn__');
+    const activeSkillBtn = R.getElById ? R.getElById('__ts_active_skill_btn__') : document.getElementById('__ts_active_skill_btn__');
     if (activeSkillBtn) activeSkillBtn.addEventListener('click', R.useActiveSkill);
 
     if (R.bindPettingEvents) R.bindPettingEvents();
 
-    const tabStatus = document.getElementById('__ts_tab_status__');
-    const tabShop = document.getElementById('__ts_tab_shop__');
-    const tabInventory = document.getElementById('__ts_tab_inventory__');
-    const tabRanking = document.getElementById('__ts_tab_ranking__');
-    const panelShop = document.getElementById('__ts_panel_shop__');
-    const panelInventory = document.getElementById('__ts_panel_inventory__');
-    const panelRanking = document.getElementById('__ts_panel_ranking__');
+    const tabStatus = R.getElById ? R.getElById('__ts_tab_status__') : document.getElementById('__ts_tab_status__');
+    const tabShop = R.getElById ? R.getElById('__ts_tab_shop__') : document.getElementById('__ts_tab_shop__');
+    const tabInventory = R.getElById ? R.getElById('__ts_tab_inventory__') : document.getElementById('__ts_tab_inventory__');
+    const tabRanking = R.getElById ? R.getElById('__ts_tab_ranking__') : document.getElementById('__ts_tab_ranking__');
+    const panelShop = R.getElById ? R.getElById('__ts_panel_shop__') : document.getElementById('__ts_panel_shop__');
+    const panelInventory = R.getElById ? R.getElById('__ts_panel_inventory__') : document.getElementById('__ts_panel_inventory__');
+    const panelRanking = R.getElById ? R.getElById('__ts_panel_ranking__') : document.getElementById('__ts_panel_ranking__');
 
     function hidePanels() {
       if (panelShop) panelShop.style.display = 'none';
@@ -216,7 +216,7 @@
       if (R.renderRankingPanel) R.renderRankingPanel();
     });
 
-    const header = document.getElementById('__ts_header__');
+    const header = R.getElById ? R.getElById('__ts_header__') : document.getElementById('__ts_header__');
     if (header && R.widgetEl) {
       let dragging = false;
       let dragOX = 0;
@@ -286,10 +286,10 @@
     }
 
     setInterval(() => {
-      const el = document.getElementById('__ts_online__');
-      if (el && R.state) {
+      const onlineEl = R.getElById ? R.getElById('__ts_online__') : document.getElementById('__ts_online__');
+      if (onlineEl && R.state) {
         const ms = R.state.totalOnline + (R.now() - R.state.sessionStart);
-        el.textContent = R.formatTime(ms);
+        onlineEl.textContent = R.formatTime(ms);
       }
       if (R.refreshActiveSkillUI) {
         R.refreshActiveSkillUI();

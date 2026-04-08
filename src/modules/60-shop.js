@@ -36,7 +36,7 @@
   };
 
   R.renderShopPanel = function renderShopPanel() {
-    const panel = document.getElementById('__ts_panel_shop__');
+    const panel = R.getElById ? R.getElById('__ts_panel_shop__') : document.getElementById('__ts_panel_shop__');
     if (!panel || panel.style.display === 'none') return;
 
     panel.innerHTML = R.SHOP_ITEMS.map((item) => {

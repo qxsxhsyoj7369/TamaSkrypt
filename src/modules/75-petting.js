@@ -4,15 +4,30 @@
   const R = window.GelekRuntime;
   if (!R) return;
 
-  const STYLE_ID = '__ts_petting_styles__';
+  const STYLE_ID_WIDGET = '__ts_petting_styles_widget__';
+  const STYLE_ID_GLOBAL = '__ts_petting_styles_global__';
 
   function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = `
+    const widgetRoot = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (widgetRoot && !widgetRoot.getElementById(STYLE_ID_WIDGET)) {
+      const widgetStyle = document.createElement('style');
+      widgetStyle.id = STYLE_ID_WIDGET;
+      widgetStyle.textContent = `
       #__ts_zelek__ { cursor: pointer; position: relative; }
       #__ts_zelek__.__ts_petting_pop__ { animation: __tsPetPop .22s ease; }
+      @keyframes __tsPetPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+      }
+    `;
+      widgetRoot.appendChild(widgetStyle);
+    }
+
+    if (document.getElementById(STYLE_ID_GLOBAL)) return;
+    const globalStyle = document.createElement('style');
+    globalStyle.id = STYLE_ID_GLOBAL;
+    globalStyle.textContent = `
       .__ts_petting_fx__ {
         position: fixed;
         z-index: 2147483647;
@@ -22,18 +37,13 @@
         animation: __tsPetFloat .8s ease-out forwards;
         text-shadow: 0 1px 2px rgba(255,255,255,.75);
       }
-      @keyframes __tsPetPop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.08); }
-        100% { transform: scale(1); }
-      }
       @keyframes __tsPetFloat {
         0% { opacity: 0; transform: translate(-50%, 0) scale(.85); }
         15% { opacity: 1; transform: translate(-50%, -3px) scale(1); }
         100% { opacity: 0; transform: translate(-50%, -28px) scale(1.05); }
       }
     `;
-    (document.head || document.documentElement).appendChild(style);
+    (document.head || document.documentElement).appendChild(globalStyle);
   }
 
   function playPettingAnimation(targetEl) {
@@ -79,7 +89,8 @@
     const pointX = evt && Number.isFinite(evt.clientX) ? evt.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
     const pointY = evt && Number.isFinite(evt.clientY) ? evt.clientY : (rect ? rect.top + 10 : window.innerHeight / 2);
 
-    playPettingAnimation(document.getElementById('__ts_zelek__'));
+    const petRoot = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
+    playPettingAnimation(petRoot);
     showPettingFx(pointX, pointY);
 
     if (typeof R.persistState === 'function') R.persistState();
@@ -88,7 +99,7 @@
 
   R.bindPettingEvents = function bindPettingEvents() {
     ensureStyles();
-    const petEl = document.getElementById('__ts_zelek__');
+    const petEl = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
     if (!petEl || petEl.dataset.tsPettingBound === '1') return;
 
     petEl.dataset.tsPettingBound = '1';

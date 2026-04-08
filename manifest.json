@@ -1,7 +1,7 @@
 {
-  "version": "3.12.0",
+  "version": "3.13.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Core gameplay: aktywne umiejętności per forma Gelka (cooldown + efekty czasowe + przycisk w UI).",
+  "changelog": "UI refactor: Soft-3D Gelek + Glass/Bento wygląd + Shadow DOM izolacja widgetu bez zmiany logiki ID/state.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.12.0",
-      "hash": "22af559735340fd9fedca934e6af3b59f65673ba21853786733315eb6b111354",
+      "version": "3.13.0",
+      "hash": "b46afe31071802fb85d6695f2538a2cfccdee0c70bbcd8fc46013ae1931b8b9c",
       "execute": "raw",
       "required": true
     },
@@ -65,40 +65,40 @@
     {
       "name": "shop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/60-shop.js",
-      "version": "3.1.0",
-      "hash": "2c2fd0fcff5cc816a5f2c821293cf83ff39169d06898d2384089f723a8af29d1",
+      "version": "3.13.0",
+      "hash": "35304ca8879f97d21b04926f42cfa52b1b1f3d7e432f43d90cdfc4cad546d6ec",
       "execute": "raw",
       "required": true
     },
     {
       "name": "inventory",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/70-inventory.js",
-      "version": "3.11.0",
-      "hash": "ab3edde940ee833d754a1cf131d843ee447a4d643214e758aba6e7d0e0ffa58e",
+      "version": "3.13.0",
+      "hash": "1481bb1a474fd2846c524277bd8b87688fb9c87232bc18a166e70a094eb9af89",
       "execute": "raw",
       "required": true
     },
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.11.0",
-      "hash": "53e4be5d128ed69e9ca402a5591c0fed3603bdad01daf8b60c50b2a00184edaa",
+      "version": "3.13.0",
+      "hash": "a2317d0a4207dd480cbf6c93f865ff392a6303fa89c8335874e711f0e7c0f4ba",
       "execute": "raw",
       "required": true
     },
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.12.0",
-      "hash": "04243f7b5170255cb7bdcfa372547f6775f80e461541e4e561a634fcbbf91e7a",
+      "version": "3.13.0",
+      "hash": "33f5837da9195768ca0fb671c18b6168f7d7eca66fc125d57e97c391b86d92b7",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ranking",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
-      "version": "3.3.0",
-      "hash": "8264936693cf66f1f188d0ee2423279a52bc6e9ec0450f7c801905b422eb9e3e",
+      "version": "3.13.0",
+      "hash": "94350616d6d5328fc90972bcb6615e75dfecec8efa0142f1ef8d240604d9fe0a",
       "execute": "raw",
       "required": true
     },
