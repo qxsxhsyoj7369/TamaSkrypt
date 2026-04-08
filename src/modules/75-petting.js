@@ -14,11 +14,24 @@
       widgetStyle.id = STYLE_ID_WIDGET;
       widgetStyle.textContent = `
       #__ts_zelek__ { cursor: pointer; position: relative; }
-      #__ts_zelek__.__ts_petting_pop__ { animation: __tsPetPop .22s ease; }
+      #__ts_body_svg__.__ts_petting_pop__ .__ts_slime_svg__ { animation: __tsPetHop .3s cubic-bezier(.2,.8,.2,1); }
+      #__ts_body_svg__.__ts_petting_pop__ .__ts_slime_stage { animation: __tsPetTilt .3s cubic-bezier(.2,.8,.2,1); }
       @keyframes __tsPetPop {
         0% { transform: scale(1); }
         50% { transform: scale(1.08); }
         100% { transform: scale(1); }
+      }
+      @keyframes __tsPetHop {
+        0% { transform: translateY(0) scaleX(1) scaleY(1); }
+        35% { transform: translateY(-8px) scaleX(1.04) scaleY(0.96); }
+        65% { transform: translateY(-2px) scaleX(0.97) scaleY(1.03); }
+        100% { transform: translateY(0) scaleX(1) scaleY(1); }
+      }
+      @keyframes __tsPetTilt {
+        0% { transform: rotate(0deg); }
+        30% { transform: rotate(-3deg); }
+        70% { transform: rotate(2deg); }
+        100% { transform: rotate(0deg); }
       }
     `;
       widgetRoot.appendChild(widgetStyle);
@@ -89,8 +102,9 @@
     const pointX = evt && Number.isFinite(evt.clientX) ? evt.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
     const pointY = evt && Number.isFinite(evt.clientY) ? evt.clientY : (rect ? rect.top + 10 : window.innerHeight / 2);
 
+    const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
     const petRoot = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
-    playPettingAnimation(petRoot);
+    playPettingAnimation(petBody || petRoot);
     showPettingFx(pointX, pointY);
 
     if (typeof R.persistState === 'function') R.persistState();

@@ -1,7 +1,7 @@
 {
-  "version": "3.18.0",
+  "version": "3.19.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Gelek emotions: miny rysowane bezpośrednio na slime (happy/neutral/hungry/sad/dead), bez osobnej emotki pod spodem.",
+  "changelog": "Gelek polish: większe oczy, naturalniejsze mruganie z rzadkimi winkami lewo/prawo, podskok przy głaskaniu tylko na samym Gelku + dodatkowe cute idle animacje.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.18.0",
-      "hash": "fb114fb8a0f2d823a377e21e110a3bbcfb2299f9a03d78e269e89953803b620c",
+      "version": "3.19.0",
+      "hash": "c76aaf3a5fc77d1c477e4ddfd861934f93b72b3b2ec7a539afe3861b90136fe7",
       "execute": "raw",
       "required": true
     },
@@ -81,8 +81,8 @@
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.13.0",
-      "hash": "a2317d0a4207dd480cbf6c93f865ff392a6303fa89c8335874e711f0e7c0f4ba",
+      "version": "3.19.0",
+      "hash": "0ff8e705b8dff1908146b518055b40bc2a361c80b9cdb0293347f65c6d6aad8d",
       "execute": "raw",
       "required": true
     },

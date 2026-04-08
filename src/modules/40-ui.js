@@ -213,12 +213,16 @@
     const palette = palettes[paletteIndex];
     let moodClass = '__ts_slime_mood_neutral__';
     let eyesMarkup = `
-      <ellipse class="__ts_slime_eye_white__" cx="38" cy="70" rx="5.2" ry="5.4"/>
-      <ellipse class="__ts_slime_eye_white__" cx="89" cy="70" rx="5.2" ry="5.4"/>
-      <circle class="__ts_slime_eye_core__" cx="38.7" cy="70.5" r="2.1"/>
-      <circle class="__ts_slime_eye_core__" cx="89.7" cy="70.5" r="2.1"/>
-      <circle class="__ts_slime_eye_gloss__" cx="39.6" cy="69.5" r="0.78"/>
-      <circle class="__ts_slime_eye_gloss__" cx="90.6" cy="69.5" r="0.78"/>
+      <g class="__ts_slime_eye__ __ts_slime_eye_l__">
+        <ellipse class="__ts_slime_eye_white__" cx="38" cy="70" rx="6.1" ry="6.4"/>
+        <circle class="__ts_slime_eye_core__" cx="38.8" cy="70.6" r="2.5"/>
+        <circle class="__ts_slime_eye_gloss__" cx="39.8" cy="69.3" r="0.9"/>
+      </g>
+      <g class="__ts_slime_eye__ __ts_slime_eye_r__">
+        <ellipse class="__ts_slime_eye_white__" cx="89" cy="70" rx="6.1" ry="6.4"/>
+        <circle class="__ts_slime_eye_core__" cx="89.8" cy="70.6" r="2.5"/>
+        <circle class="__ts_slime_eye_gloss__" cx="90.8" cy="69.3" r="0.9"/>
+      </g>
     `;
     let browsMarkup = '';
     let mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M54 80 L76.8 80"/>';
@@ -243,18 +247,26 @@
         <path class="__ts_slime_brow__" d="M82.9 62.2c4.1-1.5 7.8-0.9 12 1.1"/>
       `;
       eyesMarkup = `
-        <path class="__ts_slime_eye_line__" d="M33.3 71.1c2.5 1.7 5 1.7 7.5 0"/>
-        <path class="__ts_slime_eye_line__" d="M84.4 71.1c2.5 1.7 5 1.7 7.5 0"/>
+        <g class="__ts_slime_eye__ __ts_slime_eye_l__">
+          <path class="__ts_slime_eye_line__" d="M32.6 71.3c2.9 2.1 5.8 2.1 8.7 0"/>
+        </g>
+        <g class="__ts_slime_eye__ __ts_slime_eye_r__">
+          <path class="__ts_slime_eye_line__" d="M83.6 71.3c2.9 2.1 5.8 2.1 8.7 0"/>
+        </g>
         <path class="__ts_slime_tear__" d="M92.6 74.8c1.2 1.9 1.5 3.2 0 4.7c-1.4-1.5-1.2-2.8 0-4.7z"/>
       `;
       mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M54.4 84.3c3.4-3.4 7-4.7 11.3-4.7c4.4 0 7.9 1.3 11.3 4.7"/>';
     } else if (moodEmoji === '💀') {
       moodClass = '__ts_slime_mood_dead__';
       eyesMarkup = `
-        <path class="__ts_slime_dead_mark__" d="M33.8 66.5l7.8 7.8"/>
-        <path class="__ts_slime_dead_mark__" d="M41.6 66.5l-7.8 7.8"/>
-        <path class="__ts_slime_dead_mark__" d="M84.8 66.5l7.8 7.8"/>
-        <path class="__ts_slime_dead_mark__" d="M92.6 66.5l-7.8 7.8"/>
+        <g class="__ts_slime_eye__ __ts_slime_eye_l__">
+          <path class="__ts_slime_dead_mark__" d="M33.8 66.5l7.8 7.8"/>
+          <path class="__ts_slime_dead_mark__" d="M41.6 66.5l-7.8 7.8"/>
+        </g>
+        <g class="__ts_slime_eye__ __ts_slime_eye_r__">
+          <path class="__ts_slime_dead_mark__" d="M84.8 66.5l7.8 7.8"/>
+          <path class="__ts_slime_dead_mark__" d="M92.6 66.5l-7.8 7.8"/>
+        </g>
       `;
       mouthMarkup = '<path class="__ts_slime_mouth_line__" d="M55.2 82.2h21.2"/>';
     }
@@ -390,6 +402,7 @@
         align-items:flex-end;
         justify-content:center;
         filter: drop-shadow(0 15px 18px rgba(0,0,0,0.22)) drop-shadow(0 0 18px var(--ts-slime-glow));
+        animation: __ts_slime_idle_tilt__ 8.8s ease-in-out infinite;
       }
       #__ts_body_svg__ .__ts_slime_svg__ {
         width: 92px;
@@ -412,10 +425,20 @@
       #__ts_body_svg__ .__ts_slime_highlight__ ellipse {
         fill: #ffffff;
         opacity: 0.48;
+        transform-origin: center;
+        animation: __ts_slime_gloss_drift__ 6.5s ease-in-out infinite;
       }
       #__ts_body_svg__ .__ts_slime_eyes__ {
-        animation: __ts_slime_blink__ 3s infinite ease-in-out;
         transform-origin: 62.5px 72px;
+      }
+      #__ts_body_svg__ .__ts_slime_eye__ {
+        transform-origin: center;
+      }
+      #__ts_body_svg__ .__ts_slime_eye_l__ {
+        animation: __ts_slime_blink_base__ 4.2s infinite ease-in-out, __ts_slime_wink_left__ 17.5s infinite ease-in-out;
+      }
+      #__ts_body_svg__ .__ts_slime_eye_r__ {
+        animation: __ts_slime_blink_base__ 4.2s infinite ease-in-out .14s, __ts_slime_wink_right__ 19.5s infinite ease-in-out;
       }
       #__ts_body_svg__ .__ts_slime_eye_white__ {
         fill: #eff8ff;
@@ -453,8 +476,16 @@
       #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_eyes__ {
         animation: none;
       }
+      #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_eye_l__,
+      #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_eye_r__ {
+        animation: none;
+      }
       #__ts_body_svg__ .__ts_slime_stage.__ts_slime_mood_dead__ .__ts_slime_svg__ {
         filter: saturate(0.6) brightness(0.92);
+      }
+      @keyframes __ts_slime_idle_tilt__ {
+        0%, 100% { transform: rotate(-1deg) translateY(0); }
+        50% { transform: rotate(1deg) translateY(-1px); }
       }
       @keyframes __ts_slime_breathe__ {
         0% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
@@ -471,12 +502,26 @@
         90% { transform-origin: 50% 100%; transform: scaleX(1.2) scaleY(0.8); }
         100% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
       }
-      @keyframes __ts_slime_blink__ {
+      @keyframes __ts_slime_blink_base__ {
         0% { transform: scaleY(1); }
-        70% { transform: scaleY(1); }
-        80% { transform: scaleY(0.2); }
-        90% { transform: scaleY(1); }
+        74% { transform: scaleY(1); }
+        78% { transform: scaleY(0.14); }
+        82% { transform: scaleY(1); }
         100% { transform: scaleY(1); }
+      }
+      @keyframes __ts_slime_wink_left__ {
+        0%, 89%, 100% { transform: scaleY(1); }
+        92% { transform: scaleY(0.22); }
+        95% { transform: scaleY(1); }
+      }
+      @keyframes __ts_slime_wink_right__ {
+        0%, 93%, 100% { transform: scaleY(1); }
+        96% { transform: scaleY(0.22); }
+        98% { transform: scaleY(1); }
+      }
+      @keyframes __ts_slime_gloss_drift__ {
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+        50% { transform: translate(-0.8px, 0.6px) scale(1.04); opacity: 0.62; }
       }
 
       #__ts_levelup_inline__ {
