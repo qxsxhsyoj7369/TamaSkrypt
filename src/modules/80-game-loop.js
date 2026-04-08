@@ -6,7 +6,11 @@
 
   R.gainXP = function gainXP(amount) {
     if (!R.state || !R.state.alive) return;
-    R.state.xp += amount;
+    const gain = Math.max(0, Number(amount) || 0);
+    R.state.xp += gain;
+    if (R.incrementHourlyGoalProgress) {
+      R.incrementHourlyGoalProgress('gain_xp', gain);
+    }
     while (R.state.xp >= R.CONFIG.XP_PER_LEVEL) {
       R.state.xp -= R.CONFIG.XP_PER_LEVEL;
       R.state.level += 1;
@@ -94,6 +98,7 @@
       R.state.foodCollected += 1;
       if (R.incrementHourlyGoalProgress) {
         R.incrementHourlyGoalProgress('feed', 1);
+        R.incrementHourlyGoalProgress('eat_specific_food', 1, { foodName: food.name });
       }
 
       const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;

@@ -121,8 +121,8 @@
     const tickNow = R.now();
     const delta = Math.max(0, tickNow - R.state.lastDailyTick);
     R.state.lastDailyTick = tickNow;
-    if (R.incrementHourlyGoalProgress) {
-      R.incrementHourlyGoalProgress('online', delta);
+    if (R.updateTimedHourlyGoals) {
+      R.updateTimedHourlyGoals(delta);
     }
   };
 })();

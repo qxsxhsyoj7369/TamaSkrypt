@@ -1,7 +1,7 @@
 {
-  "version": "3.5.0",
+  "version": "3.6.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Quests Hourly Plus: 3 losowe cele co godzinę z różnymi rewardami oraz dynamiczny panel postępu.",
+  "changelog": "Quests Hourly Plus v2: losowanie 3 celów z puli 8 typów (XP, HP, sytość, konkretny przysmak i więcej) z różnymi rewardami.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.5.0",
-      "hash": "8560eef9eb3fbd7956d241267cf7bdcb5ecbbe8421f035f3dffe626e3b0a2401",
+      "version": "3.6.0",
+      "hash": "c4e05cb53e440e23d60abffcc15b0fb38f99409ba48e9a495f50d00b072c4073",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.5.0",
-      "hash": "6f129c3826eac712ba709386532ce21ec207e231bcc952f1a69ca88c231c63b2",
+      "version": "3.6.0",
+      "hash": "68ea6186b1fba3aa5d28d0ab57e810e75dd2bfd80b3b1c88747e33bc7ce6c9f1",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.5.0",
-      "hash": "627b66dc976d5e73565339d68ca57e0e4765d3f46ab67d9961ee03c2d4dd66a5",
+      "version": "3.6.0",
+      "hash": "1cb32d2fd43558c13c1681113514780212a334926967b7c6b4615119cbe9e5ac",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.5.0",
-      "hash": "9613ed70776d487b25d88d2361c0c6c65174d68e99f189c37f4ebc83e523e278",
+      "version": "3.6.0",
+      "hash": "e6e5a3cb0b983576d3331c63cd809f52b33d3c98be7654898039286c0d2710ea",
       "execute": "raw",
       "required": true
     },

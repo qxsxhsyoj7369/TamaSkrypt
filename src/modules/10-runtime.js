@@ -30,6 +30,9 @@
   runtime.CONFIG.DAILY_REWARD_COINS = runtime.CONFIG.HOURLY_REWARD_COINS;
   runtime.CONFIG.DAILY_REWARD_XP = runtime.CONFIG.HOURLY_REWARD_XP;
 
+  runtime.HOURLY_QUEST_VERSION = 2;
+  runtime.HOURLY_GOAL_POOL_SIZE = 3;
+
   runtime.HOURLY_GOAL_DEFS = [
     {
       id: 'feed',
@@ -37,7 +40,7 @@
       label: 'Karm',
       unit: 'count',
       minTarget: 2,
-      maxTarget: 5,
+      maxTarget: 6,
       baseRewardCoins: 8,
       baseRewardXp: 6,
       rewardStepCoins: 4,
@@ -61,10 +64,74 @@
       label: 'Głaszcz',
       unit: 'count',
       minTarget: 12,
-      maxTarget: 36,
+      maxTarget: 40,
       baseRewardCoins: 9,
       baseRewardXp: 7,
       rewardStepCoins: 3,
+      rewardStepXp: 2,
+    },
+    {
+      id: 'gain_xp',
+      icon: '⭐',
+      label: 'Zdobądź XP',
+      unit: 'count',
+      minTarget: 20,
+      maxTarget: 90,
+      baseRewardCoins: 10,
+      baseRewardXp: 10,
+      rewardStepCoins: 2,
+      rewardStepXp: 2,
+    },
+    {
+      id: 'keep_hp',
+      icon: '❤️',
+      label: 'Utrzymaj HP',
+      unit: 'ms',
+      minTargetMinutes: 3,
+      maxTargetMinutes: 10,
+      minThreshold: 55,
+      maxThreshold: 85,
+      baseRewardCoins: 11,
+      baseRewardXp: 9,
+      rewardStepCoins: 2,
+      rewardStepXp: 2,
+    },
+    {
+      id: 'keep_hunger',
+      icon: '🍬',
+      label: 'Utrzymaj sytość',
+      unit: 'ms',
+      minTargetMinutes: 3,
+      maxTargetMinutes: 10,
+      minThreshold: 45,
+      maxThreshold: 80,
+      baseRewardCoins: 10,
+      baseRewardXp: 8,
+      rewardStepCoins: 2,
+      rewardStepXp: 2,
+    },
+    {
+      id: 'eat_specific_food',
+      icon: '🍓',
+      label: 'Zjedz konkretny przysmak',
+      unit: 'count',
+      minTarget: 1,
+      maxTarget: 3,
+      baseRewardCoins: 12,
+      baseRewardXp: 9,
+      rewardStepCoins: 4,
+      rewardStepXp: 3,
+    },
+    {
+      id: 'survive_time',
+      icon: '🛡️',
+      label: 'Przetrwaj',
+      unit: 'ms',
+      minTargetMinutes: 5,
+      maxTargetMinutes: 15,
+      baseRewardCoins: 9,
+      baseRewardXp: 8,
+      rewardStepCoins: 2,
       rewardStepXp: 2,
     },
   ];
@@ -144,6 +211,17 @@
     return min + Math.floor(roll * (max - min + 1));
   };
 
+  runtime.pickRandomItems = function pickRandomItems(items, count, random) {
+    const source = Array.isArray(items) ? items.slice() : [];
+    for (let index = source.length - 1; index > 0; index -= 1) {
+      const swapWith = runtime.randomInt(0, index, random);
+      const temp = source[index];
+      source[index] = source[swapWith];
+      source[swapWith] = temp;
+    }
+    return source.slice(0, Math.max(0, Math.min(count, source.length)));
+  };
+
   runtime.computeHourlyGoalReward = function computeHourlyGoalReward(definition, targetValue) {
     if (!definition) return { coins: 0, xp: 0 };
     if (definition.unit === 'ms') {
@@ -163,25 +241,54 @@
 
   runtime.createHourlyGoal = function createHourlyGoal(definition, random) {
     if (!definition) return null;
-    const target = definition.unit === 'ms'
-      ? runtime.randomInt(definition.minTargetMinutes, definition.maxTargetMinutes, random) * 60000
-      : runtime.randomInt(definition.minTarget, definition.maxTarget, random);
-    const reward = runtime.computeHourlyGoalReward(definition, target);
-    return {
+
+    const goal = {
       id: definition.id,
       icon: definition.icon,
       label: definition.label,
+      displayLabel: definition.label,
       unit: definition.unit,
-      target,
+      target: 1,
       progress: 0,
-      rewardCoins: reward.coins,
-      rewardXp: reward.xp,
+      rewardCoins: 0,
+      rewardXp: 0,
     };
+
+    if (definition.id === 'eat_specific_food') {
+      const foodList = Array.isArray(runtime.FOODS) ? runtime.FOODS : [];
+      const foodIndex = foodList.length ? runtime.randomInt(0, foodList.length - 1, random) : 0;
+      const food = foodList[foodIndex] || { name: 'Przysmak', emoji: '🍓' };
+      goal.foodName = food.name;
+      goal.foodEmoji = food.emoji;
+      goal.target = runtime.randomInt(definition.minTarget, definition.maxTarget, random);
+      goal.displayLabel = `Zjedz ${food.emoji} ${food.name}`;
+    } else if (definition.id === 'keep_hp') {
+      goal.threshold = runtime.randomInt(definition.minThreshold, definition.maxThreshold, random);
+      goal.target = runtime.randomInt(definition.minTargetMinutes, definition.maxTargetMinutes, random) * 60000;
+      goal.displayLabel = `HP ≥ ${goal.threshold}`;
+    } else if (definition.id === 'keep_hunger') {
+      goal.threshold = runtime.randomInt(definition.minThreshold, definition.maxThreshold, random);
+      goal.target = runtime.randomInt(definition.minTargetMinutes, definition.maxTargetMinutes, random) * 60000;
+      goal.displayLabel = `Sytość ≥ ${goal.threshold}`;
+    } else if (definition.unit === 'ms') {
+      goal.target = runtime.randomInt(definition.minTargetMinutes, definition.maxTargetMinutes, random) * 60000;
+    } else {
+      goal.target = runtime.randomInt(definition.minTarget, definition.maxTarget, random);
+    }
+
+    const target = definition.unit === 'ms'
+      ? goal.target
+      : goal.target;
+    const reward = runtime.computeHourlyGoalReward(definition, target);
+    goal.rewardCoins = reward.coins;
+    goal.rewardXp = reward.xp;
+    return goal;
   };
 
   runtime.createHourlyGoals = function createHourlyGoals(seedText) {
     const random = runtime.createSeededRng(seedText);
-    return runtime.HOURLY_GOAL_DEFS
+    const pickedDefs = runtime.pickRandomItems(runtime.HOURLY_GOAL_DEFS, runtime.HOURLY_GOAL_POOL_SIZE, random);
+    return pickedDefs
       .map(definition => runtime.createHourlyGoal(definition, random))
       .filter(Boolean);
   };
@@ -219,10 +326,37 @@
 
   runtime.incrementHourlyGoalProgress = function incrementHourlyGoalProgress(goalId, amount) {
     if (!runtime.state || !runtime.state.dailyQuest) return;
-    const goal = runtime.getHourlyGoalById(runtime.state.dailyQuest, goalId);
-    if (!goal) return;
+    const extra = arguments.length > 2 ? arguments[2] : null;
+    const goals = Array.isArray(runtime.state.dailyQuest.goals) ? runtime.state.dailyQuest.goals : [];
+    const candidateGoals = goals.filter(goal => goal && goal.id === goalId);
+    if (!candidateGoals.length) return;
     const delta = Math.max(0, Number(amount) || 0);
-    goal.progress = runtime.clamp((Number(goal.progress) || 0) + delta, 0, Math.max(1, Number(goal.target) || 1));
+    candidateGoals.forEach((goal) => {
+      if (goal.id === 'eat_specific_food') {
+        const consumedName = extra && extra.foodName ? String(extra.foodName) : '';
+        const expectedName = goal.foodName ? String(goal.foodName) : '';
+        if (!consumedName || !expectedName || consumedName !== expectedName) return;
+      }
+      goal.progress = runtime.clamp((Number(goal.progress) || 0) + delta, 0, Math.max(1, Number(goal.target) || 1));
+    });
+  };
+
+  runtime.updateTimedHourlyGoals = function updateTimedHourlyGoals(deltaMs) {
+    if (!runtime.state || !runtime.state.dailyQuest) return;
+    const goals = Array.isArray(runtime.state.dailyQuest.goals) ? runtime.state.dailyQuest.goals : [];
+    const delta = Math.max(0, Number(deltaMs) || 0);
+    if (delta <= 0) return;
+
+    goals.forEach((goal) => {
+      if (!goal || goal.unit !== 'ms') return;
+      let canProgress = false;
+      if (goal.id === 'online') canProgress = true;
+      if (goal.id === 'survive_time') canProgress = runtime.state.alive === true;
+      if (goal.id === 'keep_hp') canProgress = Number(runtime.state.hp) >= Number(goal.threshold || 0);
+      if (goal.id === 'keep_hunger') canProgress = Number(runtime.state.hunger) >= Number(goal.threshold || 0);
+      if (!canProgress) return;
+      goal.progress = runtime.clamp((Number(goal.progress) || 0) + delta, 0, Math.max(1, Number(goal.target) || 1));
+    });
   };
 
   runtime.makeHourlyQuest = function makeHourlyQuest() {
@@ -232,6 +366,7 @@
     const rewards = runtime.getHourlyQuestRewards({ goals });
     return {
       hourKey,
+      questVersion: runtime.HOURLY_QUEST_VERSION,
       goals,
       rewardCoins: rewards.coins,
       rewardXp: rewards.xp,
@@ -247,6 +382,7 @@
     if (!raw || typeof raw !== 'object') return runtime.makeHourlyQuest();
     const hourKey = raw.hourKey || raw.dayKey;
     if (hourKey !== runtime.getHourKey()) return runtime.makeHourlyQuest();
+    if (Number(raw.questVersion) !== runtime.HOURLY_QUEST_VERSION) return runtime.makeHourlyQuest();
 
     const seedIdentity = runtime.currentUid || runtime.currentUser || 'guest';
     const defaults = runtime.createHourlyGoals(`${seedIdentity}::${hourKey}`);
@@ -262,18 +398,24 @@
       const target = Math.max(1, Number(existing && existing.target) || Number(defGoal.target) || 1);
       const rewardCoins = Math.max(0, Number(existing && existing.rewardCoins) || Number(defGoal.rewardCoins) || 0);
       const rewardXp = Math.max(0, Number(existing && existing.rewardXp) || Number(defGoal.rewardXp) || 0);
+      const threshold = Number(existing && existing.threshold);
       return {
         ...defGoal,
         target,
         progress: runtime.clamp(Number.isFinite(progressValue) ? progressValue : 0, 0, target),
         rewardCoins,
         rewardXp,
+        threshold: Number.isFinite(threshold) ? threshold : defGoal.threshold,
+        foodName: (existing && existing.foodName) || defGoal.foodName,
+        foodEmoji: (existing && existing.foodEmoji) || defGoal.foodEmoji,
+        displayLabel: (existing && existing.displayLabel) || defGoal.displayLabel || defGoal.label,
       };
     });
 
     const rewards = runtime.getHourlyQuestRewards({ goals: mergedGoals });
     return {
       hourKey,
+      questVersion: runtime.HOURLY_QUEST_VERSION,
       goals: mergedGoals,
       rewardCoins: rewards.coins,
       rewardXp: rewards.xp,

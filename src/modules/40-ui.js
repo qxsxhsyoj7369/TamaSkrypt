@@ -17,6 +17,11 @@
     if (goalId === 'feed') return '__ts_goal_bar_feed__';
     if (goalId === 'online') return '__ts_goal_bar_online__';
     if (goalId === 'pet') return '__ts_goal_bar_pet__';
+    if (goalId === 'gain_xp') return '__ts_goal_bar_xp__';
+    if (goalId === 'keep_hp') return '__ts_goal_bar_hp__';
+    if (goalId === 'keep_hunger') return '__ts_goal_bar_hunger__';
+    if (goalId === 'eat_specific_food') return '__ts_goal_bar_feed__';
+    if (goalId === 'survive_time') return '__ts_goal_bar_survive__';
     return '__ts_goal_bar_default__';
   };
 
@@ -31,9 +36,10 @@
       const pct = R.getHourlyGoalPercent ? R.getHourlyGoalPercent(goal) : 0;
       const progressLabel = R.formatGoalProgress ? R.formatGoalProgress(goal) : '0/0';
       const barClass = R.getGoalBarClass(goal.id);
+      const goalLabel = goal.displayLabel || goal.label || goal.id;
       return `
         <div class="__ts_goal_block__">
-          <div class="__ts_stat_row__"><span class="__ts_label__">${goal.icon || '🎯'} ${goal.label || goal.id}</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ ${barClass}" id="__ts_goal_bar_${goal.id}__" style="width:${R.clamp(pct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_goal_val_${goal.id}__">${progressLabel}</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">${goal.icon || '🎯'} ${goalLabel}</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ ${barClass}" id="__ts_goal_bar_${goal.id}__" style="width:${R.clamp(pct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_goal_val_${goal.id}__">${progressLabel}</span></div>
           <div class="__ts_goal_reward__">Nagroda: +${goal.rewardCoins || 0} 🪙, +${goal.rewardXp || 0} XP</div>
         </div>
       `;
@@ -79,6 +85,10 @@
       .__ts_goal_bar_feed__ { background: linear-gradient(90deg,#ffd166,#fca311); }
       .__ts_goal_bar_online__ { background: linear-gradient(90deg,#06d6a0,#118ab2); }
       .__ts_goal_bar_pet__ { background: linear-gradient(90deg,#ff7eb3,#ff4d6d); }
+      .__ts_goal_bar_xp__ { background: linear-gradient(90deg,#7f7fd5,#86a8e7); }
+      .__ts_goal_bar_hp__ { background: linear-gradient(90deg,#f093fb,#f5576c); }
+      .__ts_goal_bar_hunger__ { background: linear-gradient(90deg,#4facfe,#00f2fe); }
+      .__ts_goal_bar_survive__ { background: linear-gradient(90deg,#43e97b,#38f9d7); }
       .__ts_goal_reward__ { margin:0 0 5px 68px; font-size:9px; color:#6b5a8f; }
       .__ts_val__ { font-size: 9px; color:#555; width:52px; text-align:right; }
       #__ts_info__ { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:#444; }
