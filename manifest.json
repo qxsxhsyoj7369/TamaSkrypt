@@ -1,7 +1,7 @@
 {
-  "version": "3.25.1",
+  "version": "3.25.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Petting particle tuning: większa widoczność, dalszy spawn od kursora i dłuższa animacja unoszenia.",
+  "changelog": "Petting precision update: klik działa na samego Gelka (nie całą płytkę) + smart spread particle względem środka kliknięcia.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -81,8 +81,8 @@
     {
       "name": "petting",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/75-petting.js",
-      "version": "3.25.1",
-      "hash": "26b63bf3773058a51e4e21b9d0a7a89b61f6ac0064cfa2437a0298b93bcae98e",
+      "version": "3.25.2",
+      "hash": "1a035d18684eb5091ef9a55bd4203ad7effff358398a1a441cafdf106d592862",
       "execute": "raw",
       "required": true
     },

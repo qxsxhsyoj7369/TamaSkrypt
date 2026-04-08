@@ -21,7 +21,8 @@
       const widgetStyle = document.createElement('style');
       widgetStyle.id = STYLE_ID_WIDGET;
       widgetStyle.textContent = `
-      #__ts_zelek__ { cursor: pointer; position: relative; }
+      #__ts_zelek__ { position: relative; }
+      #__ts_body_svg__, #__ts_body_svg__ .__ts_slime_svg__ { cursor: pointer; }
       #__ts_body_svg__.__ts_petting_pop__ .__ts_slime_svg__ { animation: __tsPetHop .3s cubic-bezier(.2,.8,.2,1); }
       #__ts_body_svg__.__ts_petting_pop__ .__ts_slime_stage { animation: __tsPetTilt .3s cubic-bezier(.2,.8,.2,1); }
       @keyframes __tsPetPop {
@@ -88,13 +89,35 @@
     const x = pointX - widgetRect.left;
     const y = pointY - widgetRect.top;
     const randomParticle = PET_PARTICLES[Math.floor(Math.random() * PET_PARTICLES.length)] || PET_PARTICLES[0];
-    const horizontalSide = Math.random() < 0.5 ? -1 : 1;
-    const primaryXOffset = horizontalSide * (14 + Math.random() * 14);
-    const primaryYOffset = -(8 + Math.random() * 14);
-    const xpXOffset = -horizontalSide * (10 + Math.random() * 16);
-    const xpYOffset = -(16 + Math.random() * 14);
-    const bonusXOffset = horizontalSide * (18 + Math.random() * 14);
-    const bonusYOffset = -(20 + Math.random() * 16);
+    const centerX = rect ? (rect.left + rect.width / 2) : pointX;
+    const centerY = rect ? (rect.top + rect.height / 2) : pointY;
+    let dx = pointX - centerX;
+    let dy = pointY - centerY;
+    let magnitude = Math.hypot(dx, dy);
+    if (magnitude < 0.001) {
+      const angle = Math.random() * Math.PI * 2;
+      dx = Math.cos(angle);
+      dy = Math.sin(angle);
+      magnitude = 1;
+    }
+    const nx = dx / magnitude;
+    const ny = dy / magnitude;
+    const px = -ny;
+    const py = nx;
+
+    const primaryOutward = 16 + (Math.random() * 16);
+    const primaryLateral = (Math.random() * 16) - 8;
+    const xpOutward = 10 + (Math.random() * 12);
+    const xpLateral = (Math.random() * 14) - 7;
+    const bonusOutward = 22 + (Math.random() * 16);
+    const bonusLateral = (Math.random() * 20) - 10;
+
+    const primaryXOffset = (nx * primaryOutward) + (px * primaryLateral);
+    const primaryYOffset = (ny * primaryOutward) + (py * primaryLateral) - (10 + (Math.random() * 8));
+    const xpXOffset = (nx * xpOutward) - (px * xpLateral);
+    const xpYOffset = (ny * xpOutward) - (py * xpLateral) - (16 + (Math.random() * 10));
+    const bonusXOffset = (nx * bonusOutward) + (px * bonusLateral);
+    const bonusYOffset = (ny * bonusOutward) + (py * bonusLateral) - (18 + (Math.random() * 12));
 
     R.spawnParticle(x + primaryXOffset, y + primaryYOffset, randomParticle.content, randomParticle.type);
     R.spawnParticle(x + xpXOffset, y + xpYOffset, '+1 XP', 'xp');
@@ -136,17 +159,24 @@
   R.bindPettingEvents = function bindPettingEvents() {
     ensureStyles();
     const petEl = R.getElById ? R.getElById('__ts_zelek__') : document.getElementById('__ts_zelek__');
-    if (!petEl || petEl.dataset.tsPettingBound === '1') return;
+    const petBody = R.getElById ? R.getElById('__ts_body_svg__') : document.getElementById('__ts_body_svg__');
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    const slimeSvg = root && typeof root.querySelector === 'function'
+      ? root.querySelector('#__ts_body_svg__ .__ts_slime_svg__')
+      : document.querySelector('#__ts_body_svg__ .__ts_slime_svg__');
+    const interactEl = slimeSvg || petBody;
 
-    petEl.dataset.tsPettingBound = '1';
-    petEl.addEventListener('click', (evt) => {
+    if (!petEl || !interactEl || interactEl.dataset.tsPettingBound === '1') return;
+
+    interactEl.dataset.tsPettingBound = '1';
+    interactEl.addEventListener('click', (evt) => {
       R.handlePetting(evt);
     });
-    petEl.addEventListener('touchstart', (evt) => {
+    interactEl.addEventListener('touchstart', (evt) => {
       const touch = evt.touches && evt.touches[0] ? evt.touches[0] : null;
       const syntheticEvt = touch
-        ? { currentTarget: petEl, clientX: touch.clientX, clientY: touch.clientY }
-        : { currentTarget: petEl };
+        ? { currentTarget: interactEl, clientX: touch.clientX, clientY: touch.clientY }
+        : { currentTarget: interactEl };
       R.handlePetting(syntheticEvt);
     }, { passive: true });
   };
