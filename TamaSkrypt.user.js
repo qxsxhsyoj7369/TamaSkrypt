@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         TamaSkrypt – Żelek w przeglądarce
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      2.1.0
+// @version      2.2.0
 // @description  Wirtualny żelek żyjący w Twojej przeglądarce. Karm go, opiekuj się nim i zdobywaj poziomy!
 // @author       TamaSkrypt
 // @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_xmlhttpRequest
+// @connect      gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app
 // @updateURL    https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js
 // @downloadURL  https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js
 // @run-at       document-end
@@ -40,6 +42,9 @@
     DAILY_REWARD_COINS: 50,
     DAILY_REWARD_XP: 40,
   };
+
+  const FIREBASE_DB_URL = 'https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app';
+  const FIREBASE_TIMEOUT = 10000;
 
   // Kolory i emoji jedzenia
   const FOODS = [
@@ -76,22 +81,16 @@
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     },
 
-    accounts() {
-      try { return JSON.parse(GM_getValue('ts_accounts', '{}')); } catch { return {}; }
-    },
-    saveAccounts(a) {
-      GM_setValue('ts_accounts', JSON.stringify(a));
-    },
-
     session() {
       try {
         const s = JSON.parse(GM_getValue('ts_session', 'null'));
         return (s && s.expires > Date.now()) ? s : null;
       } catch { return null; }
     },
-    startSession(username) {
+    startSession(username, uid) {
       GM_setValue('ts_session', JSON.stringify({
         username,
+        uid,
         expires: Date.now() + this.SESSION_TTL,
       }));
     },
@@ -99,51 +98,144 @@
       GM_setValue('ts_session', JSON.stringify(null));
     },
 
+    normalizeUsername(username) {
+      return (username || '').trim().toLowerCase();
+    },
+
+    async resolveUidByUsername(username) {
+      const uname = this.normalizeUsername(username);
+      if (!uname) return null;
+      return firebaseRead(`usernameToUid/${encodeURIComponent(uname)}`);
+    },
+
     async register(username, password) {
-      username = (username || '').trim();
+      username = this.normalizeUsername(username);
       if (username.length < 2)               return 'Nazwa musi mieć min. 2 znaki';
       if (password.length < 4)               return 'Hasło musi mieć min. 4 znaki';
-      if (!/^[a-zA-Z0-9_]{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (a-z, 0-9, _)';
-      const accs = this.accounts();
-      if (accs[username])                    return 'Ta nazwa jest już zajęta';
-      accs[username] = { hash: await this._hash(username, password), created: Date.now() };
-      this.saveAccounts(accs);
-      this.startSession(username);
+      if (!/^[a-z0-9_]{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (a-z, 0-9, _)';
+
+      const existingUid = await this.resolveUidByUsername(username);
+      if (existingUid) return 'Ta nazwa jest już zajęta';
+
+      const uid = `uid_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+      const createdAt = Date.now();
+      const hash = await this._hash(username, password);
+
+      await firebaseWrite(`usernameToUid/${encodeURIComponent(username)}`, uid, 'PUT');
+      try {
+        await firebaseWrite(`users/${uid}`, {
+          profile: {
+            username,
+            createdAt,
+            lastLoginAt: createdAt,
+            roles: {
+              isAdmin: false,
+              isModerator: false,
+            },
+          },
+          auth: {
+            passwordHash: hash,
+            updatedAt: createdAt,
+          },
+          pet: {
+            level: 1,
+            xp: 0,
+            hp: 100,
+            hpMax: 100,
+            hunger: 100,
+            hungerMax: 100,
+            foodCollected: 0,
+            alive: true,
+            lastTickAt: createdAt,
+            updatedAt: createdAt,
+          },
+          stats: {
+            totalOnlineMs: 0,
+            updatedAt: createdAt,
+          },
+          progress: {
+            coins: 0,
+            dailyQuest: makeDailyQuest(),
+            updatedAt: createdAt,
+          },
+        }, 'PUT');
+      } catch (error) {
+        await firebaseWrite(`usernameToUid/${encodeURIComponent(username)}`, null, 'PUT');
+        throw error;
+      }
+
+      this.startSession(username, uid);
       return null;
     },
 
     async login(username, password) {
-      username = (username || '').trim();
-      const accs = this.accounts();
-      const acc  = accs[username];
-      if (!acc) return 'Nieprawidłowy login lub hasło';
+      username = this.normalizeUsername(username);
+      const uid = await this.resolveUidByUsername(username);
+      if (!uid) return 'Nieprawidłowy login lub hasło';
+
+      const authData = await firebaseRead(`users/${uid}/auth`);
+      if (!authData || !authData.passwordHash) return 'Nieprawidłowy login lub hasło';
       const hash = await this._hash(username, password);
-      if (acc.hash !== hash) return 'Nieprawidłowy login lub hasło';
-      this.startSession(username);
+      if (authData.passwordHash !== hash) return 'Nieprawidłowy login lub hasło';
+
+      await firebaseWrite(`users/${uid}/profile/lastLoginAt`, Date.now(), 'PUT');
+      this.startSession(username, uid);
       return null;
     },
   };
+
+  function firebaseUrl(path) {
+    return `${FIREBASE_DB_URL}/${path}.json`;
+  }
+
+  function firebaseRequest(method, path, body) {
+    return new Promise((resolve, reject) => {
+      GM_xmlhttpRequest({
+        method,
+        url: firebaseUrl(path),
+        timeout: FIREBASE_TIMEOUT,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: body === undefined ? undefined : JSON.stringify(body),
+        onload: function (resp) {
+          if (resp.status < 200 || resp.status >= 300) {
+            reject(new Error(`Firebase ${method} ${path} failed (${resp.status})`));
+            return;
+          }
+          if (!resp.responseText || resp.responseText === 'null') {
+            resolve(null);
+            return;
+          }
+          try {
+            resolve(JSON.parse(resp.responseText));
+          } catch {
+            resolve(null);
+          }
+        },
+        onerror: function () {
+          reject(new Error(`Firebase ${method} ${path} network error`));
+        },
+        ontimeout: function () {
+          reject(new Error(`Firebase ${method} ${path} timeout`));
+        },
+      });
+    });
+  }
+
+  async function firebaseRead(path) {
+    return firebaseRequest('GET', path);
+  }
+
+  async function firebaseWrite(path, data, method = 'PUT') {
+    return firebaseRequest(method, path, data);
+  }
 
   // ---------------------------------------------------------------------------
   // Aktualnie zalogowany użytkownik (ustawiany po auth)
   // ---------------------------------------------------------------------------
   let _currentUser = '';
-
-  // Prefiks klucza pamięci – każdy użytkownik ma własne dane
-  function sk(key) { return _currentUser ? _currentUser + '_' + key : key; }
-
-
-  function load(key, def) {
-    try {
-      const v = GM_getValue(sk(key), null);
-      return v === null ? def : v;
-    } catch {
-      return def;
-    }
-  }
-  function save(key, value) {
-    try { GM_setValue(sk(key), value); } catch { /* ignore */ }
-  }
+  let _currentUid = '';
 
   // ---------------------------------------------------------------------------
   // Stan gry (inicjalizowany po zalogowaniu przez loadStateForUser)
@@ -178,15 +270,6 @@
     };
   }
 
-  function loadDailyQuest() {
-    try {
-      const raw = JSON.parse(load('dailyQuest', 'null'));
-      return normalizeDailyQuest(raw);
-    } catch {
-      return makeDailyQuest();
-    }
-  }
-
   function isDailyQuestCompleted() {
     if (!state || !state.dailyQuest) return false;
     return state.dailyQuest.feedProgress >= CONFIG.DAILY_FEED_TARGET
@@ -194,26 +277,36 @@
   }
 
   let state = null;
+  let _persistInFlight = false;
+  let _persistQueued = false;
 
-  function loadStateForUser() {
+  async function loadStateForUser() {
+    const [profile, pet, stats, progress] = await Promise.all([
+      firebaseRead(`users/${_currentUid}/profile`),
+      firebaseRead(`users/${_currentUid}/pet`),
+      firebaseRead(`users/${_currentUid}/stats`),
+      firebaseRead(`users/${_currentUid}/progress`),
+    ]);
+
     state = {
-      hunger:         load('hunger',         100),
-      hp:             load('hp',             100),
-      level:          load('level',          1),
-      xp:             load('xp',             0),
-      coins:          load('coins',          0),
-      foodCollected:  load('foodCollected',  0),
-      totalOnline:    load('totalOnline',    0),   // ms
+      hunger:         Math.max(0, Math.min(100, Number(pet?.hunger) || 100)),
+      hp:             Math.max(0, Math.min(CONFIG.HP_MAX, Number(pet?.hp) || 100)),
+      level:          Math.max(1, Number(pet?.level) || 1),
+      xp:             Math.max(0, Number(pet?.xp) || 0),
+      coins:          Math.max(0, Number(progress?.coins) || 0),
+      foodCollected:  Math.max(0, Number(pet?.foodCollected) || 0),
+      totalOnline:    Math.max(0, Number(stats?.totalOnlineMs) || 0),
       sessionStart:   now(),
-      lastSave:       now(),
-      lastHungerTick: load('lastHungerTick', now()),
-      alive:          load('alive',          true),
-      dailyQuest:     loadDailyQuest(),
+      lastSave:       Number(pet?.updatedAt) || now(),
+      lastHungerTick: Number(pet?.lastTickAt) || now(),
+      alive:          typeof pet?.alive === 'boolean' ? pet.alive : true,
+      dailyQuest:     normalizeDailyQuest(progress?.dailyQuest),
       lastDailyTick:  now(),
+      profileCreatedAt: Number(profile?.createdAt) || now(),
     };
 
     // Nadrabiamy czas nieobecności (max 2h)
-    const offlineMs   = Math.min(now() - load('lastSave', now()), CONFIG.OFFLINE_CATCHUP_MAX);
+    const offlineMs   = Math.min(now() - (state.lastSave || now()), CONFIG.OFFLINE_CATCHUP_MAX);
     const offlineMins = offlineMs / 60000;
     const hungerLost  = Math.floor(offlineMins * CONFIG.HUNGER_DRAIN_RATE);
     if (state.alive) {
@@ -227,18 +320,59 @@
   }
 
   function persistState() {
-    if (!state) return;
-    save('hunger',       state.hunger);
-    save('hp',           state.hp);
-    save('level',        state.level);
-    save('xp',           state.xp);
-    save('coins',        state.coins);
-    save('foodCollected', state.foodCollected);
-    save('alive',        state.alive);
-    save('dailyQuest',   JSON.stringify(state.dailyQuest));
-    save('lastSave',     now());
-    save('totalOnline',  state.totalOnline + (now() - state.sessionStart));
-    save('lastHungerTick', state.lastHungerTick);
+    if (!state || !_currentUid) return;
+
+    if (_persistInFlight) {
+      _persistQueued = true;
+      return;
+    }
+
+    _persistInFlight = true;
+    const savedAt = now();
+    const totalOnlineMs = state.totalOnline + (savedAt - state.sessionStart);
+    const payload = {
+      profile: {
+        username: _currentUser,
+        createdAt: state.profileCreatedAt || savedAt,
+        lastLoginAt: savedAt,
+      },
+      pet: {
+        level: state.level,
+        xp: state.xp,
+        hp: state.hp,
+        hpMax: CONFIG.HP_MAX,
+        hunger: state.hunger,
+        hungerMax: 100,
+        foodCollected: state.foodCollected,
+        alive: state.alive,
+        lastTickAt: state.lastHungerTick,
+        updatedAt: savedAt,
+      },
+      stats: {
+        totalOnlineMs,
+        updatedAt: savedAt,
+      },
+      progress: {
+        coins: state.coins,
+        dailyQuest: state.dailyQuest,
+        updatedAt: savedAt,
+      },
+    };
+
+    firebaseWrite(`users/${_currentUid}`, payload, 'PATCH')
+      .then(() => {
+        state.lastSave = savedAt;
+      })
+      .catch((error) => {
+        console.warn('[TamaSkrypt] Nie udało się zapisać stanu do Firebase:', error.message);
+      })
+      .finally(() => {
+        _persistInFlight = false;
+        if (_persistQueued) {
+          _persistQueued = false;
+          persistState();
+        }
+      });
   }
 
   // ---------------------------------------------------------------------------
@@ -764,7 +898,13 @@
       if (err) { errEl.textContent = err; return; }
 
       modal.remove();
-      onSuccess(username.trim());
+      try {
+        await onSuccess(AUTH.normalizeUsername(username), AUTH.session()?.uid || '');
+      } catch (startErr) {
+        console.error('[TamaSkrypt] Błąd startu po logowaniu:', startErr);
+        AUTH.clearSession();
+        showAuthModal(onSuccess);
+      }
     });
   }
 
@@ -1139,6 +1279,7 @@
       AUTH.clearSession();
       state       = null;
       _currentUser = '';
+      _currentUid = '';
       const widget = document.getElementById(WIDGET_ID);
       if (widget) widget.remove();
       showAuthModal(startGame);
@@ -1205,9 +1346,12 @@
   if (window.__TS_RUNNING__) return;
   window.__TS_RUNNING__ = true;
 
-  function startGame(username) {
-    _currentUser = username;
-    loadStateForUser();
+  async function startGame(username, uid) {
+    _currentUser = AUTH.normalizeUsername(username);
+    _currentUid = uid || await AUTH.resolveUidByUsername(username);
+    if (!_currentUid) throw new Error('Brak UID użytkownika');
+
+    await loadStateForUser();
     try {
       mountWidget();
     } catch (err) {
@@ -1218,7 +1362,11 @@
   try {
     const session = AUTH.session();
     if (session) {
-      startGame(session.username);
+      startGame(session.username, session.uid).catch((err) => {
+        console.error('[TamaSkrypt] Sesja wygasła lub niepoprawna:', err);
+        AUTH.clearSession();
+        showAuthModal(startGame);
+      });
     } else {
       // Pierwsze wejście lub wygasła sesja – pokaż modal
       const target = document.body || document.documentElement;

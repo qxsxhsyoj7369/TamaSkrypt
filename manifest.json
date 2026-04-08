@@ -1,6 +1,6 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "minLauncherVersion": "2.0.0",
-  "changelog": "Dodano rozbudowę gameplayu: misję dzienną, system monet i nagrodę za aktywność"
+  "changelog": "Przeniesiono dane kont i stanu gry do Firebase RTDB; lokalnie zostaje tylko sesja logowania"
 }
