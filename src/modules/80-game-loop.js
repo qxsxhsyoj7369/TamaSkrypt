@@ -315,6 +315,11 @@
 
   R.initGame = function initGame() {
     R.bindUIEvents();
+    if (R.multiplayer && typeof R.multiplayer.init === 'function') {
+      R.multiplayer.init().catch((error) => {
+        console.warn('[Gelek] Multiplayer init failed:', error && error.message ? error.message : String(error));
+      });
+    }
     R.updateUI();
     if (R.fetchLeaderboard) {
       R.fetchLeaderboard(true).then(() => {

@@ -1,7 +1,7 @@
 {
-  "version": "3.25.3",
+  "version": "3.26.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Petting hotfix: przywrócone stabilne kliknięcia po rerenderze + filtr interakcji tylko do obszaru Gelka.",
+  "changelog": "Nowy moduł multiplayer: URL stashes + King of the Domain (Firestore) z eventami i inicjalizacją runtime.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.24.0",
-      "hash": "ab6ceb90ea604d8a9e3db2804e31f645b75a7a78341f8620cb005d102f8fc1a5",
+      "version": "3.26.0",
+      "hash": "b2bd6070b5cc4ccbd096422c21b89239e3bc25fb4d45a5e4e96aa69ff2346325",
       "execute": "raw",
       "required": true
     },
@@ -99,6 +99,14 @@
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
       "version": "3.13.0",
       "hash": "94350616d6d5328fc90972bcb6615e75dfecec8efa0142f1ef8d240604d9fe0a",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "multiplayer",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
+      "version": "3.26.0",
+      "hash": "57cf54d62d0227f4c623e27101626aa430f5324e7f35d941af735cd8d07a675d",
       "execute": "raw",
       "required": true
     },
