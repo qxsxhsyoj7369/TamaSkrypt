@@ -1,7 +1,7 @@
 {
-  "version": "3.13.0",
+  "version": "3.14.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI refactor: Soft-3D Gelek + Glass/Bento wygląd + Shadow DOM izolacja widgetu bez zmiany logiki ID/state.",
+  "changelog": "UI hotfix: żelowy różowy Gelek + luksusowy mesh glass panel + neonowa karta skilla i lepsze paski postępu.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.13.0",
-      "hash": "b46afe31071802fb85d6695f2538a2cfccdee0c70bbcd8fc46013ae1931b8b9c",
+      "version": "3.14.0",
+      "hash": "60b36351910fd046d3a974520939f348a1709fc74776865ecce40a12751200e7",
       "execute": "raw",
       "required": true
     },

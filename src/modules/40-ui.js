@@ -69,7 +69,7 @@
   R.renderActiveSkillCard = function renderActiveSkillCard() {
     return `
       <div id="__ts_skill_card__" class="__ts_skill_card__">
-        <div id="__ts_skill_title__" class="__ts_skill_title__">✨ Umiejętność formy</div>
+        <div id="__ts_skill_title__" class="__ts_skill_title__"><span class="__ts_skill_icon__">✨</span>Umiejętność formy</div>
         <div id="__ts_skill_desc__" class="__ts_skill_desc__">Brak aktywnej umiejętności.</div>
         <div id="__ts_skill_meta__" class="__ts_skill_meta__">—</div>
         <button id="__ts_active_skill_btn__" class="__ts_btn__ __ts_skill_btn__" disabled>Brak</button>
@@ -87,26 +87,46 @@
 
     const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
     if (!skill) {
-      titleEl.textContent = '✨ Umiejętność formy';
+      titleEl.innerHTML = '<span class="__ts_skill_icon__">✨</span>Umiejętność formy';
       descEl.textContent = 'Brak aktywnej umiejętności dla tej formy.';
       metaEl.textContent = 'Odblokuj wyższą formę Gelka.';
       buttonEl.textContent = 'Brak';
       buttonEl.disabled = true;
+      card.classList.remove('__ts_skill_spark__');
+      buttonEl.classList.remove('__ts_skill_cooling__');
+      buttonEl.style.removeProperty('--ts-energy-ratio');
       buttonEl.classList.remove('__ts_skill_ready__');
       return;
     }
 
-    titleEl.textContent = `${skill.emoji || '✨'} ${skill.name}`;
+    if (skill.id === 'spark-xp') {
+      titleEl.innerHTML = '<span class="__ts_neon_bolt__">⚡</span>Iskrzący Zgryz';
+    } else {
+      titleEl.innerHTML = `<span class="__ts_skill_icon__">${skill.emoji || '✨'}</span>${skill.name}`;
+    }
     descEl.textContent = skill.description || 'Aktywna umiejętność formy.';
+    card.classList.toggle('__ts_skill_spark__', skill.id === 'spark-xp');
 
     const cooldownRemaining = R.getActiveSkillCooldownRemaining ? R.getActiveSkillCooldownRemaining(skill) : 0;
     const effectRemaining = R.getActiveSkillEffectRemaining ? R.getActiveSkillEffectRemaining(skill) : 0;
     const alive = R.state ? R.state.alive !== false : true;
+    const cooldownTotal = Math.max(1, Number(skill.cooldownMs) || 1);
+    const energyRatio = cooldownRemaining > 0
+      ? (1 - (cooldownRemaining / cooldownTotal))
+      : 1;
+    const ratio = R.clamp(energyRatio, 0, 1);
+    const energyHue = Math.round(282 + ((48 - 282) * ratio));
+    const energyHue2 = Math.max(36, energyHue - 14);
+    buttonEl.style.setProperty('--ts-energy-ratio', String(ratio));
+    buttonEl.style.setProperty('--ts-energy-start', `hsl(${energyHue} 86% 60%)`);
+    buttonEl.style.setProperty('--ts-energy-end', `hsl(${energyHue2} 92% 62%)`);
+    buttonEl.style.setProperty('--ts-energy-glow', `hsl(${energyHue} 90% 62%)`);
 
     if (!alive) {
       metaEl.textContent = 'Umiejętność niedostępna gdy Gelek nie żyje.';
       buttonEl.textContent = '💀 Niedostępna';
       buttonEl.disabled = true;
+      buttonEl.classList.remove('__ts_skill_cooling__');
       buttonEl.classList.remove('__ts_skill_ready__');
       return;
     }
@@ -117,6 +137,7 @@
         : `Cooldown: ${R.formatTime(cooldownRemaining)}`;
       buttonEl.textContent = `⏳ ${R.formatTime(cooldownRemaining)}`;
       buttonEl.disabled = true;
+      buttonEl.classList.add('__ts_skill_cooling__');
       buttonEl.classList.remove('__ts_skill_ready__');
       return;
     }
@@ -126,6 +147,7 @@
       : 'Gotowe do użycia';
     buttonEl.textContent = '✨ Użyj umiejętności';
     buttonEl.disabled = false;
+    buttonEl.classList.remove('__ts_skill_cooling__');
     buttonEl.classList.add('__ts_skill_ready__');
   };
 
@@ -156,39 +178,46 @@
   R.buildZelekSVG = function buildZelekSVG() {
     const state = R.state;
     const level = state ? state.level : 1;
-    const evolution = R.getEvolutionForLevel ? R.getEvolutionForLevel(level) : null;
-    const colors = ['#FF6B9D', '#FF8E53', '#A8EB12', '#12C2E9', '#F64F59', '#C471ED'];
-    const color = (evolution && evolution.color) || colors[(level - 1) % colors.length];
+    const glowPower = 0.3 + (Math.min(30, level) / 100);
     return `
       <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg" aria-label="Gelek">
         <defs>
-          <radialGradient id="__ts_blob_grad__" cx="34%" cy="24%" r="74%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.78" />
-            <stop offset="24%" stop-color="${color}" stop-opacity="0.96" />
-            <stop offset="78%" stop-color="${color}" stop-opacity="0.88" />
-            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.25" />
+          <radialGradient id="__ts_blob_grad__" cx="36%" cy="20%" r="80%">
+            <stop offset="0%" stop-color="#fff8ff" stop-opacity="0.94" />
+            <stop offset="18%" stop-color="#ffc8ea" stop-opacity="0.92" />
+            <stop offset="58%" stop-color="#ff7ec8" stop-opacity="0.86" />
+            <stop offset="100%" stop-color="#ff5fb4" stop-opacity="0.72" />
           </radialGradient>
-          <radialGradient id="__ts_head_grad__" cx="40%" cy="22%" r="80%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.82" />
-            <stop offset="30%" stop-color="${color}" stop-opacity="0.95" />
-            <stop offset="100%" stop-color="#111827" stop-opacity="0.2" />
+          <radialGradient id="__ts_head_grad__" cx="38%" cy="20%" r="84%">
+            <stop offset="0%" stop-color="#fff7ff" stop-opacity="0.95" />
+            <stop offset="40%" stop-color="#ffa8de" stop-opacity="0.86" />
+            <stop offset="100%" stop-color="#ff6ec3" stop-opacity="0.68" />
           </radialGradient>
-          <filter id="__ts_soft_shadow__" x="-30%" y="-30%" width="160%" height="180%">
-            <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.24" />
-            <feGaussianBlur stdDeviation="0.2" />
+          <radialGradient id="__ts_inner_glow__" cx="50%" cy="45%" r="65%">
+            <stop offset="0%" stop-color="#fff6ff" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="__ts_jelly_filter__" x="-35%" y="-35%" width="170%" height="180%" color-interpolation-filters="sRGB">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="alphaBlur" />
+            <feSpecularLighting in="alphaBlur" surfaceScale="5" specularConstant="0.8" specularExponent="22" lighting-color="#fff4ff" result="specLight">
+              <fePointLight x="18" y="8" z="42" />
+            </feSpecularLighting>
+            <feComposite in="specLight" in2="SourceAlpha" operator="in" result="specIn" />
+            <feBlend in="SourceGraphic" in2="specIn" mode="screen" />
           </filter>
-          <filter id="__ts_blob_glow__" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.6" result="blur" />
-            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .32 0" />
+          <filter id="__ts_soft_glow__" x="-30%" y="-30%" width="170%" height="170%">
+            <feGaussianBlur stdDeviation="2.4" result="blur"/>
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.55 0 0 0.15  0 0 0.75 0 0.25  0 0 0 ${glowPower} 0"/>
           </filter>
         </defs>
 
-        <ellipse cx="32" cy="66" rx="19" ry="5" fill="#0f172a" opacity="0.2" />
-        <g filter="url(#__ts_soft_shadow__)" class="__ts_blob_body__">
-          <ellipse cx="32" cy="44" rx="23" ry="27" fill="url(#__ts_blob_grad__)" />
+        <ellipse cx="32" cy="66" rx="20" ry="5.6" fill="#5f2b6a" opacity="0.16" filter="url(#__ts_soft_glow__)" />
+        <g class="__ts_blob_body__" filter="url(#__ts_jelly_filter__)">
+          <ellipse cx="32" cy="44" rx="23.5" ry="27.5" fill="url(#__ts_blob_grad__)" />
           <ellipse cx="32" cy="22" rx="19" ry="17" fill="url(#__ts_head_grad__)" />
-          <ellipse cx="23" cy="14" rx="7" ry="4.6" fill="#ffffff" opacity="0.58" filter="url(#__ts_blob_glow__)" />
-          <ellipse cx="36" cy="39" rx="6" ry="4" fill="#ffffff" opacity="0.16" />
+          <ellipse cx="32" cy="42" rx="17" ry="20" fill="url(#__ts_inner_glow__)" opacity="0.78" />
+          <ellipse cx="23" cy="14" rx="7.2" ry="4.8" fill="#ffffff" opacity="0.66" filter="url(#__ts_soft_glow__)" />
+          <ellipse cx="39" cy="37" rx="4.6" ry="3.1" fill="#fff6ff" opacity="0.35" />
         </g>
 
         <circle cx="25" cy="22" r="3.7" fill="#111827" />
@@ -210,15 +239,13 @@
     style.id = '__tamaskrypt_styles__';
     style.textContent = `
       :host {
-        --ts-bg-ink: oklch(27% .04 279);
-        --ts-violet-1: oklch(64% .22 308);
-        --ts-violet-2: oklch(54% .19 292);
-        --ts-green-1: oklch(78% .21 145);
-        --ts-green-2: oklch(64% .18 156);
-        --ts-cyan: oklch(79% .15 220);
-        --ts-glass: color-mix(in oklab, white 68%, transparent);
-        --ts-glass-border: color-mix(in oklab, white 46%, oklch(45% .1 280) 54%);
-        --ts-soft-shadow: 0 10px 32px rgba(20, 10, 40, .24);
+        --ts-violet-1: oklch(68% .23 309);
+        --ts-violet-2: oklch(56% .19 288);
+        --ts-pink-1: oklch(74% .19 350);
+        --ts-cyan-1: oklch(79% .13 235);
+        --ts-green-1: oklch(79% .2 153);
+        --ts-green-2: oklch(66% .17 164);
+        --ts-soft-shadow: 0 14px 36px rgba(28, 12, 52, .28);
         --ts-font: InterVariable, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
         position: fixed;
         bottom: 16px;
@@ -235,7 +262,7 @@
       }
 
       #__ts_header__ {
-        background: linear-gradient(135deg, var(--ts-violet-1), var(--ts-violet-2));
+        background: linear-gradient(132deg, color-mix(in oklab, var(--ts-violet-1) 82%, white 18%), var(--ts-violet-2));
         color: #fff;
         padding: 8px 10px;
         border-radius: 16px 16px 0 0;
@@ -251,10 +278,14 @@
         min-width: 248px;
         padding: 10px;
         border-radius: 0 0 16px 16px;
-        background: color-mix(in oklab, var(--ts-glass) 90%, #f4edff 10%);
-        border: 0.5px solid var(--ts-glass-border);
-        backdrop-filter: blur(16px) saturate(1.2);
-        box-shadow: var(--ts-soft-shadow), inset 0 1px 0 rgba(255,255,255,.55);
+        background:
+          radial-gradient(130% 90% at 8% 6%, color-mix(in oklab, var(--ts-violet-1) 32%, transparent) 0%, transparent 58%),
+          radial-gradient(120% 90% at 96% 14%, color-mix(in oklab, var(--ts-pink-1) 28%, transparent) 0%, transparent 58%),
+          radial-gradient(140% 120% at 52% 100%, color-mix(in oklab, var(--ts-cyan-1) 24%, transparent) 0%, transparent 62%),
+          linear-gradient(160deg, rgba(255,255,255,.52), rgba(247,240,255,.36));
+        border: 0.5px solid rgba(255,255,255,.56);
+        backdrop-filter: blur(20px) saturate(1.28);
+        box-shadow: var(--ts-soft-shadow), inset 0 1px 0 rgba(255,255,255,.65);
       }
 
       #__ts_body__.hidden { display: none; }
@@ -292,21 +323,30 @@
 
       .__ts_bar_wrap__ {
         flex:1;
-        height:10px;
+        height:11px;
         border-radius:999px;
-        background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(220,215,240,.52));
-        border: 1px solid rgba(255,255,255,.66);
-        box-shadow: inset 0 1px 2px rgba(255,255,255,.55), inset 0 -1px 2px rgba(88,70,136,.15);
+        background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(213, 205, 238, .45));
+        border: 1px solid rgba(255,255,255,.7);
+        box-shadow: inset 0 2px 2px rgba(255,255,255,.62), inset 0 -2px 4px rgba(76, 56, 117, .22);
         overflow:hidden;
       }
       .__ts_bar__ {
         height:100%;
         border-radius:999px;
         transition: width .42s cubic-bezier(.2,.8,.2,1);
+        position: relative;
       }
-      .__ts_hp_bar__ { background: linear-gradient(90deg, oklch(73% .19 350), oklch(66% .21 18)); filter: drop-shadow(0 0 4px oklch(67% .2 354)); }
-      .__ts_hunger_bar__ { background: linear-gradient(90deg, oklch(77% .16 229), oklch(73% .14 198)); filter: drop-shadow(0 0 4px oklch(72% .14 220)); }
-      .__ts_xp_bar__ { background: linear-gradient(90deg, var(--ts-green-1), var(--ts-green-2)); filter: drop-shadow(0 0 4px oklch(71% .17 150)); }
+      .__ts_bar__::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,0));
+        opacity: .8;
+        pointer-events: none;
+      }
+      .__ts_hp_bar__ { background: linear-gradient(102deg, oklch(74% .2 349), oklch(66% .22 18), oklch(78% .16 332)); box-shadow: 0 0 7px oklch(67% .22 350); }
+      .__ts_hunger_bar__ { background: linear-gradient(102deg, oklch(79% .14 232), oklch(72% .14 208), oklch(76% .11 250)); box-shadow: 0 0 7px oklch(74% .13 224); }
+      .__ts_xp_bar__ { background: linear-gradient(102deg, var(--ts-green-1), var(--ts-green-2), oklch(74% .14 183)); box-shadow: 0 0 8px oklch(71% .17 151); }
       .__ts_goal_bar_default__ { background: linear-gradient(90deg, oklch(70% .02 260), oklch(61% .03 260)); }
       .__ts_goal_bar_feed__ { background: linear-gradient(90deg, oklch(85% .12 90), oklch(76% .15 70)); filter: drop-shadow(0 0 3px oklch(76% .14 78)); }
       .__ts_goal_bar_online__ { background: linear-gradient(90deg, oklch(76% .13 180), oklch(69% .13 220)); filter: drop-shadow(0 0 3px oklch(71% .12 210)); }
@@ -340,8 +380,8 @@
       .__ts_card__ {
         border-radius: 18px;
         border: 0.5px solid rgba(255,255,255,.66);
-        background: linear-gradient(160deg, rgba(255,255,255,.78), rgba(244,236,255,.62));
-        box-shadow: 0 10px 20px rgba(49, 35, 86, .12), inset 0 1px 0 rgba(255,255,255,.7);
+        background: linear-gradient(160deg, rgba(255,255,255,.8), rgba(247,238,255,.64));
+        box-shadow: 0 12px 24px rgba(49, 35, 86, .16), inset 0 1px 0 rgba(255,255,255,.72);
       }
 
       .__ts_goal_block__ { padding: 6px 7px; margin-bottom: 5px; }
@@ -353,10 +393,33 @@
       .__ts_goal_badge_epic__ { background:#f3e8ff; color:#7e22ce; border-color:#d8b4fe; }
 
       .__ts_skill_card__ { margin-top:8px; padding:8px; }
+      .__ts_skill_card__.__ts_skill_spark__ {
+        background:
+          radial-gradient(120% 130% at 10% 0%, rgba(156, 112, 255, .28), transparent 60%),
+          radial-gradient(90% 120% at 90% 100%, rgba(255, 213, 93, .22), transparent 60%),
+          linear-gradient(160deg, rgba(255,255,255,.82), rgba(242,235,255,.7));
+        box-shadow:
+          0 0 0 0.5px rgba(255,255,255,.64),
+          0 0 18px oklch(73% .16 300 / .35),
+          0 0 26px oklch(80% .13 88 / .25),
+          0 12px 24px rgba(53, 31, 98, .24);
+      }
       #__ts_hourly_box__ { margin-top:8px; padding:8px; }
       .__ts_skill_title__ { font-size:10px; font-weight:730; color: oklch(42% .09 297); margin-bottom:2px; }
       .__ts_skill_desc__ { font-size:9px; color: oklch(46% .05 286); margin-bottom:3px; }
       .__ts_skill_meta__ { font-size:9px; color: oklch(45% .04 282); margin-bottom:6px; }
+      .__ts_skill_icon__ { display:inline-flex; margin-right:4px; }
+      .__ts_neon_bolt__ {
+        display:inline-flex;
+        margin-right:4px;
+        color: oklch(81% .14 76);
+        text-shadow: 0 0 5px oklch(81% .15 76), 0 0 11px oklch(73% .2 300);
+        animation: __ts_neon_bolt__ 1.2s ease-in-out infinite;
+      }
+      @keyframes __ts_neon_bolt__ {
+        0%, 100% { transform: translateY(0); text-shadow: 0 0 5px oklch(81% .15 76), 0 0 11px oklch(73% .2 300); }
+        50% { transform: translateY(-1px); text-shadow: 0 0 7px oklch(83% .17 92), 0 0 14px oklch(71% .2 299); }
+      }
 
       .__ts_btn__ {
         border: none;
@@ -366,11 +429,27 @@
         font-weight: 700;
         cursor: pointer;
         color: #fff;
-        background: linear-gradient(135deg, var(--ts-violet-1), var(--ts-violet-2));
-        box-shadow: 0 8px 16px rgba(89, 52, 155, .24);
+        background: linear-gradient(130deg, var(--ts-violet-1), var(--ts-violet-2), color-mix(in oklab, var(--ts-cyan-1) 42%, var(--ts-violet-2)));
+        box-shadow: 0 0 10px oklch(66% .18 300 / .26), 0 8px 18px rgba(89, 52, 155, .28);
       }
       .__ts_skill_btn__ { width:100%; }
-      .__ts_skill_btn__.__ts_skill_ready__ { background: linear-gradient(135deg, oklch(63% .22 297), oklch(68% .14 220)); }
+      .__ts_skill_btn__.__ts_skill_ready__ {
+        background: linear-gradient(130deg, oklch(64% .21 297), oklch(76% .15 84));
+        animation: __ts_skill_ready_pulse__ 1.6s ease-in-out infinite;
+      }
+      .__ts_skill_btn__.__ts_skill_cooling__ {
+        background: linear-gradient(130deg, var(--ts-energy-start, hsl(276 78% 58%)), var(--ts-energy-end, hsl(262 84% 60%)));
+        box-shadow: 0 0 10px var(--ts-energy-glow, hsl(274 84% 60%));
+        animation: __ts_skill_cooling_pulse__ 1.1s ease-in-out infinite;
+      }
+      @keyframes __ts_skill_ready_pulse__ {
+        0%,100% { box-shadow: 0 0 10px oklch(72% .16 92 / .35), 0 8px 18px rgba(89,52,155,.26); }
+        50% { box-shadow: 0 0 16px oklch(74% .16 92 / .55), 0 10px 20px rgba(89,52,155,.3); }
+      }
+      @keyframes __ts_skill_cooling_pulse__ {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-1px); }
+      }
 
       #__ts_diag__ { margin-top:7px; display:flex; justify-content:flex-end; }
       #__ts_diag_badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; background:rgba(255,255,255,.68); border:0.5px solid rgba(255,255,255,.72); color: oklch(41% .06 290); }
