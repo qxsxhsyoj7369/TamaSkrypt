@@ -96,6 +96,12 @@
   }
 
   function getDomainRtdbKey(hostname) {
+    return String(hostname || '')
+      .toLowerCase()
+      .replace(/[.#$\[\]/]/g, '_');
+  }
+
+  function getLegacyDomainRtdbKey(hostname) {
     return encodeURIComponent(String(hostname || '').toLowerCase());
   }
 
@@ -103,7 +109,15 @@
     if (!hasRtdbApi() || !hostname) return null;
     const key = getDomainRtdbKey(hostname);
     const data = await R.firebaseRead(`${RTDB_MULTIPLAYER_DOMAINS_PATH}/${key}`);
-    return data && typeof data === 'object' ? data : null;
+    if (data && typeof data === 'object') return data;
+
+    const legacyKey = getLegacyDomainRtdbKey(hostname);
+    if (legacyKey !== key) {
+      const legacyData = await R.firebaseRead(`${RTDB_MULTIPLAYER_DOMAINS_PATH}/${legacyKey}`);
+      if (legacyData && typeof legacyData === 'object') return legacyData;
+    }
+
+    return null;
   }
 
   async function writeDomainToRtdb(hostname, payload) {

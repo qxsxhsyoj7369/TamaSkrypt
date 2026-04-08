@@ -1,7 +1,7 @@
 {
-  "version": "3.27.6",
+  "version": "3.27.7",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix UI: ukryty debugowy badge DB (DB: ERROR/RETRY) w produkcji; retry DB działa dalej w tle.",
+  "changelog": "Hotfix multiplayer domains: naprawiony klucz RTDB dla hostów z kropkami, więc Zajmij (Darmowe) znów zapisuje przejęcie domeny.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -105,8 +105,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.5",
-      "hash": "2f52a8eb13d06f289c71de734ce9d6f9695b931cd2fa68358fbd660184798ff4",
+      "version": "3.27.7",
+      "hash": "19336c5398528890ee62c13c8f68ed6e2e5c76688fd0a9a6d8d018067ddb3c6b",
       "execute": "raw",
       "required": true
     },
