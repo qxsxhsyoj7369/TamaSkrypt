@@ -176,13 +176,67 @@
   };
 
   R.buildZelekSVG = function buildZelekSVG() {
+    const level = R.state && Number.isFinite(R.state.level) ? R.state.level : 1;
+    const palettes = [
+      {
+        body: '#1abc9c',
+        rim: '#16a085',
+        mouth: '#14806d',
+        tongue: '#91f0e2',
+        glow: 'rgba(26,188,156,0.34)',
+      },
+      {
+        body: '#2ecc71',
+        rim: '#27ae60',
+        mouth: '#1d7d48',
+        tongue: '#acf1c8',
+        glow: 'rgba(46,204,113,0.34)',
+      },
+      {
+        body: '#3498db',
+        rim: '#2980b9',
+        mouth: '#21618c',
+        tongue: '#abd8ff',
+        glow: 'rgba(52,152,219,0.34)',
+      },
+      {
+        body: '#9b59b6',
+        rim: '#8e44ad',
+        mouth: '#a862a6',
+        tongue: '#e0b7e5',
+        glow: 'rgba(155,89,182,0.34)',
+      },
+    ];
+    const paletteIndex = level >= 15 ? 3 : level >= 10 ? 2 : level >= 5 ? 1 : 0;
+    const palette = palettes[paletteIndex];
+
     return `
-      <div class="__ts_liquid_blob_wrap__" aria-label="Gelek">
-        <div class="__ts_liquid_blob__">
-          <span class="__ts_blob_eye__ __ts_blob_eye_l__"></span>
-          <span class="__ts_blob_eye__ __ts_blob_eye_r__"></span>
-          <span class="__ts_blob_mouth__"></span>
-        </div>
+      <div class="__ts_slime_stage__" aria-label="Gelek" style="--ts-slime-body:${palette.body};--ts-slime-rim:${palette.rim};--ts-slime-mouth:${palette.mouth};--ts-slime-tongue:${palette.tongue};--ts-slime-glow:${palette.glow};">
+        <svg class="__ts_slime_svg__" viewBox="0 0 126.75 103.25" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g class="__ts_slime_body__">
+            <path d="M126.153,71.798c0,35.275-30.128,31.452-65.403,31.452S0.411,107.073,0.411,71.798S34,0.927,63.282,0.927C92,0.927,126.153,36.523,126.153,71.798z"/>
+          </g>
+          <g class="__ts_slime_shadow__">
+            <path d="M98.583,98.968c0,5.085-4.708,4.313-37.833,4.313c-29.563,0-32.769,0.771-32.769-4.313c0-8.718,18.86-10.218,35.301-10.218C79.407,88.75,98.583,91.125,98.583,98.968z"/>
+          </g>
+          <g class="__ts_slime_highlight__">
+            <ellipse transform="matrix(0.5486 -0.8361 0.8361 0.5486 20.2905 77.5842)" cx="82" cy="20" rx="7.75" ry="13.75"/>
+          </g>
+          <g class="__ts_slime_eyes__">
+            <g>
+              <path d="M36.833,66.583c-3.359,0-6.083,2.724-6.083,6.083c0,3.359,2.724,6.083,6.083,6.083c3.36,0,6.083-2.724,6.083-6.083C42.917,69.307,40.193,66.583,36.833,66.583z M39.5,71.25c-0.874,0-1.583-0.709-1.583-1.583c0-0.875,0.709-1.583,1.583-1.583c0.875,0,1.583,0.709,1.583,1.583C41.083,70.541,40.375,71.25,39.5,71.25z"/>
+              <circle class="__ts_slime_pupil__" cx="39.5" cy="69.667" r="1.583"/>
+              <path d="M88.833,66.583c-3.359,0-6.083,2.724-6.083,6.083c0,3.359,2.724,6.083,6.083,6.083c3.36,0,6.083-2.724,6.083-6.083C94.917,69.307,92.193,66.583,88.833,66.583z M91.5,71.25c-0.874,0-1.583-0.709-1.583-1.583c0-0.875,0.709-1.583,1.583-1.583c0.875,0,1.583,0.709,1.583,1.583C93.083,70.541,92.375,71.25,91.5,71.25z"/>
+              <circle class="__ts_slime_pupil__" cx="91.5" cy="69.667" r="1.583"/>
+            </g>
+          </g>
+          <g class="__ts_slime_mouth__">
+            <path d="M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite" values="M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z;M49.9,73c0,3.151,1.885,10.435,4.528,12c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-8.849,4.528-12H65.584H49.9z;M49.9,78c0,3.151,1.885,5.435,4.528,7c3.228-1.911,7.589-2.749,11.072-2.749S73.344,83.089,76.572,85c2.643-1.565,4.528-3.849,4.528-7H65.584H49.9z" />
+            </path>
+            <path d="M52.678,84.25c7.116,3.558,15.028,3.558,22.144,0C68.463,80.485,59.037,80.485,52.678,84.25C52.679,84.25,52.656,84.25,52.678,84.25z"/>
+          </g>
+        </svg>
       </div>`;
   };
 
@@ -278,63 +332,80 @@
         border: 1px solid rgba(255, 255, 255, 0.04);
         box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
       }
-      #__ts_body_svg__ { width:78px; height:86px; display:flex; align-items:center; justify-content:center; }
-      #__ts_body_svg__ .__ts_liquid_blob_wrap__ { width:72px; height:82px; display:flex; align-items:flex-end; justify-content:center; }
-      #__ts_body_svg__ .__ts_liquid_blob__ {
-        width:56px;
-        height:66px;
-        position: relative;
-        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-        background: radial-gradient(130% 130% at 30% 18%, oklch(92% 0.05 324), oklch(72% 0.2 314) 42%, oklch(58% 0.23 300) 100%);
-        box-shadow:
-          inset -8px -10px 18px oklch(48% 0.24 302 / 0.62),
-          inset 8px 10px 15px rgba(255, 255, 255, 0.72),
-          0 10px 22px oklch(18% 0.08 284 / 0.45),
-          0 0 22px oklch(66% 0.22 310 / 0.28);
-        animation: __ts_blob_morph__ 8.2s ease-in-out infinite, __ts_blob_drift__ 4.8s ease-in-out infinite;
+      #__ts_body_svg__ {
+        width: 94px;
+        height: 86px;
+        display:flex;
+        align-items:flex-end;
+        justify-content:center;
       }
-      #__ts_body_svg__ .__ts_liquid_blob__::before {
-        content: '';
-        position: absolute;
-        top: 8px;
-        left: 10px;
-        width: 16px;
-        height: 9px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.58);
-        filter: blur(0.3px);
+      #__ts_body_svg__ .__ts_slime_stage__ {
+        width: 92px;
+        height: 76px;
+        display:flex;
+        align-items:flex-end;
+        justify-content:center;
+        filter: drop-shadow(0 15px 18px rgba(0,0,0,0.22)) drop-shadow(0 0 18px var(--ts-slime-glow));
       }
-      #__ts_body_svg__ .__ts_blob_eye__ {
-        position: absolute;
-        top: 22px;
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #111827;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+      #__ts_body_svg__ .__ts_slime_svg__ {
+        width: 92px;
+        height: auto;
+        overflow: visible;
+        transform-origin: 50% 100%;
+        animation: __ts_slime_breathe__ 3s infinite ease-in-out;
       }
-      #__ts_body_svg__ .__ts_blob_eye_l__ { left: 17px; }
-      #__ts_body_svg__ .__ts_blob_eye_r__ { right: 17px; }
-      #__ts_body_svg__ .__ts_blob_mouth__ {
-        position: absolute;
-        left: 50%;
-        bottom: 21px;
-        transform: translateX(-50%);
-        width: 15px;
-        height: 8px;
-        border-bottom: 2.2px solid #1f2937;
-        border-radius: 0 0 10px 10px;
+      #__ts_zelek__:hover #__ts_body_svg__ .__ts_slime_svg__ {
+        animation: __ts_slime_squish__ 1s ease-in-out;
       }
-      @keyframes __ts_blob_morph__ {
-        0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
-        25% { border-radius: 52% 48% 38% 62% / 52% 40% 60% 48%; }
-        50% { border-radius: 60% 40% 44% 56% / 45% 62% 38% 55%; }
-        75% { border-radius: 36% 64% 58% 42% / 58% 42% 64% 36%; }
-        100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      #__ts_body_svg__ .__ts_slime_body__ path {
+        fill: var(--ts-slime-body);
+        stroke: var(--ts-slime-rim);
+        stroke-width: 1.75;
       }
-      @keyframes __ts_blob_drift__ {
-        0%, 100% { transform: translateY(0) rotate(0.001deg); }
-        50% { transform: translateY(-2px) rotate(-1deg); }
+      #__ts_body_svg__ .__ts_slime_shadow__ path {
+        fill: rgba(8, 12, 22, 0.16);
+      }
+      #__ts_body_svg__ .__ts_slime_highlight__ ellipse {
+        fill: #ffffff;
+        opacity: 0.48;
+      }
+      #__ts_body_svg__ .__ts_slime_eyes__ {
+        animation: __ts_slime_blink__ 3s infinite ease-in-out;
+        transform-origin: 62.5px 72px;
+      }
+      #__ts_body_svg__ .__ts_slime_eyes__ path {
+        fill: #17202a;
+      }
+      #__ts_body_svg__ .__ts_slime_pupil__ {
+        fill: #ffffff;
+      }
+      #__ts_body_svg__ .__ts_slime_mouth__ path:first-child {
+        fill: var(--ts-slime-mouth);
+      }
+      #__ts_body_svg__ .__ts_slime_mouth__ path:last-child {
+        fill: var(--ts-slime-tongue);
+      }
+      @keyframes __ts_slime_breathe__ {
+        0% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
+        50% { transform-origin: 50% 100%; transform: scaleX(1.05) scaleY(0.95); }
+        100% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
+      }
+      @keyframes __ts_slime_squish__ {
+        0% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
+        40% { transform-origin: 50% 100%; transform: scaleX(0.8) scaleY(1.2); }
+        50% { transform-origin: 50% 100%; transform: scaleX(1.2) scaleY(0.8); }
+        60% { transform-origin: 50% 100%; transform: scaleX(0.9) scaleY(1.1); }
+        70% { transform-origin: 50% 100%; transform: scaleX(1.2) scaleY(0.8); }
+        80% { transform-origin: 50% 100%; transform: scaleX(0.9) scaleY(1.1); }
+        90% { transform-origin: 50% 100%; transform: scaleX(1.2) scaleY(0.8); }
+        100% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
+      }
+      @keyframes __ts_slime_blink__ {
+        0% { transform: scaleY(1); }
+        70% { transform: scaleY(1); }
+        80% { transform: scaleY(0.2); }
+        90% { transform: scaleY(1); }
+        100% { transform: scaleY(1); }
       }
       #__ts_mood__ { font-size:19px; margin-top:-2px; }
 
