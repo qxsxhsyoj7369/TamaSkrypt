@@ -1,7 +1,7 @@
 {
-  "version": "3.21.0",
+  "version": "3.22.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Viewport safety: widget nie wychodzi poza ekran (clamp pozycji + max-height i scroll w treści przy rozwiniętych panelach).",
+  "changelog": "Compact missions accordion: misje domyślnie zwinięte, rozwijane kliknięciem + cienki luksusowy scrollbar i bardziej kompaktowy layout.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.21.0",
-      "hash": "bee41d05909a965b9211073a2fa1fbf2e1dedfdfd837f0f12b7da7d6199e1f43",
+      "version": "3.22.0",
+      "hash": "624bcf16e269e299024163aacd9f16684262ecfdc148f2c34623c541d9e3ae12",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.21.0",
-      "hash": "b87da793331426317cb87137f8b47c453c7358d778be4f063122027ab26b0695",
+      "version": "3.22.0",
+      "hash": "66844fe416a15ab16f5ee7748c5589b1482ea7190bbaf7c4d6a28d87c3d10dd9",
       "execute": "raw",
       "required": true
     },

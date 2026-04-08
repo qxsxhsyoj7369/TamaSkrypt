@@ -175,6 +175,19 @@
     const claimBtn = R.getElById ? R.getElById('__ts_claim_daily__') : document.getElementById('__ts_claim_daily__');
     if (claimBtn) claimBtn.addEventListener('click', R.claimDailyReward);
 
+    const missionsToggle = R.getElById ? R.getElById('__ts_missions_toggle__') : document.getElementById('__ts_missions_toggle__');
+    const missionsContent = R.getElById ? R.getElById('__ts_missions_content__') : document.getElementById('__ts_missions_content__');
+    const missionsArrow = R.getElById ? R.getElById('__ts_missions_arrow__') : document.getElementById('__ts_missions_arrow__');
+    if (missionsToggle && missionsContent && missionsArrow && missionsToggle.dataset.tsBound !== '1') {
+      missionsToggle.dataset.tsBound = '1';
+      missionsToggle.addEventListener('click', () => {
+        const isHidden = missionsContent.style.display === 'none';
+        missionsContent.style.display = isHidden ? 'block' : 'none';
+        missionsArrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        if (R.clampWidgetToViewport) requestAnimationFrame(() => R.clampWidgetToViewport());
+      });
+    }
+
     const activeSkillBtn = R.getElById ? R.getElById('__ts_active_skill_btn__') : document.getElementById('__ts_active_skill_btn__');
     if (activeSkillBtn) activeSkillBtn.addEventListener('click', R.useActiveSkill);
 

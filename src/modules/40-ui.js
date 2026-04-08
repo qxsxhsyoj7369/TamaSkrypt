@@ -310,6 +310,7 @@
         --ts-bg-panel: oklch(20% 0.05 280 / 0.8);
         --ts-accent: oklch(65% 0.25 310);
         --ts-accent-2: oklch(72% 0.18 292);
+        --ts-violet-1: oklch(72% 0.18 292);
         --ts-neon-cyan: oklch(76% 0.13 232);
         --ts-neon-pink: oklch(73% 0.21 338);
         --ts-neon-lime: oklch(78% 0.2 154);
@@ -358,7 +359,7 @@
         border-radius: 0 0 18px 18px;
         display: grid;
         gap: 8px;
-        max-height: min(76vh, calc(100vh - 84px));
+        max-height: 85vh;
         overflow-y: auto;
         overflow-x: hidden;
         background:
@@ -371,6 +372,19 @@
         backdrop-filter: blur(20px) saturate(1.28);
         box-shadow: var(--ts-shadow), inset 0 1px 0 oklch(100% 0 0 / 0.18);
         animation: __ts_panel_flow__ 26s ease-in-out infinite alternate;
+      }
+      #__ts_body__::-webkit-scrollbar {
+        width: 4px;
+      }
+      #__ts_body__::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #__ts_body__::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      #__ts_body__::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
       }
       @keyframes __ts_panel_flow__ {
         0% { background-position: 0% 10%, 100% 25%, 42% 100%, 50% 50%; }
@@ -861,11 +875,16 @@
           <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
           ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
           <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
-          <div id="__ts_hourly_box__">
-            <div style="font-size:10px;font-weight:bold;color:#5f4692;margin-bottom:5px;text-align:center;">🕐 Misja godzinowa</div>
-            ${R.renderHourlyGoalRows()}
-            <div id="__ts_hourly_reward_total__" style="font-size:10px;color:#6b5a8f;margin:4px 0 6px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
-            <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+          <div id="__ts_hourly_box__" class="__ts_card__">
+            <div id="__ts_missions_toggle__" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:bold; color:var(--ts-violet-1);">
+              <span>🕐 Misje godzinowe</span>
+              <span id="__ts_missions_arrow__" style="transition: transform 0.3s;">▼</span>
+            </div>
+            <div id="__ts_missions_content__" style="display:none; margin-top:8px;">
+              ${R.renderHourlyGoalRows()}
+              <div id="__ts_hourly_reward_total__" style="font-size:10px;color:#6b5a8f;margin:4px 0 6px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
+              <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+            </div>
           </div>
           <div id="__ts_tabs__">
             <button id="__ts_tab_status__">Status</button>
