@@ -1,6 +1,32 @@
 {
-  "version": "2.2.0",
+  "version": "3.0.0",
+  "minLauncherVersion": "3.0.0",
+  "changelog": "Wprowadzono modułowy loader z cache per moduł, walidacją SHA-256 i paskiem ładowania.",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
-  "minLauncherVersion": "2.0.0",
-  "changelog": "Przeniesiono dane kont i stanu gry do Firebase RTDB; lokalnie zostaje tylko sesja logowania"
+  "modules": [
+    {
+      "name": "core-init",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/00-core-init.js",
+      "version": "3.0.0",
+      "hash": "aea6ec843b21d3b4b57e0bf6e33d3b2f8bad7e0cc946b384be80f7945574123c",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "loader-events",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/05-loader-events.js",
+      "version": "3.0.0",
+      "hash": "b825147ae8fed187aa3570735f251dd741c4bab926401c24b91f853c3c6fd9fc",
+      "execute": "raw",
+      "required": false
+    },
+    {
+      "name": "game-main",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
+      "version": "2.2.0",
+      "hash": "0a1cbb43401043516a7f4bd6600e768a3d8d06b4eebe64015d8daa215dd9a4f0",
+      "execute": "raw",
+      "required": true
+    }
+  ]
 }
