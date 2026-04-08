@@ -1,6 +1,6 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "minLauncherVersion": "2.0.0",
-  "changelog": "Dodano integrację Firebase, system versjonowania schematu, auto-migracja danych, sprawdzanie kompatybilności przy starcie"
+  "changelog": "Dodano rozbudowę gameplayu: misję dzienną, system monet i nagrodę za aktywność"
 }

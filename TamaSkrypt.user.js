@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Żelek w przeglądarce
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      2.0.0
+// @version      2.1.0
 // @description  Wirtualny żelek żyjący w Twojej przeglądarce. Karm go, opiekuj się nim i zdobywaj poziomy!
 // @author       TamaSkrypt
 // @match        *://*/*
@@ -35,6 +35,10 @@
     OFFLINE_CATCHUP_MAX: 7200000,  // ms – maksymalny czas offline uwzględniany (2 godziny)
     REVIVE_HP: 30,                 // HP po wskrzeszeniu
     REVIVE_HUNGER: 50,             // głód po wskrzeszeniu
+    DAILY_FEED_TARGET: 5,
+    DAILY_ONLINE_TARGET_MS: 15 * 60 * 1000,
+    DAILY_REWARD_COINS: 50,
+    DAILY_REWARD_XP: 40,
   };
 
   // Kolory i emoji jedzenia
@@ -146,6 +150,49 @@
   // ---------------------------------------------------------------------------
   const now = () => Date.now();
 
+  function getDayKey(ts = Date.now()) {
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function makeDailyQuest() {
+    return {
+      dayKey: getDayKey(),
+      feedProgress: 0,
+      onlineProgressMs: 0,
+      claimed: false,
+    };
+  }
+
+  function normalizeDailyQuest(raw) {
+    if (!raw || typeof raw !== 'object') return makeDailyQuest();
+    if (raw.dayKey !== getDayKey()) return makeDailyQuest();
+    return {
+      dayKey: raw.dayKey,
+      feedProgress: Math.max(0, Math.min(CONFIG.DAILY_FEED_TARGET, Number(raw.feedProgress) || 0)),
+      onlineProgressMs: Math.max(0, Math.min(CONFIG.DAILY_ONLINE_TARGET_MS, Number(raw.onlineProgressMs) || 0)),
+      claimed: Boolean(raw.claimed),
+    };
+  }
+
+  function loadDailyQuest() {
+    try {
+      const raw = JSON.parse(load('dailyQuest', 'null'));
+      return normalizeDailyQuest(raw);
+    } catch {
+      return makeDailyQuest();
+    }
+  }
+
+  function isDailyQuestCompleted() {
+    if (!state || !state.dailyQuest) return false;
+    return state.dailyQuest.feedProgress >= CONFIG.DAILY_FEED_TARGET
+      && state.dailyQuest.onlineProgressMs >= CONFIG.DAILY_ONLINE_TARGET_MS;
+  }
+
   let state = null;
 
   function loadStateForUser() {
@@ -154,11 +201,15 @@
       hp:             load('hp',             100),
       level:          load('level',          1),
       xp:             load('xp',             0),
+      coins:          load('coins',          0),
+      foodCollected:  load('foodCollected',  0),
       totalOnline:    load('totalOnline',    0),   // ms
       sessionStart:   now(),
       lastSave:       now(),
       lastHungerTick: load('lastHungerTick', now()),
       alive:          load('alive',          true),
+      dailyQuest:     loadDailyQuest(),
+      lastDailyTick:  now(),
     };
 
     // Nadrabiamy czas nieobecności (max 2h)
@@ -181,7 +232,10 @@
     save('hp',           state.hp);
     save('level',        state.level);
     save('xp',           state.xp);
+    save('coins',        state.coins);
+    save('foodCollected', state.foodCollected);
     save('alive',        state.alive);
+    save('dailyQuest',   JSON.stringify(state.dailyQuest));
     save('lastSave',     now());
     save('totalOnline',  state.totalOnline + (now() - state.sessionStart));
     save('lastHungerTick', state.lastHungerTick);
@@ -246,6 +300,9 @@
     const xpPct   = Math.round((state.xp / CONFIG.XP_PER_LEVEL) * 100);
     const hungerPct = Math.max(0, Math.min(100, state.hunger));
     const hpPct     = Math.max(0, Math.min(100, state.hp));
+    const dailyFeedPct = Math.round((state.dailyQuest.feedProgress / CONFIG.DAILY_FEED_TARGET) * 100);
+    const dailyOnlinePct = Math.round((state.dailyQuest.onlineProgressMs / CONFIG.DAILY_ONLINE_TARGET_MS) * 100);
+    const canClaimDaily = isDailyQuestCompleted() && !state.dailyQuest.claimed;
 
     return `
       <div id="__ts_header__">
@@ -286,7 +343,29 @@
 
         <div id="__ts_info__">
           <span>Poziom: <strong>${state.level}</strong></span>
+          <span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span>
           <span>Online: <strong id="__ts_online__">${formatTime(onlineMs)}</strong></span>
+        </div>
+
+        <div id="__ts_daily__">
+          <div class="__ts_daily_title__">📅 Misja dnia</div>
+          <div class="__ts_stat_row__">
+            <span class="__ts_label__">🍽️ Karm</span>
+            <div class="__ts_bar_wrap__">
+              <div class="__ts_bar__ __ts_daily_feed_bar__" style="width:${Math.max(0, Math.min(100, dailyFeedPct))}%"></div>
+            </div>
+            <span class="__ts_val__" id="__ts_daily_feed_val__">${state.dailyQuest.feedProgress}/${CONFIG.DAILY_FEED_TARGET}</span>
+          </div>
+          <div class="__ts_stat_row__">
+            <span class="__ts_label__">⏱️ Graj</span>
+            <div class="__ts_bar_wrap__">
+              <div class="__ts_bar__ __ts_daily_online_bar__" style="width:${Math.max(0, Math.min(100, dailyOnlinePct))}%"></div>
+            </div>
+            <span class="__ts_val__" id="__ts_daily_online_val__">${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/15m</span>
+          </div>
+          <button id="__ts_claim_daily__" ${canClaimDaily ? '' : 'disabled'}>
+            ${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}
+          </button>
         </div>
 
         <div id="__ts_msg__"></div>
@@ -427,6 +506,38 @@
         min-height: 14px;
         font-weight: bold;
         margin-top: 4px;
+      }
+      #__ts_daily__ {
+        margin-top: 8px;
+        border: 1px dashed #b8a6d9;
+        border-radius: 10px;
+        padding: 6px;
+        background: #faf8ff;
+      }
+      .__ts_daily_title__ {
+        font-size: 10px;
+        font-weight: bold;
+        color: #5f4692;
+        margin-bottom: 5px;
+        text-align: center;
+      }
+      .__ts_daily_feed_bar__ { background: linear-gradient(90deg,#ffd166,#fca311); }
+      .__ts_daily_online_bar__ { background: linear-gradient(90deg,#06d6a0,#118ab2); }
+      #__ts_claim_daily__ {
+        width: 100%;
+        margin-top: 6px;
+        border: none;
+        border-radius: 8px;
+        padding: 7px 8px;
+        font-size: 11px;
+        font-weight: bold;
+        color: white;
+        background: linear-gradient(135deg,#7c5cff,#5e35b1);
+        cursor: pointer;
+      }
+      #__ts_claim_daily__:disabled {
+        background: #b3b3c7;
+        cursor: not-allowed;
       }
 
       /* Jedzenie na stronie */
@@ -768,11 +879,22 @@
     updateBar('__ts_hp_bar__',     state.hp,     CONFIG.HP_MAX,         `${state.hp}/${CONFIG.HP_MAX}`);
     updateBar('__ts_hunger_bar__', state.hunger, 100,                   `${state.hunger}/100`);
     updateBar('__ts_xp_bar__',     state.xp,     CONFIG.XP_PER_LEVEL,  `${state.xp}/${CONFIG.XP_PER_LEVEL}`);
+    updateBar('__ts_daily_feed_bar__', state.dailyQuest.feedProgress, CONFIG.DAILY_FEED_TARGET, `${state.dailyQuest.feedProgress}/${CONFIG.DAILY_FEED_TARGET}`);
+    updateBar('__ts_daily_online_bar__', state.dailyQuest.onlineProgressMs, CONFIG.DAILY_ONLINE_TARGET_MS, `${Math.floor(state.dailyQuest.onlineProgressMs / 60000)}/15m`);
 
     const infoEl = document.getElementById('__ts_info__');
     if (infoEl) {
       const spans = infoEl.querySelectorAll('span');
       if (spans[0]) spans[0].innerHTML = `Poziom: <strong>${state.level}</strong>`;
+    }
+    const coinsEl = document.getElementById('__ts_coins__');
+    if (coinsEl) coinsEl.textContent = String(state.coins);
+
+    const claimBtn = document.getElementById('__ts_claim_daily__');
+    if (claimBtn) {
+      const canClaim = isDailyQuestCompleted() && !state.dailyQuest.claimed;
+      claimBtn.disabled = !canClaim;
+      claimBtn.textContent = state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę';
     }
 
     // Wiadomość w zależności od stanu
@@ -890,6 +1012,8 @@
     }, 400);
 
     state.hunger = Math.min(100, state.hunger + food.hunger);
+    state.foodCollected += 1;
+    state.dailyQuest.feedProgress = Math.min(CONFIG.DAILY_FEED_TARGET, state.dailyQuest.feedProgress + 1);
     gainXP(food.xp);
 
     // Animacja jedzenia
@@ -912,6 +1036,44 @@
       state.level += 1;
       showLevelUp();
     }
+  }
+
+  function updateDailyQuestProgress() {
+    if (!state || !state.dailyQuest) return;
+
+    const todayKey = getDayKey();
+    if (state.dailyQuest.dayKey !== todayKey) {
+      state.dailyQuest = makeDailyQuest();
+      state.lastDailyTick = now();
+      showMessage('📅 Nowa misja dzienna jest już dostępna!', 3500);
+    }
+
+    const tickNow = now();
+    const delta = Math.max(0, tickNow - state.lastDailyTick);
+    state.lastDailyTick = tickNow;
+    state.dailyQuest.onlineProgressMs = Math.min(
+      CONFIG.DAILY_ONLINE_TARGET_MS,
+      state.dailyQuest.onlineProgressMs + delta
+    );
+  }
+
+  function claimDailyReward() {
+    if (!state || !state.dailyQuest) return;
+    if (state.dailyQuest.claimed) {
+      showMessage('✅ Nagroda dzienna już odebrana');
+      return;
+    }
+    if (!isDailyQuestCompleted()) {
+      showMessage('⏳ Dokończ misję dnia, aby odebrać nagrodę');
+      return;
+    }
+
+    state.dailyQuest.claimed = true;
+    state.coins += CONFIG.DAILY_REWARD_COINS;
+    gainXP(CONFIG.DAILY_REWARD_XP);
+    showMessage(`🎁 Nagroda: +${CONFIG.DAILY_REWARD_COINS} monet i +${CONFIG.DAILY_REWARD_XP} XP!`, 4500);
+    updateUI();
+    persistState();
   }
 
   // ---------------------------------------------------------------------------
@@ -983,10 +1145,17 @@
     });
   }
 
+  function bindDailyQuest() {
+    const btn = document.getElementById('__ts_claim_daily__');
+    if (!btn) return;
+    btn.addEventListener('click', claimDailyReward);
+  }
+
   // ---------------------------------------------------------------------------
   // Główna pętla
   // ---------------------------------------------------------------------------
   function mainLoop() {
+    updateDailyQuestProgress();
     hungerTick();
     updateUI();
   }
@@ -1000,6 +1169,7 @@
     bindToggle();
     bindRevive();
     bindLogout();
+    bindDailyQuest();
     updateUI();
 
     // Ticki gry
