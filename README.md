@@ -1,9 +1,11 @@
-# TamaSkrypt 🟢
+# TamaSkrypt / Gelek 🟢
 
 **Wirtualny żelek żyjący w Twojej przeglądarce!**
 
 Skrypt Tampermonkey do przeglądarki Firefox na Androida (działa też na desktopie).
 Twój żelek pojawi się na każdej stronie – karm go, dbaj o niego i zdobywaj poziomy!
+
+**Edycja robocza `Gelek`**: Poszerzenie z Firebase, systemem kont w chmurze, rankingami i czatem.
 
 ---
 
@@ -88,6 +90,22 @@ Przycisk **⏏** w nagłówku widgetu pozwala się wylogować lub przełączyć 
 | Regeneracja HP | +5 HP co 2 minuty (gdy głód > 40) |
 | Utrata HP przy głodzie 0 | –3 HP / minutę |
 | XP do awansu | 100 XP |
+
+---
+
+## Firebase & Infrastruktura
+
+### Baza danych
+- **Endpoint**: `https://gelek-995f2-default-rtdb.europe-west1.firebasedatabase.app/`
+- **Dokumentacja**: `docs/FIREBASE_DATA_MAP.md`
+- **Schemat**: `firebase/database-schema.json`
+- **Reguły bezpieczeństwa**: `firebase/database.rules.json`
+
+### Dokumentacja projektu
+- **Plan i roadmapa**: `docs/PROJECT_PLAN.md`
+- **Analiza prototypu**: `docs/PROTOTYPE_ANALYSIS.md`
+- **Historia zmian**: `docs/WORKLOG.md`
+- **Publikacja GitHub**: `docs/GITHUB_PUBLISH.md`
 
 ---
 
