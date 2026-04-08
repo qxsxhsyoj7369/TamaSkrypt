@@ -178,53 +178,59 @@
   R.buildZelekSVG = function buildZelekSVG() {
     const state = R.state;
     const level = state ? state.level : 1;
-    const glowPower = 0.3 + (Math.min(30, level) / 100);
+    const glowPower = 0.22 + (Math.min(40, level) / 120);
     return `
       <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg" aria-label="Gelek">
         <defs>
-          <radialGradient id="__ts_blob_grad__" cx="36%" cy="20%" r="80%">
-            <stop offset="0%" stop-color="#fff8ff" stop-opacity="0.94" />
-            <stop offset="18%" stop-color="#ffc8ea" stop-opacity="0.92" />
-            <stop offset="58%" stop-color="#ff7ec8" stop-opacity="0.86" />
-            <stop offset="100%" stop-color="#ff5fb4" stop-opacity="0.72" />
+          <radialGradient id="__ts_g_core__" cx="48%" cy="34%" r="74%">
+            <stop offset="0%" stop-color="oklch(86% 0.11 320)" stop-opacity="0.98" />
+            <stop offset="36%" stop-color="oklch(74% 0.19 318)" stop-opacity="0.9" />
+            <stop offset="72%" stop-color="oklch(63% 0.24 312)" stop-opacity="0.83" />
+            <stop offset="100%" stop-color="oklch(54% 0.19 292)" stop-opacity="0.76" />
           </radialGradient>
-          <radialGradient id="__ts_head_grad__" cx="38%" cy="20%" r="84%">
-            <stop offset="0%" stop-color="#fff7ff" stop-opacity="0.95" />
-            <stop offset="40%" stop-color="#ffa8de" stop-opacity="0.86" />
-            <stop offset="100%" stop-color="#ff6ec3" stop-opacity="0.68" />
+          <radialGradient id="__ts_g_skin__" cx="34%" cy="20%" r="78%">
+            <stop offset="0%" stop-color="oklch(94% 0.04 325)" stop-opacity="0.95" />
+            <stop offset="42%" stop-color="oklch(79% 0.12 322)" stop-opacity="0.9" />
+            <stop offset="100%" stop-color="oklch(63% 0.23 311)" stop-opacity="0.86" />
           </radialGradient>
-          <radialGradient id="__ts_inner_glow__" cx="50%" cy="45%" r="65%">
-            <stop offset="0%" stop-color="#fff6ff" stop-opacity="0.4"/>
-            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          <radialGradient id="__ts_g_inner__" cx="50%" cy="44%" r="64%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5" />
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
           </radialGradient>
-          <filter id="__ts_jelly_filter__" x="-35%" y="-35%" width="170%" height="180%" color-interpolation-filters="sRGB">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="alphaBlur" />
-            <feSpecularLighting in="alphaBlur" surfaceScale="5" specularConstant="0.8" specularExponent="22" lighting-color="#fff4ff" result="specLight">
-              <fePointLight x="18" y="8" z="42" />
+          <filter id="__ts_g_jelly__" x="-40%" y="-40%" width="185%" height="190%" color-interpolation-filters="sRGB">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="alphaBlur" />
+            <feSpecularLighting in="alphaBlur" surfaceScale="7" specularConstant="0.85" specularExponent="24" lighting-color="#ffe7ff" result="specLight">
+              <fePointLight x="15" y="10" z="46" />
             </feSpecularLighting>
             <feComposite in="specLight" in2="SourceAlpha" operator="in" result="specIn" />
             <feBlend in="SourceGraphic" in2="specIn" mode="screen" />
           </filter>
-          <filter id="__ts_soft_glow__" x="-30%" y="-30%" width="170%" height="170%">
-            <feGaussianBlur stdDeviation="2.4" result="blur"/>
-            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.55 0 0 0.15  0 0 0.75 0 0.25  0 0 0 ${glowPower} 0"/>
+          <filter id="__ts_g_neon__" x="-40%" y="-40%" width="190%" height="190%">
+            <feGaussianBlur stdDeviation="2.9" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="0.9 0 0 0 0.16  0 0.46 0 0 0.12  0 0 1 0 0.42  0 0 0 ${glowPower} 0" />
           </filter>
+          <linearGradient id="__ts_g_rim__" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="oklch(89% 0.08 320)" stop-opacity="0.72" />
+            <stop offset="100%" stop-color="oklch(60% 0.22 295)" stop-opacity="0.2" />
+          </linearGradient>
         </defs>
 
-        <ellipse cx="32" cy="66" rx="20" ry="5.6" fill="#5f2b6a" opacity="0.16" filter="url(#__ts_soft_glow__)" />
-        <g class="__ts_blob_body__" filter="url(#__ts_jelly_filter__)">
-          <ellipse cx="32" cy="44" rx="23.5" ry="27.5" fill="url(#__ts_blob_grad__)" />
-          <ellipse cx="32" cy="22" rx="19" ry="17" fill="url(#__ts_head_grad__)" />
-          <ellipse cx="32" cy="42" rx="17" ry="20" fill="url(#__ts_inner_glow__)" opacity="0.78" />
-          <ellipse cx="23" cy="14" rx="7.2" ry="4.8" fill="#ffffff" opacity="0.66" filter="url(#__ts_soft_glow__)" />
-          <ellipse cx="39" cy="37" rx="4.6" ry="3.1" fill="#fff6ff" opacity="0.35" />
+        <ellipse cx="32" cy="67" rx="21" ry="5.4" fill="oklch(47% 0.13 286 / 0.42)" filter="url(#__ts_g_neon__)" />
+
+        <g class="__ts_blob_body__" filter="url(#__ts_g_jelly__)">
+          <path d="M13 45c0-14.4 8.2-28.8 19-30.8 11.3-2.1 18.8 10 18.8 22.7 0 13.8-7.4 30.8-19.2 31.7C20.3 69.5 13 59 13 45z" fill="url(#__ts_g_core__)" />
+          <ellipse cx="32" cy="22.8" rx="17.2" ry="15.3" fill="url(#__ts_g_skin__)" opacity="0.92" />
+          <ellipse cx="31.8" cy="42" rx="15.6" ry="18.2" fill="url(#__ts_g_inner__)" opacity="0.8" />
+          <path d="M15.5 44.5c.2-14.1 8.3-27.1 18.9-29 11.4-2 18.7 10.3 18.1 21.9-.8 14.6-8.3 29.4-19.1 30" fill="none" stroke="url(#__ts_g_rim__)" stroke-width="1.2" stroke-linecap="round" opacity="0.9" />
+          <ellipse cx="23" cy="15.2" rx="7" ry="4.5" fill="#fff" opacity="0.64" filter="url(#__ts_g_neon__)" />
+          <ellipse cx="39.3" cy="34.6" rx="4.8" ry="3" fill="#ffeaff" opacity="0.38" />
         </g>
 
-        <circle cx="25" cy="22" r="3.7" fill="#111827" />
-        <circle cx="39" cy="22" r="3.7" fill="#111827" />
-        <circle cx="24.1" cy="20.9" r="1" fill="#ffffff" opacity="0.45" />
-        <circle cx="38.1" cy="20.9" r="1" fill="#ffffff" opacity="0.45" />
-        <path d="M25 30 Q32 36 39 30" stroke="#1f2937" stroke-width="2.3" fill="none" stroke-linecap="round" />
+        <circle cx="25" cy="22" r="3.6" fill="#0f172a" />
+        <circle cx="39" cy="22" r="3.6" fill="#0f172a" />
+        <circle cx="24.15" cy="20.95" r="0.95" fill="#fff" opacity="0.44" />
+        <circle cx="38.15" cy="20.95" r="0.95" fill="#fff" opacity="0.44" />
+        <path d="M24.9 30 Q32 36.2 39.1 30" stroke="#0f172a" stroke-width="2.35" fill="none" stroke-linecap="round" />
       </svg>`;
   };
 
@@ -239,14 +245,18 @@
     style.id = '__tamaskrypt_styles__';
     style.textContent = `
       :host {
-        --ts-violet-1: oklch(68% .23 309);
-        --ts-violet-2: oklch(56% .19 288);
-        --ts-pink-1: oklch(74% .19 350);
-        --ts-cyan-1: oklch(79% .13 235);
-        --ts-green-1: oklch(79% .2 153);
-        --ts-green-2: oklch(66% .17 164);
-        --ts-soft-shadow: 0 14px 36px rgba(28, 12, 52, .28);
-        --ts-font: InterVariable, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+        --ts-bg-panel: oklch(20% 0.05 280 / 0.8);
+        --ts-accent: oklch(65% 0.25 310);
+        --ts-accent-2: oklch(72% 0.18 292);
+        --ts-neon-cyan: oklch(76% 0.13 232);
+        --ts-neon-pink: oklch(73% 0.21 338);
+        --ts-neon-lime: oklch(78% 0.2 154);
+        --ts-text-main: oklch(95% 0.01 300);
+        --ts-text-muted: oklch(82% 0.02 295);
+        --ts-glass: oklch(99% 0.01 300 / 0.1);
+        --ts-glass-edge: oklch(100% 0 0 / 0.24);
+        --ts-shadow: 0 20px 50px oklch(5% 0.02 275 / 0.45);
+        --ts-font: Inter, "Geist Sans", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
         position: fixed;
         bottom: 16px;
         right: 16px;
@@ -256,42 +266,59 @@
 
       #__tamaskrypt_widget__ {
         font-family: var(--ts-font);
-        font-variation-settings: "wght" 520;
+        font-variation-settings: "wght" 510;
         font-size: 12px;
         user-select: none;
+        color: var(--ts-text-main);
       }
 
       #__ts_header__ {
-        background: linear-gradient(132deg, color-mix(in oklab, var(--ts-violet-1) 82%, white 18%), var(--ts-violet-2));
-        color: #fff;
-        padding: 8px 10px;
-        border-radius: 16px 16px 0 0;
+        background:
+          linear-gradient(120deg, oklch(34% 0.09 288 / 0.86), oklch(24% 0.06 280 / 0.9)),
+          radial-gradient(120% 130% at 15% 0%, oklch(65% 0.25 310 / 0.28), transparent 62%);
+        color: var(--ts-text-main);
+        padding: 9px 11px;
+        border-radius: 18px 18px 0 0;
         display: flex;
         align-items: center;
         gap: 6px;
-        font-weight: 700;
+        font-weight: 680;
         cursor: move;
-        letter-spacing: .01em;
+        letter-spacing: -0.02em;
+        border: 1px solid oklch(100% 0 0 / 0.2);
+        border-bottom-color: oklch(100% 0 0 / 0.12);
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.32);
       }
 
       #__ts_body__ {
-        min-width: 248px;
+        min-width: 258px;
         padding: 10px;
-        border-radius: 0 0 16px 16px;
+        border-radius: 0 0 18px 18px;
+        display: grid;
+        gap: 8px;
         background:
-          radial-gradient(130% 90% at 8% 6%, color-mix(in oklab, var(--ts-violet-1) 32%, transparent) 0%, transparent 58%),
-          radial-gradient(120% 90% at 96% 14%, color-mix(in oklab, var(--ts-pink-1) 28%, transparent) 0%, transparent 58%),
-          radial-gradient(140% 120% at 52% 100%, color-mix(in oklab, var(--ts-cyan-1) 24%, transparent) 0%, transparent 62%),
-          linear-gradient(160deg, rgba(255,255,255,.52), rgba(247,240,255,.36));
-        border: 0.5px solid rgba(255,255,255,.56);
+          radial-gradient(115% 90% at 8% 6%, oklch(65% 0.25 310 / 0.23), transparent 62%),
+          radial-gradient(120% 100% at 95% 16%, oklch(76% 0.13 232 / 0.15), transparent 66%),
+          radial-gradient(130% 110% at 50% 105%, oklch(73% 0.21 338 / 0.13), transparent 70%),
+          linear-gradient(150deg, var(--ts-bg-panel), oklch(18% 0.03 280 / 0.88));
+        border: 1px solid oklch(100% 0 0 / 0.16);
         backdrop-filter: blur(20px) saturate(1.28);
-        box-shadow: var(--ts-soft-shadow), inset 0 1px 0 rgba(255,255,255,.65);
+        box-shadow: var(--ts-shadow), inset 0 1px 0 oklch(100% 0 0 / 0.18);
       }
 
       #__ts_body__.hidden { display: none; }
       #__ts_toggle__ { cursor: pointer; font-size: 10px; }
 
-      #__ts_zelek__ { display:flex; flex-direction:column; align-items:center; margin-bottom:8px; }
+      #__ts_zelek__ {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        padding: 8px;
+        border-radius: 16px;
+        background: var(--ts-glass);
+        border: 1px solid var(--ts-glass-edge);
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.22);
+      }
       #__ts_body_svg__ svg { animation: __ts_blob_breathe__ 3.8s ease-in-out infinite; transform-origin: 50% 58%; }
       #__ts_mood__ { font-size:19px; margin-top:-2px; }
       @keyframes __ts_blob_breathe__ {
@@ -300,15 +327,16 @@
       }
 
       #__ts_levelup_inline__ {
-        margin: 0 0 8px;
+        margin: 0;
         padding: 7px 8px;
         border-radius: 12px;
         text-align:center;
         font-size:11px;
         font-weight:700;
-        color: oklch(42% .13 40);
-        background: linear-gradient(135deg, oklch(90% .08 94), oklch(94% .06 110));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 16px rgba(240, 180, 45, .18);
+        color: oklch(92% 0.02 100);
+        background: linear-gradient(135deg, oklch(61% 0.2 62 / 0.35), oklch(68% 0.13 95 / 0.28));
+        border: 1px solid oklch(96% 0.04 100 / 0.38);
+        box-shadow: 0 0 18px oklch(74% 0.15 85 / 0.28), inset 0 1px 0 oklch(100% 0 0 / 0.2);
         opacity:0;
         max-height:0;
         overflow:hidden;
@@ -317,17 +345,27 @@
       }
       #__ts_levelup_inline__.show { opacity:1; max-height:52px; transform:translateY(0) scale(1); }
 
-      .__ts_stat_row__ { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-      .__ts_label__ { width:66px; font-size:10px; color: oklch(42% .05 278); }
-      .__ts_val__ { width:54px; text-align:right; font-size:9px; color: oklch(40% .04 278); }
+      .__ts_stat_row__ {
+        display:flex;
+        align-items:center;
+        gap:6px;
+        margin:0;
+        padding: 7px 8px;
+        border-radius: 14px;
+        background: var(--ts-glass);
+        border: 1px solid var(--ts-glass-edge);
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.2);
+      }
+      .__ts_label__ { width:66px; font-size:10px; color: var(--ts-text-muted); }
+      .__ts_val__ { width:54px; text-align:right; font-size:9px; color: oklch(88% 0.01 294); }
 
       .__ts_bar_wrap__ {
         flex:1;
-        height:11px;
+        height:8px;
         border-radius:999px;
-        background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(213, 205, 238, .45));
-        border: 1px solid rgba(255,255,255,.7);
-        box-shadow: inset 0 2px 2px rgba(255,255,255,.62), inset 0 -2px 4px rgba(76, 56, 117, .22);
+        background: linear-gradient(180deg, oklch(31% 0.03 282 / 0.88), oklch(23% 0.02 280 / 0.93));
+        border: 1px solid oklch(100% 0 0 / 0.14);
+        box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.06), inset 0 2px 4px oklch(8% 0.02 280 / 0.5);
         overflow:hidden;
       }
       .__ts_bar__ {
@@ -340,24 +378,43 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,0));
-        opacity: .8;
-        pointer-events: none;
+        background: linear-gradient(180deg, oklch(100% 0 0 / 0.48), transparent);
+        opacity: .86;
       }
-      .__ts_hp_bar__ { background: linear-gradient(102deg, oklch(74% .2 349), oklch(66% .22 18), oklch(78% .16 332)); box-shadow: 0 0 7px oklch(67% .22 350); }
-      .__ts_hunger_bar__ { background: linear-gradient(102deg, oklch(79% .14 232), oklch(72% .14 208), oklch(76% .11 250)); box-shadow: 0 0 7px oklch(74% .13 224); }
-      .__ts_xp_bar__ { background: linear-gradient(102deg, var(--ts-green-1), var(--ts-green-2), oklch(74% .14 183)); box-shadow: 0 0 8px oklch(71% .17 151); }
-      .__ts_goal_bar_default__ { background: linear-gradient(90deg, oklch(70% .02 260), oklch(61% .03 260)); }
-      .__ts_goal_bar_feed__ { background: linear-gradient(90deg, oklch(85% .12 90), oklch(76% .15 70)); filter: drop-shadow(0 0 3px oklch(76% .14 78)); }
-      .__ts_goal_bar_online__ { background: linear-gradient(90deg, oklch(76% .13 180), oklch(69% .13 220)); filter: drop-shadow(0 0 3px oklch(71% .12 210)); }
-      .__ts_goal_bar_pet__ { background: linear-gradient(90deg, oklch(78% .18 344), oklch(69% .2 8)); filter: drop-shadow(0 0 3px oklch(72% .18 350)); }
-      .__ts_goal_bar_xp__ { background: linear-gradient(90deg, oklch(75% .13 280), oklch(73% .12 235)); }
-      .__ts_goal_bar_hp__ { background: linear-gradient(90deg, oklch(73% .19 350), oklch(66% .21 18)); }
-      .__ts_goal_bar_hunger__ { background: linear-gradient(90deg, oklch(77% .16 229), oklch(73% .14 198)); }
-      .__ts_goal_bar_survive__ { background: linear-gradient(90deg, var(--ts-green-1), var(--ts-green-2)); }
+      .__ts_hp_bar__ { background: linear-gradient(90deg, oklch(72% 0.22 345), oklch(64% 0.22 18)); filter: drop-shadow(0 0 5px oklch(70% 0.21 344)); }
+      .__ts_hunger_bar__ { background: linear-gradient(90deg, oklch(76% 0.14 232), oklch(69% 0.13 215)); filter: drop-shadow(0 0 5px oklch(74% 0.13 225)); }
+      .__ts_xp_bar__ { background: linear-gradient(90deg, oklch(79% 0.21 154), oklch(67% 0.17 164)); filter: drop-shadow(0 0 6px oklch(74% 0.18 155)); }
+      .__ts_goal_bar_default__ { background: linear-gradient(90deg, oklch(69% 0.04 275), oklch(60% 0.05 275)); }
+      .__ts_goal_bar_feed__ { background: linear-gradient(90deg, oklch(82% 0.13 92), oklch(74% 0.16 72)); filter: drop-shadow(0 0 4px oklch(79% 0.14 82)); }
+      .__ts_goal_bar_online__ { background: linear-gradient(90deg, oklch(76% 0.13 188), oklch(69% 0.14 223)); filter: drop-shadow(0 0 4px oklch(73% 0.12 212)); }
+      .__ts_goal_bar_pet__ { background: linear-gradient(90deg, oklch(77% 0.19 342), oklch(69% 0.2 8)); filter: drop-shadow(0 0 4px oklch(72% 0.18 350)); }
+      .__ts_goal_bar_xp__ { background: linear-gradient(90deg, oklch(76% 0.13 282), oklch(72% 0.12 238)); filter: drop-shadow(0 0 4px oklch(73% 0.12 260)); }
+      .__ts_goal_bar_hp__ { background: linear-gradient(90deg, oklch(72% 0.21 350), oklch(66% 0.21 22)); filter: drop-shadow(0 0 4px oklch(69% 0.2 350)); }
+      .__ts_goal_bar_hunger__ { background: linear-gradient(90deg, oklch(77% 0.16 229), oklch(72% 0.14 198)); filter: drop-shadow(0 0 4px oklch(75% 0.14 214)); }
+      .__ts_goal_bar_survive__ { background: linear-gradient(90deg, oklch(79% 0.21 154), oklch(67% 0.17 164)); filter: drop-shadow(0 0 4px oklch(74% 0.17 154)); }
 
-      #__ts_info { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color: oklch(37% .05 280); }
-      #__ts_evolution_line__ { margin-top:6px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      #__ts_info {
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        padding: 6px 8px;
+        border-radius: 14px;
+        background: var(--ts-glass);
+        border: 1px solid var(--ts-glass-edge);
+        font-size:10px;
+        color: var(--ts-text-muted);
+      }
+      #__ts_evolution_line__ {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:8px;
+        padding: 7px 8px;
+        border-radius: 14px;
+        background: var(--ts-glass);
+        border: 1px solid var(--ts-glass-edge);
+      }
+      .__ts_evo_badge__,
       .__ts_evo_badge {
         display:inline-flex;
         align-items:center;
@@ -366,10 +423,16 @@
         border-radius:999px;
         font-size:9px;
         font-weight:700;
-        background: linear-gradient(135deg, oklch(90% .04 300), oklch(85% .06 290));
-        border: 0.5px solid rgba(255,255,255,.75);
+        background: linear-gradient(135deg, oklch(65% 0.25 310 / 0.35), oklch(73% 0.18 292 / 0.25));
+        border: 1px solid oklch(100% 0 0 / 0.24);
+        color: oklch(96% 0.01 300);
       }
-      .__ts_evo_meta { font-size:9px; color: oklch(45% .04 284); text-align:right; }
+      .__ts_evo_meta__,
+      .__ts_evo_meta {
+        font-size:9px;
+        color: var(--ts-text-muted);
+        text-align:right;
+      }
 
       .__ts_skill_card__,
       #__ts_hourly_box__,
@@ -378,73 +441,123 @@
       #__ts_panel_ranking__,
       .__ts_goal_block__,
       .__ts_card__ {
-        border-radius: 18px;
-        border: 0.5px solid rgba(255,255,255,.66);
-        background: linear-gradient(160deg, rgba(255,255,255,.8), rgba(247,238,255,.64));
-        box-shadow: 0 12px 24px rgba(49, 35, 86, .16), inset 0 1px 0 rgba(255,255,255,.72);
+        border-radius: 16px;
+        border: 1px solid var(--ts-glass-edge);
+        background: var(--ts-glass);
+        backdrop-filter: blur(20px) saturate(1.2);
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.2), 0 10px 26px oklch(8% 0.03 280 / 0.32);
       }
 
-      .__ts_goal_block__ { padding: 6px 7px; margin-bottom: 5px; }
-      .__ts_goal_reward__ { margin:0 0 2px 68px; font-size:9px; color: oklch(43% .06 300); }
+      .__ts_goal_block__ { padding: 7px 8px; margin-bottom: 6px; }
+      .__ts_goal_reward__ { margin:0 0 2px 68px; font-size:9px; color: var(--ts-text-muted); }
       .__ts_goal_badge__ { display:inline-flex; align-items:center; padding:1px 7px; border-radius:999px; font-size:8px; font-weight:700; margin-right:5px; border:1px solid transparent; }
-      .__ts_goal_badge_common__ { background:#f3f4f6; color:#4b5563; border-color:#d1d5db; }
-      .__ts_goal_badge_uncommon__ { background:#dcfce7; color:#166534; border-color:#86efac; }
-      .__ts_goal_badge_rare__ { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
-      .__ts_goal_badge_epic__ { background:#f3e8ff; color:#7e22ce; border-color:#d8b4fe; }
+      .__ts_goal_badge_common__ { background:oklch(58% 0.03 278 / 0.34); color:oklch(93% 0.01 300); border-color:oklch(100% 0 0 / 0.2); }
+      .__ts_goal_badge_uncommon__ { background:oklch(61% 0.11 154 / 0.34); color:oklch(95% 0.02 150); border-color:oklch(80% 0.15 154 / 0.5); }
+      .__ts_goal_badge_rare__ { background:oklch(63% 0.12 242 / 0.34); color:oklch(95% 0.02 240); border-color:oklch(80% 0.15 230 / 0.5); }
+      .__ts_goal_badge_epic__ { background:oklch(66% 0.18 306 / 0.32); color:oklch(96% 0.02 306); border-color:oklch(79% 0.2 306 / 0.56); }
 
       .__ts_skill_card__ { margin-top:8px; padding:8px; }
       .__ts_skill_card__.__ts_skill_spark__ {
         background:
-          radial-gradient(120% 130% at 10% 0%, rgba(156, 112, 255, .28), transparent 60%),
-          radial-gradient(90% 120% at 90% 100%, rgba(255, 213, 93, .22), transparent 60%),
-          linear-gradient(160deg, rgba(255,255,255,.82), rgba(242,235,255,.7));
+          radial-gradient(120% 130% at 10% 0%, oklch(65% 0.25 310 / 0.34), transparent 60%),
+          radial-gradient(90% 120% at 90% 100%, oklch(77% 0.15 82 / 0.24), transparent 60%),
+          var(--ts-glass);
         box-shadow:
-          0 0 0 0.5px rgba(255,255,255,.64),
-          0 0 18px oklch(73% .16 300 / .35),
-          0 0 26px oklch(80% .13 88 / .25),
-          0 12px 24px rgba(53, 31, 98, .24);
+          0 0 0 1px oklch(100% 0 0 / 0.2),
+          0 0 20px oklch(65% 0.25 310 / 0.34),
+          0 0 26px oklch(77% 0.15 84 / 0.22),
+          0 12px 24px oklch(8% 0.03 278 / 0.3);
       }
       #__ts_hourly_box__ { margin-top:8px; padding:8px; }
-      .__ts_skill_title__ { font-size:10px; font-weight:730; color: oklch(42% .09 297); margin-bottom:2px; }
-      .__ts_skill_desc__ { font-size:9px; color: oklch(46% .05 286); margin-bottom:3px; }
-      .__ts_skill_meta__ { font-size:9px; color: oklch(45% .04 282); margin-bottom:6px; }
+      #__ts_hourly_box__ > div:first-child { letter-spacing: -0.02em; color: oklch(95% 0.02 300) !important; }
+      .__ts_skill_title__ {
+        font-size:10px;
+        font-weight:730;
+        color: oklch(96% 0.01 300);
+        margin-bottom:2px;
+        letter-spacing: -0.02em;
+      }
+      .__ts_skill_desc__ { font-size:9px; color: var(--ts-text-muted); margin-bottom:3px; }
+      .__ts_skill_meta__ { font-size:9px; color: oklch(84% 0.02 296); margin-bottom:6px; }
       .__ts_skill_icon__ { display:inline-flex; margin-right:4px; }
       .__ts_neon_bolt__ {
         display:inline-flex;
         margin-right:4px;
-        color: oklch(81% .14 76);
-        text-shadow: 0 0 5px oklch(81% .15 76), 0 0 11px oklch(73% .2 300);
+        color: oklch(82% 0.15 79);
+        text-shadow: 0 0 6px oklch(82% 0.16 79), 0 0 13px oklch(70% 0.22 302);
         animation: __ts_neon_bolt__ 1.2s ease-in-out infinite;
       }
       @keyframes __ts_neon_bolt__ {
-        0%, 100% { transform: translateY(0); text-shadow: 0 0 5px oklch(81% .15 76), 0 0 11px oklch(73% .2 300); }
-        50% { transform: translateY(-1px); text-shadow: 0 0 7px oklch(83% .17 92), 0 0 14px oklch(71% .2 299); }
+        0%, 100% { transform: translateY(0); text-shadow: 0 0 6px oklch(82% 0.16 79), 0 0 13px oklch(70% 0.22 302); }
+        50% { transform: translateY(-1px); text-shadow: 0 0 8px oklch(84% 0.17 92), 0 0 16px oklch(69% 0.22 299); }
       }
 
       .__ts_btn__ {
-        border: none;
+        border: 1px solid oklch(100% 0 0 / 0.22);
         border-radius: 12px;
         padding: 6px 8px;
         font-size: 10px;
         font-weight: 700;
         cursor: pointer;
-        color: #fff;
-        background: linear-gradient(130deg, var(--ts-violet-1), var(--ts-violet-2), color-mix(in oklab, var(--ts-cyan-1) 42%, var(--ts-violet-2)));
-        box-shadow: 0 0 10px oklch(66% .18 300 / .26), 0 8px 18px rgba(89, 52, 155, .28);
+        color: oklch(97% 0.01 300);
+        background: linear-gradient(140deg, oklch(58% 0.19 299 / 0.72), oklch(50% 0.16 282 / 0.78));
+        box-shadow: 0 0 12px oklch(65% 0.24 310 / 0.24), 0 8px 18px oklch(8% 0.03 280 / 0.35);
       }
-      .__ts_skill_btn__ { width:100%; }
+      .__ts_skill_btn__ {
+        width:100%;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        background:
+          linear-gradient(140deg, oklch(42% 0.08 282 / 0.85), oklch(33% 0.06 278 / 0.9)) padding-box,
+          linear-gradient(120deg, oklch(65% 0.25 310), oklch(80% 0.14 90), oklch(75% 0.14 230), oklch(65% 0.25 310)) border-box;
+        background-size: 100% 100%, 220% 220%;
+        animation: __ts_shiny_border__ 4s linear infinite;
+        box-shadow: 0 0 14px oklch(65% 0.25 310 / 0.35), 0 10px 22px oklch(8% 0.03 280 / 0.45);
+      }
+      .__ts_skill_btn__::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -52%;
+        width: 36%;
+        background: linear-gradient(110deg, transparent, oklch(100% 0 0 / 0.45), transparent);
+        transform: skewX(-24deg);
+        animation: __ts_button_shine__ 2.8s ease-in-out infinite;
+        pointer-events: none;
+      }
       .__ts_skill_btn__.__ts_skill_ready__ {
-        background: linear-gradient(130deg, oklch(64% .21 297), oklch(76% .15 84));
+        background:
+          linear-gradient(140deg, oklch(58% 0.22 300 / 0.88), oklch(66% 0.2 322 / 0.85)) padding-box,
+          linear-gradient(120deg, oklch(65% 0.25 310), oklch(82% 0.16 85), oklch(65% 0.25 310)) border-box;
         animation: __ts_skill_ready_pulse__ 1.6s ease-in-out infinite;
       }
       .__ts_skill_btn__.__ts_skill_cooling__ {
-        background: linear-gradient(130deg, var(--ts-energy-start, hsl(276 78% 58%)), var(--ts-energy-end, hsl(262 84% 60%)));
-        box-shadow: 0 0 10px var(--ts-energy-glow, hsl(274 84% 60%));
+        background:
+          linear-gradient(140deg, hsl(var(--ts-energy-start, 286 72% 58%) / 0.86), hsl(var(--ts-energy-end, 42 92% 62%) / 0.85)) padding-box,
+          linear-gradient(120deg, hsl(var(--ts-energy-start, 286 72% 58%)), hsl(var(--ts-energy-end, 42 92% 62%)), hsl(var(--ts-energy-start, 286 72% 58%))) border-box;
+        box-shadow: 0 0 12px hsl(var(--ts-energy-glow, 286 86% 64%) / 0.5), 0 8px 18px oklch(8% 0.03 280 / 0.35);
         animation: __ts_skill_cooling_pulse__ 1.1s ease-in-out infinite;
       }
+      .__ts_btn__:disabled,
+      .__ts_skill_btn__:disabled {
+        opacity: .8;
+        cursor: not-allowed;
+      }
+      @keyframes __ts_shiny_border__ {
+        0% { background-position: 0% 50%, 0% 50%; }
+        100% { background-position: 0% 50%, 200% 50%; }
+      }
+      @keyframes __ts_button_shine__ {
+        0%, 22% { left: -52%; opacity: 0; }
+        35% { opacity: 1; }
+        68% { left: 122%; opacity: 0; }
+        100% { left: 122%; opacity: 0; }
+      }
       @keyframes __ts_skill_ready_pulse__ {
-        0%,100% { box-shadow: 0 0 10px oklch(72% .16 92 / .35), 0 8px 18px rgba(89,52,155,.26); }
-        50% { box-shadow: 0 0 16px oklch(74% .16 92 / .55), 0 10px 20px rgba(89,52,155,.3); }
+        0%,100% { box-shadow: 0 0 14px oklch(65% 0.25 310 / 0.38), 0 10px 22px oklch(8% 0.03 280 / 0.42); }
+        50% { box-shadow: 0 0 18px oklch(80% 0.14 88 / 0.5), 0 12px 24px oklch(8% 0.03 280 / 0.48); }
       }
       @keyframes __ts_skill_cooling_pulse__ {
         0%,100% { transform: translateY(0); }
@@ -452,26 +565,30 @@
       }
 
       #__ts_diag__ { margin-top:7px; display:flex; justify-content:flex-end; }
-      #__ts_diag_badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; background:rgba(255,255,255,.68); border:0.5px solid rgba(255,255,255,.72); color: oklch(41% .06 290); }
-      #__ts_msg__ { text-align:center; font-size:11px; color: oklch(45% .12 300); min-height:14px; font-weight:700; margin-top:5px; }
+      #__ts_diag_badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; background:var(--ts-glass); border:1px solid var(--ts-glass-edge); color: var(--ts-text-muted); }
+      #__ts_msg__ { text-align:center; font-size:11px; color: oklch(88% 0.04 310); min-height:14px; font-weight:700; margin-top:2px; }
 
       #__ts_tabs {
         display:grid;
         grid-template-columns: repeat(4,1fr);
         gap:6px;
-        margin-top:8px;
-
-        & button {
-          border:none;
-          border-radius:12px;
-          padding:6px;
-          font-size:10px;
-          font-weight:680;
-          cursor:pointer;
-          color: oklch(35% .08 285);
-          background: rgba(255,255,255,.7);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px rgba(87, 70, 130, .12);
-        }
+        margin-top:2px;
+        padding: 6px;
+        border-radius: 14px;
+        background: var(--ts-glass);
+        border: 1px solid var(--ts-glass-edge);
+      }
+      #__ts_tabs button {
+        border:1px solid oklch(100% 0 0 / 0.18);
+        border-radius:10px;
+        padding:6px;
+        font-size:10px;
+        font-weight:680;
+        letter-spacing: -0.02em;
+        cursor:pointer;
+        color: var(--ts-text-main);
+        background: linear-gradient(145deg, oklch(35% 0.06 284 / 0.65), oklch(30% 0.05 280 / 0.8));
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.2), 0 6px 14px oklch(6% 0.02 280 / 0.35);
       }
 
       #__ts_panel_shop__, #__ts_panel_inventory__, #__ts_panel_ranking__ {
@@ -481,7 +598,7 @@
         padding:6px;
       }
       .__ts_card__ { padding:6px; margin-bottom:6px; font-size:10px; }
-      .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; }
+      .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; letter-spacing:-0.02em; }
       .ts_food_item { position: fixed; font-size: 28px; z-index: 2147483646; cursor: pointer; }
       #__ts_auth_modal__ { position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:2147483647; display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',Arial,sans-serif; }
       #__ts_auth_card__ { background:#fff; border-radius:20px; padding:28px 24px 24px; width:min(340px, 92vw); box-shadow:0 12px 40px rgba(0,0,0,0.45); text-align:center; }
