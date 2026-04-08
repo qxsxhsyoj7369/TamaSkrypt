@@ -64,15 +64,12 @@
   const AUTH = {
     SESSION_TTL: 30 * 24 * 60 * 60 * 1000, // 30 dni w ms
 
-    // FNV-1a 32-bit hash – wystarczy dla tej gry (nie dane medyczne)
-    _hash(username, password) {
-      const str = username + '\x00' + password;
-      let h = 2166136261;
-      for (let i = 0; i < str.length; i++) {
-        h ^= str.charCodeAt(i);
-        h = Math.imul(h, 16777619) >>> 0;
-      }
-      return h.toString(16).padStart(8, '0');
+    // SHA-256 z solą (WebCrypto API) – async
+    async _hash(username, password) {
+      const enc  = new TextEncoder();
+      const data = enc.encode(username + '\x00' + password + '\x00tamaskrypt_v2');
+      const buf  = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     },
 
     accounts() {
@@ -94,26 +91,30 @@
         expires: Date.now() + this.SESSION_TTL,
       }));
     },
+    clearSession() {
+      GM_setValue('ts_session', JSON.stringify(null));
+    },
 
-    register(username, password) {
+    async register(username, password) {
       username = (username || '').trim();
-      if (username.length < 2)      return 'Nazwa musi mieć min. 2 znaki';
-      if (password.length < 4)      return 'Hasło musi mieć min. 4 znaki';
-      if (!/^\w{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (litery, cyfry, _)';
+      if (username.length < 2)               return 'Nazwa musi mieć min. 2 znaki';
+      if (password.length < 4)               return 'Hasło musi mieć min. 4 znaki';
+      if (!/^[a-zA-Z0-9_]{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (a-z, 0-9, _)';
       const accs = this.accounts();
-      if (accs[username])            return 'Ta nazwa jest już zajęta';
-      accs[username] = { hash: this._hash(username, password), created: Date.now() };
+      if (accs[username])                    return 'Ta nazwa jest już zajęta';
+      accs[username] = { hash: await this._hash(username, password), created: Date.now() };
       this.saveAccounts(accs);
       this.startSession(username);
       return null;
     },
 
-    login(username, password) {
+    async login(username, password) {
       username = (username || '').trim();
       const accs = this.accounts();
       const acc  = accs[username];
-      if (!acc || acc.hash !== this._hash(username, password))
-        return 'Nieprawidłowy login lub hasło';
+      if (!acc) return 'Nieprawidłowy login lub hasło';
+      const hash = await this._hash(username, password);
+      if (acc.hash !== hash) return 'Nieprawidłowy login lub hasło';
       this.startSession(username);
       return null;
     },
@@ -628,7 +629,7 @@
     tabLogin.addEventListener('click',    () => setTab('login'));
     tabRegister.addEventListener('click', () => setTab('register'));
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', async e => {
       e.preventDefault();
       const username = modal.querySelector('#__ts_auth_user__').value;
       const password = modal.querySelector('#__ts_auth_pass__').value;
@@ -639,9 +640,15 @@
         return;
       }
 
+      btnSubmit.disabled    = true;
+      btnSubmit.textContent = '⏳';
+
       const err = activeTab === 'login'
-        ? AUTH.login(username, password)
-        : AUTH.register(username, password);
+        ? await AUTH.login(username, password)
+        : await AUTH.register(username, password);
+
+      btnSubmit.disabled = false;
+      setTab(activeTab); // przywróć etykietę przycisku
 
       if (err) { errEl.textContent = err; return; }
 
@@ -967,7 +974,7 @@
     if (!btn) return;
     btn.addEventListener('click', () => {
       persistState();
-      GM_setValue('ts_session', 'null');
+      AUTH.clearSession();
       state       = null;
       _currentUser = '';
       const widget = document.getElementById(WIDGET_ID);
