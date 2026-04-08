@@ -6,6 +6,7 @@
 
   const URL_DROPS_COLLECTION = 'url_drops';
   const DOMAINS_COLLECTION = 'domains';
+  const RTDB_MULTIPLAYER_DOMAINS_PATH = 'mp_domains';
   const DOMAIN_CACHE_TTL_MS = 5 * 60 * 1000;
   const WAR_CACHE_TTL_MS = 5 * 60 * 1000;
   const MULTIPLAYER_FLUSH_INTERVAL_MS = 60 * 1000;
@@ -88,6 +89,35 @@
     return window.location && window.location.hostname
       ? String(window.location.hostname).toLowerCase()
       : '';
+  }
+
+  function hasRtdbApi() {
+    return typeof R.firebaseRead === 'function' && typeof R.firebaseWrite === 'function';
+  }
+
+  function getDomainRtdbKey(hostname) {
+    return encodeURIComponent(String(hostname || '').toLowerCase());
+  }
+
+  async function readDomainFromRtdb(hostname) {
+    if (!hasRtdbApi() || !hostname) return null;
+    const key = getDomainRtdbKey(hostname);
+    const data = await R.firebaseRead(`${RTDB_MULTIPLAYER_DOMAINS_PATH}/${key}`);
+    return data && typeof data === 'object' ? data : null;
+  }
+
+  async function writeDomainToRtdb(hostname, payload) {
+    if (!hasRtdbApi() || !hostname) return null;
+    const key = getDomainRtdbKey(hostname);
+    const normalized = payload && typeof payload === 'object' ? payload : {};
+    await R.firebaseWrite(`${RTDB_MULTIPLAYER_DOMAINS_PATH}/${key}`, normalized, 'PUT');
+    return normalized;
+  }
+
+  async function readAllDomainsFromRtdb() {
+    if (!hasRtdbApi()) return {};
+    const data = await R.firebaseRead(RTDB_MULTIPLAYER_DOMAINS_PATH);
+    return data && typeof data === 'object' ? data : {};
   }
 
   function getFirestoreDb() {
@@ -235,9 +265,10 @@
   multiplayer.lastWarStatsFetchAt = multiplayer.lastWarStatsFetchAt || 0;
 
   multiplayer.isAvailable = function isAvailable() {
-    if (multiplayer.disabledReason) return false;
+    if (multiplayer.disabledReason && multiplayer.disabledReason !== 'firestore-unavailable') return false;
     const db = getFirestoreDb();
-    return Boolean(db && typeof db.collection === 'function');
+    if (db && typeof db.collection === 'function') return true;
+    return hasRtdbApi();
   };
 
   multiplayer.getFactionTheme = function getFactionTheme(factionId) {
@@ -452,11 +483,34 @@
       }
     }
 
-    const db = ensureFirestoreReady('getDomainControl');
-    const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
-    const snap = await ref.get();
+    const db = getFirestoreDb();
+    let domainData = null;
+    if (db && typeof db.collection === 'function') {
+      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+      const snap = await ref.get();
+      domainData = toDomainData(snap);
+    } else if (hasRtdbApi()) {
+      const raw = await readDomainFromRtdb(hostname);
+      if (raw && typeof raw === 'object') {
+        const faction = getFactionOrDefault(raw.faction);
+        domainData = {
+          id: hostname,
+          hostname: raw.hostname || hostname,
+          kingUid: raw.kingUid || '',
+          kingName: raw.kingName || '',
+          faction: faction.id,
+          factionName: faction.name,
+          factionColor: faction.color,
+          defensePoints: normalizePositive(raw.defensePoints, 30),
+          collectedTax: normalizePositive(raw.collectedTax, 0),
+          conquestByUid: raw.conquestByUid && typeof raw.conquestByUid === 'object' ? raw.conquestByUid : {},
+          updatedAt: raw.updatedAt || null,
+          timeSpent: normalizePositive(raw.timeSpent, 0),
+          timeByUid: raw.timeByUid && typeof raw.timeByUid === 'object' ? raw.timeByUid : {},
+        };
+      }
+    }
 
-    let domainData = toDomainData(snap);
     if (!domainData) {
       const playerFaction = multiplayer.getPlayerFaction().id;
       domainData = {
@@ -492,24 +546,45 @@
   multiplayer.claimNeutralDomain = async function claimNeutralDomain() {
     if (!isAuthenticated()) throw new Error('User not authenticated');
     if (multiplayer.disabledReason === 'firestore-unavailable') {
-      throw new Error('Multiplayer chwilowo niedostępny');
+      multiplayer.disabledReason = '';
     }
 
-    const db = ensureFirestoreReady('claimNeutralDomain');
     const hostname = getCurrentDomain();
     if (!hostname) throw new Error('Brak hosta domeny');
 
     const playerFaction = multiplayer.getPlayerFaction().id;
-    const claimed = await db.runTransaction(async (tx) => {
-      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
-      const snap = await tx.get(ref);
-      const current = snap.exists ? (snap.data() || {}) : {};
+    const db = getFirestoreDb();
+    let claimed;
+    if (db && typeof db.collection === 'function') {
+      claimed = await db.runTransaction(async (tx) => {
+        const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+        const snap = await tx.get(ref);
+        const current = snap.exists ? (snap.data() || {}) : {};
 
-      if (current.kingUid) {
-        throw new Error('Domena już ma władcę');
-      }
+        if (current.kingUid) {
+          throw new Error('Domena już ma władcę');
+        }
 
-      const payload = {
+        const payload = {
+          hostname,
+          kingUid: String(R.currentUid),
+          kingName: String(R.currentUser || R.currentUid),
+          faction: playerFaction,
+          defensePoints: 100,
+          collectedTax: 0,
+          timeSpent: normalizePositive(current.timeSpent, 0),
+          timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
+          conquestByUid: current.conquestByUid && typeof current.conquestByUid === 'object' ? current.conquestByUid : {},
+          updatedAt: getServerTimestamp(),
+        };
+
+        tx.set(ref, payload, { merge: true });
+        return payload;
+      });
+    } else if (hasRtdbApi()) {
+      const current = await readDomainFromRtdb(hostname) || {};
+      if (current.kingUid) throw new Error('Domena już ma władcę');
+      claimed = {
         hostname,
         kingUid: String(R.currentUid),
         kingName: String(R.currentUser || R.currentUid),
@@ -519,12 +594,12 @@
         timeSpent: normalizePositive(current.timeSpent, 0),
         timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
         conquestByUid: current.conquestByUid && typeof current.conquestByUid === 'object' ? current.conquestByUid : {},
-        updatedAt: getServerTimestamp(),
+        updatedAt: Date.now(),
       };
-
-      tx.set(ref, payload, { merge: true });
-      return payload;
-    });
+      await writeDomainToRtdb(hostname, claimed);
+    } else {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
 
     const nextState = {
       ...claimed,
@@ -558,22 +633,35 @@
     const totalTax = taxFromXp + taxFromCoins;
     if (totalTax <= 0) return null;
 
-    const db = ensureFirestoreReady('reportEarnings');
     const hostname = getCurrentDomain();
     if (!hostname) return null;
 
-    const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(ref);
-      if (!snap.exists) return;
+    const db = getFirestoreDb();
+    if (db && typeof db.collection === 'function') {
+      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists) return;
 
-      const current = snap.data() || {};
+        const current = snap.data() || {};
+        const currentTax = normalizePositive(current.collectedTax, 0);
+        tx.set(ref, {
+          collectedTax: currentTax + totalTax,
+          updatedAt: getServerTimestamp(),
+        }, { merge: true });
+      });
+    } else if (hasRtdbApi()) {
+      const current = await readDomainFromRtdb(hostname);
+      if (!current || !current.kingUid) return null;
       const currentTax = normalizePositive(current.collectedTax, 0);
-      tx.set(ref, {
+      await writeDomainToRtdb(hostname, {
+        ...current,
         collectedTax: currentTax + totalTax,
-        updatedAt: getServerTimestamp(),
-      }, { merge: true });
-    });
+        updatedAt: Date.now(),
+      });
+    } else {
+      return null;
+    }
 
     emitEvent('multiplayer:tax_paid', {
       hostname,
@@ -587,36 +675,62 @@
 
   multiplayer.collectPendingTax = async function collectPendingTax() {
     if (!isAuthenticated()) return 0;
-    const db = ensureFirestoreReady('collectPendingTax');
-
-    const snapshot = await db
-      .collection(DOMAINS_COLLECTION)
-      .where('kingUid', '==', String(R.currentUid))
-      .limit(200)
-      .get();
-
-    if (!snapshot || snapshot.empty) return 0;
+    const db = getFirestoreDb();
 
     let totalCollected = 0;
     const updates = [];
-    snapshot.forEach((docSnap) => {
-      const value = docSnap.data() || {};
-      const tax = normalizePositive(value.collectedTax, 0);
-      if (tax <= 0) return;
-      totalCollected += tax;
-      updates.push({ ref: docSnap.ref });
-    });
+
+    if (db && typeof db.collection === 'function') {
+      const snapshot = await db
+        .collection(DOMAINS_COLLECTION)
+        .where('kingUid', '==', String(R.currentUid))
+        .limit(200)
+        .get();
+
+      if (!snapshot || snapshot.empty) return 0;
+      snapshot.forEach((docSnap) => {
+        const value = docSnap.data() || {};
+        const tax = normalizePositive(value.collectedTax, 0);
+        if (tax <= 0) return;
+        totalCollected += tax;
+        updates.push({ ref: docSnap.ref });
+      });
+    } else if (hasRtdbApi()) {
+      const all = await readAllDomainsFromRtdb();
+      Object.keys(all).forEach((key) => {
+        const value = all[key] || {};
+        if (String(value.kingUid || '') !== String(R.currentUid)) return;
+        const tax = normalizePositive(value.collectedTax, 0);
+        if (tax <= 0) return;
+        totalCollected += tax;
+        updates.push({ key, value });
+      });
+    } else {
+      return 0;
+    }
 
     if (totalCollected <= 0) return 0;
 
-    const batch = db.batch();
-    updates.forEach((item) => {
-      batch.set(item.ref, {
-        collectedTax: 0,
-        updatedAt: getServerTimestamp(),
-      }, { merge: true });
-    });
-    await batch.commit();
+    if (db && typeof db.collection === 'function') {
+      const batch = db.batch();
+      updates.forEach((item) => {
+        batch.set(item.ref, {
+          collectedTax: 0,
+          updatedAt: getServerTimestamp(),
+        }, { merge: true });
+      });
+      await batch.commit();
+    } else {
+      await Promise.all(updates.map((item) => R.firebaseWrite(
+        `${RTDB_MULTIPLAYER_DOMAINS_PATH}/${item.key}`,
+        {
+          ...item.value,
+          collectedTax: 0,
+          updatedAt: Date.now(),
+        },
+        'PUT'
+      )));
+    }
 
     if (R.state) {
       R.state.coins = Math.max(0, Number(R.state.coins) || 0) + Math.floor(totalCollected);
@@ -886,14 +1000,26 @@
       }
     }
 
-    const db = ensureFirestoreReady('getFactionDominance');
-    const snapshot = await db.collection(DOMAINS_COLLECTION).limit(500).get();
+    const db = getFirestoreDb();
     const counts = { neon: 0, toxic: 0, plasma: 0 };
     let total = 0;
 
-    if (snapshot && !snapshot.empty) {
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data() || {};
+    if (db && typeof db.collection === 'function') {
+      const snapshot = await db.collection(DOMAINS_COLLECTION).limit(500).get();
+      if (snapshot && !snapshot.empty) {
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          if (!data.kingUid) return;
+          const faction = getFactionOrDefault(data.faction).id;
+          counts[faction] += 1;
+          total += 1;
+        });
+      }
+    } else if (hasRtdbApi()) {
+      const all = await readAllDomainsFromRtdb();
+      Object.keys(all).forEach((key) => {
+        const data = all[key] || {};
+        if (!data.kingUid) return;
         const faction = getFactionOrDefault(data.faction).id;
         counts[faction] += 1;
         total += 1;
@@ -932,24 +1058,40 @@
       }
     }
 
-    const db = ensureFirestoreReady('getTopFactionKings');
     const result = {};
 
+    const db = getFirestoreDb();
     const factionIds = Object.keys(FACTIONS);
     await Promise.all(factionIds.map(async (factionId) => {
-      const snapshot = await db
-        .collection(DOMAINS_COLLECTION)
-        .where('faction', '==', factionId)
-        .limit(50)
-        .get();
-
       const rows = [];
-      if (snapshot && !snapshot.empty) {
-        snapshot.forEach((docSnap) => {
-          const value = docSnap.data() || {};
+      if (db && typeof db.collection === 'function') {
+        const snapshot = await db
+          .collection(DOMAINS_COLLECTION)
+          .where('faction', '==', factionId)
+          .limit(50)
+          .get();
+
+        if (snapshot && !snapshot.empty) {
+          snapshot.forEach((docSnap) => {
+            const value = docSnap.data() || {};
+            if (!value.kingUid) return;
+            rows.push({
+              hostname: value.hostname || docSnap.id,
+              kingUid: value.kingUid,
+              kingName: value.kingName || value.kingUid,
+              defensePoints: normalizePositive(value.defensePoints, 0),
+              collectedTax: normalizePositive(value.collectedTax, 0),
+            });
+          });
+        }
+      } else if (hasRtdbApi()) {
+        const all = await readAllDomainsFromRtdb();
+        Object.keys(all).forEach((key) => {
+          const value = all[key] || {};
           if (!value.kingUid) return;
+          if (String(value.faction || '') !== factionId) return;
           rows.push({
-            hostname: value.hostname || docSnap.id,
+            hostname: value.hostname || decodeURIComponent(key),
             kingUid: value.kingUid,
             kingName: value.kingName || value.kingUid,
             defensePoints: normalizePositive(value.defensePoints, 0),
@@ -1021,11 +1163,13 @@
     try {
       const db = getFirestoreDb();
       if (!db || typeof db.collection !== 'function') {
-        multiplayer.disabledReason = 'firestore-unavailable';
-        emitEvent('multiplayer:disabled', {
-          reason: 'firestore-unavailable',
-        });
-        return;
+        if (!hasRtdbApi()) {
+          multiplayer.disabledReason = 'firestore-unavailable';
+          emitEvent('multiplayer:disabled', {
+            reason: 'firestore-unavailable',
+          });
+          return;
+        }
       }
       multiplayer.disabledReason = '';
       await multiplayer.ensurePlayerFaction();

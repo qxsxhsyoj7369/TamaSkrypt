@@ -1,7 +1,7 @@
 {
-  "version": "3.27.4",
+  "version": "3.27.5",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix UX: przy braku Firestore multiplayer przechodzi w tryb offline (bez technicznego błędu), a akcja Zajmij jest bezpiecznie blokowana.",
+  "changelog": "Hotfix multiplayer backend: fallback RTDB dla domen i rankingów wojny, gdy Firestore SDK nie jest dostępny (koniec permanentnego trybu offline).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -105,8 +105,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.4",
-      "hash": "3af8fafc7fda90e12edeb517c4d71824134cbe3b087a5acff8a1a502474381bd",
+      "version": "3.27.5",
+      "hash": "2f52a8eb13d06f289c71de734ce9d6f9695b931cd2fa68358fbd660184798ff4",
       "execute": "raw",
       "required": true
     },
