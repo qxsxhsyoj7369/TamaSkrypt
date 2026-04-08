@@ -768,7 +768,7 @@
       #__ts_diag_badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; font-size:9px; font-weight:700; background:var(--ts-glass); border:1px solid var(--ts-glass-edge); color: var(--ts-text-muted); }
       #__ts_msg__ { text-align:center; font-size:11px; color: oklch(88% 0.04 310); min-height:14px; font-weight:700; margin-top:2px; }
 
-      #__ts_tabs {
+      #__ts_tabs__ {
         display:flex;
         gap:4px;
         margin-top:2px;
@@ -776,7 +776,7 @@
         border-radius: 24px;
         background: rgba(0, 0, 0, 0.25);
       }
-      #__ts_tabs > button {
+      #__ts_tabs__ > button {
         appearance: none;
         -webkit-appearance: none;
         background-color: transparent;
@@ -793,13 +793,13 @@
         box-shadow: none;
         transition: all 0.3s ease;
       }
-      #__ts_tabs > button:hover {
+      #__ts_tabs__ > button:hover {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       }
-      #__ts_tabs > button:active,
-      #__ts_tabs > button.__ts_tab_active__ {
+      #__ts_tabs__ > button:active,
+      #__ts_tabs__ > button.__ts_tab_active__ {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);

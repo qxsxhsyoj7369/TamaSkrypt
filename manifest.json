@@ -1,7 +1,7 @@
 {
-  "version": "3.20.1",
+  "version": "3.20.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UI tabs fix: wymuszony styl Pill Dock dla przycisków (reset natywnego appearance), aby nie wracał szary systemowy wygląd.",
+  "changelog": "UI tabs hotfix: poprawiony selektor `#__ts_tabs__`, aby styl Pill Dock faktycznie stosował się do dolnych zakładek.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.20.1",
-      "hash": "39bc1352c223b2390dbf0378c1fadb68dad40a36593cb954cb8c0c35ac271e8c",
+      "version": "3.20.2",
+      "hash": "bbe32ebe58154ac90594371a10face1e61590ccfe8968bca0acac2654a34ffd3",
       "execute": "raw",
       "required": true
     },
