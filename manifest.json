@@ -1,7 +1,8 @@
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Wprowadzono modułowy loader z cache per moduł, walidacją SHA-256 i paskiem ładowania.",
+  "changelog": "Rozcięto game-main na moduły: auth, state-sync, ui, game-loop, shop, inventory.",
+  "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
   "modules": [
     {
@@ -21,10 +22,66 @@
       "required": false
     },
     {
-      "name": "game-main",
-      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
-      "version": "2.2.0",
-      "hash": "0a1cbb43401043516a7f4bd6600e768a3d8d06b4eebe64015d8daa215dd9a4f0",
+      "name": "runtime",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
+      "version": "3.1.0",
+      "hash": "b12a390358d2ec0535dc99dcc8e9ade09e29fb535fd1d67a4838339fd8ca219a",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "auth",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/20-auth.js",
+      "version": "3.1.0",
+      "hash": "987b401c827c83e30916ff612e9a8932cf2d80fd8d2da34ab8a0ef832f5a9665",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "state-sync",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
+      "version": "3.1.0",
+      "hash": "221157f3747b23ae011535c9b393d32ba3573b0bd055b7f2619d2718b35c0be4",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "ui",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
+      "version": "3.1.0",
+      "hash": "40940091c16b0b7561fdae26a894675aea7dbfe812f52a6e9ee5649e3d37bcc8",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "shop",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/60-shop.js",
+      "version": "3.1.0",
+      "hash": "2c2fd0fcff5cc816a5f2c821293cf83ff39169d06898d2384089f723a8af29d1",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "inventory",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/70-inventory.js",
+      "version": "3.1.0",
+      "hash": "a8a340ae4e02169e64789f994bddbf5732a803d38fdbdb60f40e10d2dd01317f",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "game-loop",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
+      "version": "3.1.0",
+      "hash": "be49bb796f190327c77411fc897e3cb66b6104e2bf2ce4d56ed0ab35e252c78a",
+      "execute": "raw",
+      "required": true
+    },
+    {
+      "name": "entry",
+      "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/90-entry.js",
+      "version": "3.1.0",
+      "hash": "a34b99798cd2f4946dd8fe16723200b416c6957f240bc93c1297fcf7ad7f81a4",
       "execute": "raw",
       "required": true
     }
