@@ -1,7 +1,7 @@
 {
-  "version": "3.27.0",
+  "version": "3.27.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Wojny o Internet: frakcje, conquest, podatek domenowy, dominacja frakcji w rankingu oraz dyskretna karta terytorium + ambient indicator.",
+  "changelog": "Hotfix multiplayer init: brak Firestore nie wywala błędu w konsoli ani wejścia w ranking (graceful fallback).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -105,8 +105,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.0",
-      "hash": "f2da2510287b4f88ef316a266ba46eddeddca33004175172573ef486516e2735",
+      "version": "3.27.1",
+      "hash": "5950d316b0561d15645f76474d126ac56a440de4c18a3f61c1009714a9a8644c",
       "execute": "raw",
       "required": true
     },

@@ -924,7 +924,13 @@
     multiplayer.lastFlushAt = Date.now();
 
     try {
-      ensureFirestoreReady('init');
+      const db = getFirestoreDb();
+      if (!db || typeof db.collection !== 'function') {
+        emitEvent('multiplayer:disabled', {
+          reason: 'firestore-unavailable',
+        });
+        return;
+      }
       await multiplayer.ensurePlayerFaction();
 
       const [domainState, stashState] = await Promise.allSettled([
