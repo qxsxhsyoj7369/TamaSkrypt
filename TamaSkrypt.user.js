@@ -100,6 +100,7 @@
       if (username.length < 2)               return 'Nazwa musi mieć min. 2 znaki';
       if (password.length < 4)               return 'Hasło musi mieć min. 4 znaki';
       if (!/^[a-zA-Z0-9_]{2,20}$/.test(username)) return 'Nazwa: 2–20 znaków (a-z, 0-9, _)';
+      if (typeof crypto === 'undefined' || !crypto.subtle) return 'Wymagana strona HTTPS – otwórz dowolną stronę https:// i spróbuj ponownie.';
       const accs = this.accounts();
       if (accs[username])                    return 'Ta nazwa jest już zajęta';
       accs[username] = { hash: await this._hash(username, password), created: Date.now() };
@@ -113,6 +114,7 @@
       const accs = this.accounts();
       const acc  = accs[username];
       if (!acc) return 'Nieprawidłowy login lub hasło';
+      if (typeof crypto === 'undefined' || !crypto.subtle) return 'Wymagana strona HTTPS – otwórz dowolną stronę https:// i spróbuj ponownie.';
       const hash = await this._hash(username, password);
       if (acc.hash !== hash) return 'Nieprawidłowy login lub hasło';
       this.startSession(username);
@@ -643,17 +645,21 @@
       btnSubmit.disabled    = true;
       btnSubmit.textContent = '⏳';
 
-      const err = activeTab === 'login'
-        ? await AUTH.login(username, password)
-        : await AUTH.register(username, password);
+      try {
+        const err = activeTab === 'login'
+          ? await AUTH.login(username, password)
+          : await AUTH.register(username, password);
 
-      btnSubmit.disabled = false;
-      setTab(activeTab); // przywróć etykietę przycisku
+        if (err) { errEl.textContent = err; return; }
 
-      if (err) { errEl.textContent = err; return; }
-
-      modal.remove();
-      onSuccess(username.trim());
+        modal.remove();
+        onSuccess(username.trim());
+      } catch (e) {
+        errEl.textContent = 'Błąd: ' + (e && e.message ? e.message : String(e));
+      } finally {
+        btnSubmit.disabled = false;
+        setTab(activeTab); // przywróć etykietę przycisku
+      }
     });
   }
 
