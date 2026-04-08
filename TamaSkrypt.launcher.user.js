@@ -16,8 +16,8 @@
 (function () {
   'use strict';
 
-  // URL manifestu na GitHub
-  const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/copilot/add-gummy-bear-script/manifest.json';
+  // URL manifestu na GitHub (zawsze gałąź main)
+  const MANIFEST_URL = 'https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/manifest.json';
 
   // Sprawdzaj aktualizacje co godzinę
   const CHECK_INTERVAL_MS = 60 * 60 * 1000;
@@ -34,8 +34,12 @@
     const code = GM_getValue(KEY_CODE, '');
     if (!code) return false;
     // eval() wykonuje się w bieżącym scope – GM_setValue/GM_getValue są dostępne
-    // eslint-disable-next-line no-eval
-    eval(stripHeader(code));
+    try {
+      // eslint-disable-next-line no-eval
+      eval(stripHeader(code));
+    } catch (e) {
+      console.error('[TamaSkrypt Launcher] Błąd wykonania skryptu z cache:', e);
+    }
     return true;
   }
 
@@ -52,6 +56,11 @@
       method: 'GET',
       url: MANIFEST_URL + '?_=' + Date.now(),
       onload: function (resp) {
+        if (resp.status !== 200) {
+          console.warn('[TamaSkrypt Launcher] Błąd pobierania manifestu (status ' + resp.status + ') – używam cache');
+          execCached();
+          return;
+        }
         let manifest;
         try {
           manifest = JSON.parse(resp.responseText);
@@ -88,13 +97,22 @@
       method: 'GET',
       url: url + '?_=' + Date.now(),
       onload: function (resp) {
+        if (resp.status !== 200) {
+          console.warn('[TamaSkrypt Launcher] Błąd pobierania skryptu (status ' + resp.status + ') – używam cache');
+          execCached();
+          return;
+        }
         const code = resp.responseText;
         GM_setValue(KEY_CODE,    code);
         GM_setValue(KEY_VERSION, version);
         GM_setValue(KEY_CHECKED, Date.now());
         console.info('[TamaSkrypt Launcher] Załadowano wersję', version);
-        // eslint-disable-next-line no-eval
-        eval(stripHeader(code));
+        try {
+          // eslint-disable-next-line no-eval
+          eval(stripHeader(code));
+        } catch (e) {
+          console.error('[TamaSkrypt Launcher] Błąd wykonania pobranego skryptu:', e);
+        }
       },
       onerror: function () {
         console.warn('[TamaSkrypt Launcher] Nie można pobrać skryptu – używam cache');
