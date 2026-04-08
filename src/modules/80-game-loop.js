@@ -251,7 +251,14 @@
           }
           if (typeof R.updateUI === 'function') R.updateUI();
         } catch (error) {
-          if (R.showMessage) R.showMessage(`⚠️ ${error && error.message ? error.message : 'Akcja nieudana'}`, 2800);
+          const errorMessage = error && error.message ? String(error.message) : 'Akcja nieudana';
+          if (R.showMessage) {
+            if (/firestore not initialized/i.test(errorMessage) || /multiplayer chwilowo niedostępny/i.test(errorMessage)) {
+              R.showMessage('🌐 Multiplayer chwilowo niedostępny', 2800);
+            } else {
+              R.showMessage(`⚠️ ${errorMessage}`, 2800);
+            }
+          }
         }
       });
     }

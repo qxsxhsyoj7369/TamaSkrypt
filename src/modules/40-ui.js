@@ -1256,6 +1256,11 @@
     const playerFaction = (R.multiplayer && typeof R.multiplayer.getPlayerFaction === 'function')
       ? R.multiplayer.getPlayerFaction().id
       : '';
+    const multiplayerAvailable = Boolean(
+      R.multiplayer
+      && typeof R.multiplayer.isAvailable === 'function'
+      && R.multiplayer.isAvailable()
+    );
     const domainStatus = (R.multiplayer && typeof R.multiplayer.getDomainStatus === 'function')
       ? R.multiplayer.getDomainStatus(domainState)
       : {
@@ -1289,9 +1294,15 @@
 
     if (territoryActionBtn) {
       if (domainStatus.status === 'neutral') {
-        territoryActionBtn.disabled = false;
-        territoryActionBtn.setAttribute('data-action', 'claim-neutral');
-        territoryActionBtn.textContent = 'Zajmij (Darmowe)';
+        if (multiplayerAvailable) {
+          territoryActionBtn.disabled = false;
+          territoryActionBtn.setAttribute('data-action', 'claim-neutral');
+          territoryActionBtn.textContent = 'Zajmij (Darmowe)';
+        } else {
+          territoryActionBtn.disabled = true;
+          territoryActionBtn.setAttribute('data-action', '');
+          territoryActionBtn.textContent = 'Multiplayer offline';
+        }
       } else if (domainState && domainState.kingUid === String(R.currentUid || '')) {
         territoryActionBtn.disabled = false;
         territoryActionBtn.setAttribute('data-action', 'fortify');

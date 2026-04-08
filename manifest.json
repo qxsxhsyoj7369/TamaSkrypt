@@ -1,7 +1,7 @@
 {
-  "version": "3.27.3",
+  "version": "3.27.4",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix neutralnych domen: poprawny status Ziemi Niczyjej, przycisk Zajmij (Darmowe), podatek tylko na strefach wrogich i fallback dominacji bez danych.",
+  "changelog": "Hotfix UX: przy braku Firestore multiplayer przechodzi w tryb offline (bez technicznego błędu), a akcja Zajmij jest bezpiecznie blokowana.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.27.3",
-      "hash": "e828cd80fa881f3b6b4559f3e8ae8b3a751fa4587096a60dbe563757a993902c",
+      "version": "3.27.4",
+      "hash": "9a57d8261d295f32b3b97439419e4de1cd8ae7c13a112927a9e65df54335e4e3",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.27.3",
-      "hash": "acf13b3d3dd16e3233945f01ab5b8486aa4fa413c4655154c2bb5d3531ec7d21",
+      "version": "3.27.4",
+      "hash": "7430ce9741330e996e99b80636278706ef1b412313de375c10b72ca4efd5463f",
       "execute": "raw",
       "required": true
     },
@@ -105,8 +105,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.3",
-      "hash": "a2641bee286070b5fa960a3ea4c6a0625609dc84087750c772cabadea54ba24e",
+      "version": "3.27.4",
+      "hash": "3af8fafc7fda90e12edeb517c4d71824134cbe3b087a5acff8a1a502474381bd",
       "execute": "raw",
       "required": true
     },

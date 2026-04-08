@@ -229,9 +229,16 @@
   multiplayer.lastFlushAt = multiplayer.lastFlushAt || Date.now();
   multiplayer.currentDomainState = multiplayer.currentDomainState || null;
   multiplayer.playerFaction = multiplayer.playerFaction || 'neon';
+  multiplayer.disabledReason = multiplayer.disabledReason || '';
   multiplayer.factionDominance = multiplayer.factionDominance || null;
   multiplayer.factionKings = multiplayer.factionKings || null;
   multiplayer.lastWarStatsFetchAt = multiplayer.lastWarStatsFetchAt || 0;
+
+  multiplayer.isAvailable = function isAvailable() {
+    if (multiplayer.disabledReason) return false;
+    const db = getFirestoreDb();
+    return Boolean(db && typeof db.collection === 'function');
+  };
 
   multiplayer.getFactionTheme = function getFactionTheme(factionId) {
     return getFactionOrDefault(factionId);
@@ -484,6 +491,9 @@
 
   multiplayer.claimNeutralDomain = async function claimNeutralDomain() {
     if (!isAuthenticated()) throw new Error('User not authenticated');
+    if (multiplayer.disabledReason === 'firestore-unavailable') {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
 
     const db = ensureFirestoreReady('claimNeutralDomain');
     const hostname = getCurrentDomain();
@@ -1011,11 +1021,13 @@
     try {
       const db = getFirestoreDb();
       if (!db || typeof db.collection !== 'function') {
+        multiplayer.disabledReason = 'firestore-unavailable';
         emitEvent('multiplayer:disabled', {
           reason: 'firestore-unavailable',
         });
         return;
       }
+      multiplayer.disabledReason = '';
       await multiplayer.ensurePlayerFaction();
 
       const [domainState, stashState] = await Promise.allSettled([
@@ -1060,6 +1072,7 @@
       });
     } catch (error) {
       multiplayer.initialized = false;
+      multiplayer.disabledReason = '';
       emitError('init', error);
       throw error;
     }
