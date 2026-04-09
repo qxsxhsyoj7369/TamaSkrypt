@@ -334,28 +334,23 @@
   };
 
   R.spawnParticle = function spawnParticle(x, y, content, type) {
-    const bodyEl = R.getElById ? R.getElById('__ts_body__') : document.getElementById('__ts_body__');
     const widgetEl = R.getElById ? R.getElById('__tamaskrypt_widget__') : document.getElementById('__tamaskrypt_widget__');
-    if (!bodyEl || !widgetEl) return;
+    if (!widgetEl) return;
 
     const safeX = Number.isFinite(x) ? x : 0;
     const safeY = Number.isFinite(y) ? y : 0;
-    const bodyRect = bodyEl.getBoundingClientRect();
-    const widgetRect = widgetEl.getBoundingClientRect();
-    const offsetX = bodyRect.left - widgetRect.left;
-    const offsetY = bodyRect.top - widgetRect.top;
 
     const particle = document.createElement('span');
     const particleType = String(type || 'default').replace(/[^a-z0-9_-]/gi, '').toLowerCase();
     particle.className = `__ts_particle__ __ts_particle_${particleType || 'default'}__`;
     particle.textContent = content == null ? '✨' : String(content);
 
-    const localX = safeX - offsetX + bodyEl.scrollLeft;
-    const localY = safeY - offsetY + bodyEl.scrollTop;
+    const localX = safeX;
+    const localY = safeY;
     particle.style.left = `${Math.round(localX)}px`;
     particle.style.top = `${Math.round(localY)}px`;
 
-    bodyEl.appendChild(particle);
+    widgetEl.appendChild(particle);
     const removeParticle = () => {
       if (particle.parentNode) particle.remove();
     };
@@ -400,6 +395,8 @@
         font-size: 12px;
         user-select: none;
         color: var(--ts-text-main);
+        position: relative;
+        overflow: visible;
       }
 
       #__ts_header__ {
@@ -441,6 +438,63 @@
         backdrop-filter: blur(20px) saturate(1.28);
         box-shadow: var(--ts-shadow), inset 0 1px 0 oklch(100% 0 0 / 0.18);
         animation: __ts_panel_flow__ 26s ease-in-out infinite alternate;
+      }
+
+      #__ts_zelek__ {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        min-width: 258px;
+        padding: 8px 10px 6px;
+        margin-top: -1px;
+        border-left: 1px solid oklch(100% 0 0 / 0.16);
+        border-right: 1px solid oklch(100% 0 0 / 0.16);
+        background:
+          radial-gradient(95% 58% at 50% -14%, oklch(72% 0.2 292 / 0.2), transparent 68%),
+          linear-gradient(180deg, oklch(24% 0.06 286 / 0.56), oklch(19% 0.04 278 / 0.34));
+        backdrop-filter: blur(14px) saturate(1.22);
+        z-index: 3;
+      }
+
+      #__ts_zelek_floe_container__ {
+        position: relative;
+        width: 130px;
+        height: 96px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      #__ts_zelek_shadow__ {
+        position: absolute;
+        left: 50%;
+        bottom: 6px;
+        width: 84px;
+        height: 17px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: radial-gradient(ellipse at center, rgba(4, 10, 18, 0.5) 0%, rgba(8, 14, 24, 0.32) 52%, rgba(8, 14, 24, 0) 100%);
+        filter: blur(1.6px);
+        opacity: 0.85;
+        z-index: 1;
+        animation: __ts_shadow_breathe__ 4.8s ease-in-out infinite;
+      }
+
+      #__ts_zelek_floe__ {
+        position: absolute;
+        left: 50%;
+        bottom: 10px;
+        width: 102px;
+        height: 24px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        border: 1px solid oklch(100% 0 0 / 0.34);
+        background:
+          radial-gradient(120% 130% at 50% 0%, oklch(100% 0 0 / 0.55), oklch(92% 0.03 232 / 0.2) 45%, transparent 85%),
+          linear-gradient(180deg, oklch(98% 0.02 242 / 0.38), oklch(90% 0.02 232 / 0.16));
+        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.42), 0 8px 22px oklch(5% 0.01 250 / 0.22);
+        z-index: 2;
       }
 
       #__ts_body__,
@@ -549,35 +603,29 @@
         box-shadow: none;
       }
       #__tamaskrypt_widget__.__ts_minimized__ #__ts_body__ {
-        min-width: 0;
-        display: block;
-        max-height: none;
-        padding: 0;
-        margin-top: 2px;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        backdrop-filter: none;
-        animation: none;
-        overflow: visible;
-        -webkit-mask-image: none;
-        mask-image: none;
-      }
-      #__tamaskrypt_widget__.__ts_minimized__ #__ts_body__ > :not(#__ts_zelek__) {
-        display: none !important;
+        display: none;
       }
       #__tamaskrypt_widget__.__ts_minimized__ #__ts_zelek__ {
-        padding: 0;
+        min-width: 0;
+        margin-top: 2px;
+        padding: 2px 4px 0;
         border: none;
         border-radius: 0;
         background: transparent;
         box-shadow: none;
+        backdrop-filter: none;
+      }
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_zelek_floe__ {
+        opacity: 0.85;
+      }
+      #__tamaskrypt_widget__.__ts_minimized__ #__ts_zelek_shadow__ {
+        opacity: 0.44;
       }
 
       .__ts_particle__ {
         position: absolute;
         pointer-events: none;
-        z-index: 7;
+        z-index: 18;
         left: 0;
         top: 0;
         transform: translate(-50%, 0) scale(0.5);
@@ -608,31 +656,23 @@
         100% { opacity: 0; transform: translate(-50%, -74px) scale(0.98); }
       }
 
-      #__ts_zelek__ {
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        padding: 8px;
-        border-radius: 16px;
-        background: var(--ts-glass);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.4);
-      }
       #__ts_body_svg__ {
-        width: 94px;
+        width: 108px;
         height: 86px;
-        display:flex;
-        align-items:flex-end;
-        justify-content:center;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        position: relative;
+        z-index: 3;
       }
       #__ts_body_svg__ .__ts_slime_stage__ {
         width: 92px;
         height: 76px;
-        display:flex;
-        align-items:flex-end;
-        justify-content:center;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
         filter: drop-shadow(0 15px 18px rgba(0,0,0,0.22)) drop-shadow(0 0 18px var(--ts-slime-glow));
-        animation: __ts_slime_idle_tilt__ 8.8s ease-in-out infinite;
+        animation: __ts_slime_idle_tilt__ 8.8s ease-in-out infinite, __ts_slime_float__ 4.8s ease-in-out infinite;
       }
       #__ts_body_svg__ .__ts_slime_svg__ {
         width: 92px;
@@ -643,6 +683,9 @@
       }
       #__ts_zelek__:hover #__ts_body_svg__ .__ts_slime_svg__ {
         animation: __ts_slime_squish__ 1s ease-in-out;
+      }
+      #__ts_zelek__:hover #__ts_zelek_shadow__ {
+        animation-duration: 2.4s;
       }
       #__ts_body_svg__ .__ts_slime_body__ path {
         fill: var(--ts-slime-body);
@@ -716,6 +759,14 @@
       @keyframes __ts_slime_idle_tilt__ {
         0%, 100% { transform: rotate(-1deg) translateY(0); }
         50% { transform: rotate(1deg) translateY(-1px); }
+      }
+      @keyframes __ts_slime_float__ {
+        0%, 100% { translate: 0 0; }
+        50% { translate: 0 -5px; }
+      }
+      @keyframes __ts_shadow_breathe__ {
+        0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.86; }
+        50% { transform: translateX(-50%) scaleX(0.84); opacity: 0.58; }
       }
       @keyframes __ts_slime_breathe__ {
         0% { transform-origin: 50% 100%; transform: scaleX(1) scaleY(1); }
@@ -1423,9 +1474,15 @@
           <span style="margin-left:auto;font-size:10px;opacity:.85;">👤 ${R.currentUser}</span>
           <button id="__ts_logout__" style="background:none;border:none;color:#fff;cursor:pointer;">⏏</button>
         </div>
+        <div id="__ts_zelek__" title="${mood.label}">
+          <div id="__ts_zelek_floe_container__">
+            <div id="__ts_zelek_shadow__"></div>
+            <div id="__ts_zelek_floe__"></div>
+            <div id="__ts_body_svg__">${R.buildZelekSVG()}</div>
+          </div>
+        </div>
         <div id="__ts_body__">
           <div id="__ts_levelup_inline__"></div>
-          <div id="__ts_zelek__" title="${mood.label}"><div id="__ts_body_svg__">${R.buildZelekSVG()}</div></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
