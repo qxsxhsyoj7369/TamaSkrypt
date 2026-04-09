@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.2.1
+// @version      3.2.2
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -41,6 +41,7 @@
   const KEY_MODULE_META = '__ts_launcher_modules_meta__';
   const KEY_MODULE_CODE_PREFIX = '__ts_launcher_mod_code__::';
   const KEY_COMMIT_SHA = '__ts_launcher_commit_sha__';
+  const HOST_SKIP_RE = /(^|\.)github\.com$|(^|\.)githubusercontent\.com$/i;
 
   function setLauncherDiagnostics(info) {
     const current = window.__TS_LAUNCHER_DIAGNOSTICS__ || {};
@@ -95,29 +96,20 @@
     return code.replace(/\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==/m, '');
   }
 
-  function makeModuleBlobUrl(code, label) {
-    const safeLabel = String(label || 'module').replace(/[^a-z0-9._-]+/gi, '_');
-    const source = `${stripHeader(code)}\n//# sourceURL=tamaskrypt_${safeLabel}.js`;
-    const blob = new Blob([source], { type: 'text/javascript' });
-    return URL.createObjectURL(blob);
-  }
-
   async function runCode(code, label) {
-    let blobUrl = '';
     try {
-      blobUrl = makeModuleBlobUrl(code, label);
-      await import(blobUrl);
+      // eslint-disable-next-line no-eval
+      eval(stripHeader(code));
       return true;
     } catch (error) {
       console.error('[TamaSkrypt Launcher] Błąd wykonania:', label, error);
       return false;
-    } finally {
-      if (blobUrl) {
-        setTimeout(() => {
-          try { URL.revokeObjectURL(blobUrl); } catch (_) {}
-        }, 0);
-      }
     }
+  }
+
+  function shouldSkipOnHost() {
+    const host = (window.location && window.location.hostname) ? String(window.location.hostname) : '';
+    return HOST_SKIP_RE.test(host);
   }
 
   function requestText(url, timeout = 15000) {
@@ -460,6 +452,10 @@
   }
 
   async function run() {
+    if (shouldSkipOnHost()) {
+      return;
+    }
+
     await checkFirebaseSchemaVersion();
 
     const mode = GM_getValue(KEY_MODE, 'legacy');
