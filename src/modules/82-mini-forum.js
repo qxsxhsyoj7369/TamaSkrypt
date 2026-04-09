@@ -85,16 +85,20 @@
   }
 
   function ensureCybercoreCss() {
-    if (document.getElementById(CYBERCORE_CSS_ID)) return;
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.head;
+    const target = root instanceof ShadowRoot ? root : document.head;
+    if (target && typeof target.querySelector === 'function' && target.querySelector(`#${CYBERCORE_CSS_ID}`)) return;
     const link = document.createElement('link');
     link.id = CYBERCORE_CSS_ID;
     link.rel = 'stylesheet';
     link.href = CYBERCORE_CSS_URL;
-    (document.head || document.documentElement).appendChild(link);
+    (target || document.head || document.documentElement).appendChild(link);
   }
 
   function ensureForumStyles() {
-    if (document.getElementById(FORUM_STYLE_ID)) return;
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.head;
+    const target = root instanceof ShadowRoot ? root : document.head;
+    if (target && typeof target.querySelector === 'function' && target.querySelector(`#${FORUM_STYLE_ID}`)) return;
     const style = document.createElement('style');
     style.id = FORUM_STYLE_ID;
     style.textContent = `
@@ -198,8 +202,7 @@
       .__ts_pager_btn__ {
         position: absolute;
         right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
+        top: 75px;
         font-family: Consolas, 'Courier New', monospace;
         font-size: 11px;
         padding: 6px 10px;
@@ -217,7 +220,7 @@
       }
       #${MODAL_ID} .text-glow { text-shadow: 0 0 9px currentColor; }
     `;
-    (document.head || document.documentElement).appendChild(style);
+    (target || document.head || document.documentElement).appendChild(style);
   }
 
   function getDb() {
@@ -390,11 +393,10 @@
 
   function ensureTrigger() {
     const root = R.getWidgetRoot ? R.getWidgetRoot() : document;
-    let targetContainer = root.querySelector('#__ts_zelek_floe_container__');
     const widgetRoot = root.querySelector('#__tamaskrypt_widget__');
 
     const existing = findTriggerInShadow();
-    if (existing && targetContainer && targetContainer.contains(existing)) return existing;
+    if (existing && widgetRoot && widgetRoot.contains(existing)) return existing;
 
     if (existing) existing.remove();
 
@@ -409,10 +411,8 @@
       if (R.forum && typeof R.forum.open === 'function') R.forum.open();
     });
 
-    if (targetContainer) {
-      targetContainer.style.position = 'relative';
-      targetContainer.appendChild(trigger);
-    } else if (widgetRoot) {
+    if (widgetRoot) {
+      widgetRoot.style.position = 'relative';
       widgetRoot.appendChild(trigger);
     } else {
       document.body.appendChild(trigger);
@@ -705,6 +705,18 @@
           init();
         } catch (_) {}
       }, 600);
+    }
+
+    const originalUpdateUI = R.updateUI;
+    if (typeof originalUpdateUI === 'function' && !R.__ts_forum_update_hook__) {
+      R.__ts_forum_update_hook__ = true;
+      R.updateUI = function patchedUpdateUI() {
+        const result = originalUpdateUI.apply(this, arguments);
+        setTimeout(() => {
+          if (R.forum && typeof R.forum.init === 'function') R.forum.init();
+        }, 0);
+        return result;
+      };
     }
   }
 
