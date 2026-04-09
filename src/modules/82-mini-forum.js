@@ -104,13 +104,15 @@
     style.textContent = `
       #${MODAL_ID} {
         position: fixed;
-        inset: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw; height: 100vh;
         z-index: 2147483647;
         background: rgba(3, 8, 18, 0.58);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 16px;
+        pointer-events: auto;
       }
       #${MODAL_ID} .__ts_forum_window__ {
         width: min(700px, 96vw);
@@ -484,7 +486,9 @@
       if (event.target === modal) closeModal();
     });
 
-    (document.body || document.documentElement).appendChild(modal);
+    const widgetRoot = R.getWidgetRoot ? R.getWidgetRoot() : document.body;
+    const wrapper = widgetRoot.querySelector('#__tamaskrypt_widget__') || widgetRoot;
+    wrapper.appendChild(modal);
 
     const root = modal.querySelector('#__ts_forum_root__');
     if (!root) return;
@@ -672,10 +676,13 @@
     R.forum.init = init;
     R.forum.open = async function openForum() {
       try {
+        console.log('[Holo-Pager] Otwieranie terminala...');
         ensureStateUid();
         await renderModal('');
+        console.log('[Holo-Pager] Połączenie nawiązane!');
       } catch (error) {
-        if (R.showMessage) R.showMessage(`⚠️ ${error.message || 'Forum niedostępne'}`, 2400);
+        console.error('[Holo-Pager] Błąd bazy danych:', error);
+        if (R.showMessage) R.showMessage(`⚠️ ${error.message || 'Brak sygnału bazy'}`, 3000);
       }
     };
     R.forum.close = closeModal;
