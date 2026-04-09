@@ -26,9 +26,13 @@
       R.applyUserGameplaySettings(gameplaySettings);
     }
 
+    const profileFaction = (R.normalizeFactionId
+      ? R.normalizeFactionId(profile?.faction)
+      : String(profile?.faction || '').toLowerCase()) || 'neutral';
+
     R.state = {
       hunger: R.clamp(Number(pet?.hunger) || 100, 0, 100),
-      hp: R.clamp(Number(pet?.hp) || 100, 0, R.getEffectiveHpMaxForLevel ? R.getEffectiveHpMaxForLevel(pet?.level) : R.CONFIG.HP_MAX),
+      hp: R.clamp(Number(pet?.hp) || 100, 0, R.getEffectiveHpMaxForLevel ? R.getEffectiveHpMaxForLevel(pet?.level, profileFaction) : R.CONFIG.HP_MAX),
       level: Math.max(1, Number(pet?.level) || 1),
       xp: Math.max(0, Number(pet?.xp) || 0),
       coins: Math.max(0, Number(progress?.coins) || 0),
@@ -45,6 +49,7 @@
       progressSettings,
       lastDailyTick: R.now(),
       profileCreatedAt: Number(profile?.createdAt) || R.now(),
+      profileFaction,
     };
 
     if (R.recalculateEvolutionStats) {
@@ -83,6 +88,7 @@
         username: R.currentUser,
         createdAt: R.state.profileCreatedAt || savedAt,
         lastLoginAt: savedAt,
+        faction: (R.normalizeFactionId ? R.normalizeFactionId(R.state.profileFaction) : (R.state.profileFaction || 'neutral')),
       },
       pet: {
         level: R.state.level,

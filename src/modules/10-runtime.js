@@ -227,116 +227,178 @@
     DEAD: { emoji: '💀', label: 'Martwy' },
   };
 
+  runtime.EVOLUTION_LIBRARY = Object.freeze({
+    neutral: [
+      {
+        id: 'jelly-seed',
+        name: 'Żelkowy Pąk',
+        minLevel: 1,
+        faction: 'neutral',
+        color: '#8f97a8',
+        activeSkill: {
+          id: 'seed-heal',
+          name: 'Słodka Regeneracja',
+          emoji: '💚',
+          description: 'Natychmiast leczy +16 HP.',
+          cooldownMs: 90 * 1000,
+          instantHeal: 16,
+        },
+        bonuses: {
+          hpMax: 0,
+          regenMultiplier: 1,
+          foodXpMultiplier: 1,
+          hungerDrainMultiplier: 1,
+        },
+      },
+    ],
+    neon: [
+      {
+        id: 'neon-cyber-sluz',
+        name: 'Cyber Śluz',
+        minLevel: 10,
+        faction: 'neon',
+        color: '#ff00ff',
+        activeSkill: {
+          id: 'neon-overclock',
+          name: 'Overclock Smaku',
+          emoji: '⚡',
+          description: '2x XP z jedzenia przez 50s.',
+          cooldownMs: 125 * 1000,
+          effectKeys: [{ key: 'xp_boost', durationMs: 50 * 1000 }],
+        },
+        bonuses: {
+          hpMax: 14,
+          regenMultiplier: 1.1,
+          foodXpMultiplier: 1.2,
+          hungerDrainMultiplier: 0.92,
+        },
+      },
+      {
+        id: 'neon-neuro-core',
+        name: 'Neonowy Rdzeń',
+        minLevel: 20,
+        faction: 'neon',
+        color: '#ff4df4',
+        activeSkill: {
+          id: 'neon-crit-loop',
+          name: 'Pętla Krytyczna',
+          emoji: '✨',
+          description: '2x XP z jedzenia + szybszy regen przez 55s.',
+          cooldownMs: 175 * 1000,
+          effectKeys: [
+            { key: 'xp_boost', durationMs: 55 * 1000 },
+            { key: 'regen_boost', durationMs: 55 * 1000 },
+          ],
+        },
+        bonuses: {
+          hpMax: 26,
+          regenMultiplier: 1.22,
+          foodXpMultiplier: 1.34,
+          hungerDrainMultiplier: 0.86,
+        },
+      },
+    ],
+    toxic: [
+      {
+        id: 'toxic-radiaktywny-blob',
+        name: 'Radioaktywny Blob',
+        minLevel: 10,
+        faction: 'toxic',
+        color: '#00ff00',
+        activeSkill: {
+          id: 'toxic-slow-field',
+          name: 'Pole Toksyn',
+          emoji: '☣️',
+          description: 'Wolniejsza utrata głodu przez 65s.',
+          cooldownMs: 130 * 1000,
+          effectKeys: [{ key: 'slow_hunger', durationMs: 65 * 1000 }],
+        },
+        bonuses: {
+          hpMax: 18,
+          regenMultiplier: 1.14,
+          foodXpMultiplier: 1.08,
+          hungerDrainMultiplier: 0.78,
+        },
+      },
+      {
+        id: 'toxic-mutant-overmass',
+        name: 'Mutant Overmass',
+        minLevel: 20,
+        faction: 'toxic',
+        color: '#8cff2a',
+        activeSkill: {
+          id: 'toxic-bio-wall',
+          name: 'Biologiczna Ściana',
+          emoji: '🛡️',
+          description: 'Silna regeneracja i osłona głodu przez 55s.',
+          cooldownMs: 175 * 1000,
+          effectKeys: [
+            { key: 'regen_boost', durationMs: 55 * 1000 },
+            { key: 'slow_hunger', durationMs: 55 * 1000 },
+          ],
+        },
+        bonuses: {
+          hpMax: 32,
+          regenMultiplier: 1.3,
+          foodXpMultiplier: 1.16,
+          hungerDrainMultiplier: 0.68,
+        },
+      },
+    ],
+    plasma: [
+      {
+        id: 'plasma-jonowa-galareta',
+        name: 'Jonowa Galareta',
+        minLevel: 10,
+        faction: 'plasma',
+        color: '#00ffff',
+        activeSkill: {
+          id: 'plasma-pulse',
+          name: 'Impuls Jonowy',
+          emoji: '🔷',
+          description: 'Szybsza regeneracja przez 55s.',
+          cooldownMs: 130 * 1000,
+          effectKeys: [{ key: 'regen_boost', durationMs: 55 * 1000 }],
+        },
+        bonuses: {
+          hpMax: 16,
+          regenMultiplier: 1.25,
+          foodXpMultiplier: 1.14,
+          hungerDrainMultiplier: 0.9,
+        },
+      },
+      {
+        id: 'plasma-kwantowy-filar',
+        name: 'Kwantowy Filar',
+        minLevel: 20,
+        faction: 'plasma',
+        color: '#4de9ff',
+        activeSkill: {
+          id: 'plasma-singularity',
+          name: 'Mikro-Singularność',
+          emoji: '💠',
+          description: 'XP boost + regen boost przez 55s.',
+          cooldownMs: 175 * 1000,
+          effectKeys: [
+            { key: 'xp_boost', durationMs: 55 * 1000 },
+            { key: 'regen_boost', durationMs: 55 * 1000 },
+          ],
+        },
+        bonuses: {
+          hpMax: 28,
+          regenMultiplier: 1.32,
+          foodXpMultiplier: 1.24,
+          hungerDrainMultiplier: 0.82,
+        },
+      },
+    ],
+  });
+
   runtime.EVOLUTION_FORMS = [
-    {
-      id: 'jelly-seed',
-      name: 'Żelkowy Pąk',
-      emoji: '🟢',
-      minLevel: 1,
-      color: '#A8EB12',
-      activeSkill: {
-        id: 'seed-heal',
-        name: 'Słodka Regeneracja',
-        emoji: '💚',
-        description: 'Natychmiast leczy +16 HP.',
-        cooldownMs: 90 * 1000,
-        instantHeal: 16,
-      },
-      bonuses: {
-        hpMax: 0,
-        regenMultiplier: 1,
-        foodXpMultiplier: 1,
-        hungerDrainMultiplier: 1,
-      },
-    },
-    {
-      id: 'jelly-spark',
-      name: 'Żelkowa Iskra',
-      emoji: '🟡',
-      minLevel: 5,
-      color: '#facc15',
-      activeSkill: {
-        id: 'spark-xp',
-        name: 'Iskrzący Zgryz',
-        emoji: '⚡',
-        description: '2x XP z jedzenia przez 45s.',
-        cooldownMs: 120 * 1000,
-        effectKeys: [{ key: 'xp_boost', durationMs: 45 * 1000 }],
-      },
-      bonuses: {
-        hpMax: 8,
-        regenMultiplier: 1.08,
-        foodXpMultiplier: 1.05,
-        hungerDrainMultiplier: 0.96,
-      },
-    },
-    {
-      id: 'jelly-bloom',
-      name: 'Żelkowy Kwiat',
-      emoji: '🟣',
-      minLevel: 10,
-      color: '#c084fc',
-      activeSkill: {
-        id: 'bloom-guard',
-        name: 'Kwiatowa Aura',
-        emoji: '🌸',
-        description: 'Wolniejsza utrata głodu przez 60s.',
-        cooldownMs: 140 * 1000,
-        effectKeys: [{ key: 'slow_hunger', durationMs: 60 * 1000 }],
-      },
-      bonuses: {
-        hpMax: 16,
-        regenMultiplier: 1.15,
-        foodXpMultiplier: 1.1,
-        hungerDrainMultiplier: 0.9,
-      },
-    },
-    {
-      id: 'jelly-nova',
-      name: 'Żelkowa Nova',
-      emoji: '🔵',
-      minLevel: 15,
-      color: '#38bdf8',
-      activeSkill: {
-        id: 'nova-regen',
-        name: 'Nova Regen',
-        emoji: '🛡️',
-        description: 'Mocna regeneracja HP przez 45s.',
-        cooldownMs: 160 * 1000,
-        effectKeys: [{ key: 'regen_boost', durationMs: 45 * 1000 }],
-      },
-      bonuses: {
-        hpMax: 24,
-        regenMultiplier: 1.23,
-        foodXpMultiplier: 1.16,
-        hungerDrainMultiplier: 0.84,
-      },
-    },
-    {
-      id: 'jelly-legend',
-      name: 'Legendarny Gelek',
-      emoji: '🌈',
-      minLevel: 25,
-      color: '#fb7185',
-      activeSkill: {
-        id: 'legend-overdrive',
-        name: 'Pryzmatyczny Overdrive',
-        emoji: '🌟',
-        description: 'XP x2 + regen + osłona głodu przez 60s.',
-        cooldownMs: 200 * 1000,
-        effectKeys: [
-          { key: 'xp_boost', durationMs: 60 * 1000 },
-          { key: 'regen_boost', durationMs: 60 * 1000 },
-          { key: 'slow_hunger', durationMs: 60 * 1000 },
-        ],
-      },
-      bonuses: {
-        hpMax: 36,
-        regenMultiplier: 1.32,
-        foodXpMultiplier: 1.24,
-        hungerDrainMultiplier: 0.78,
-      },
-    },
+    ...(runtime.EVOLUTION_LIBRARY.neutral || []),
+    ...(runtime.EVOLUTION_LIBRARY.neon || []),
+    ...(runtime.EVOLUTION_LIBRARY.toxic || []),
+    ...(runtime.EVOLUTION_LIBRARY.plasma || []),
   ];
 
   runtime.ids = {
@@ -355,13 +417,38 @@
 
   runtime.clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-  runtime.getEvolutionForLevel = function getEvolutionForLevel(level) {
-    const forms = Array.isArray(runtime.EVOLUTION_FORMS) ? runtime.EVOLUTION_FORMS : [];
-    const targetLevel = Math.max(1, Math.floor(Number(level) || 1));
-    let selected = forms[0] || null;
+  runtime.normalizeFactionId = function normalizeFactionId(value) {
+    const key = String(value || '').toLowerCase();
+    if (key === 'neon' || key === 'toxic' || key === 'plasma') return key;
+    return 'neutral';
+  };
 
-    for (let index = 0; index < forms.length; index += 1) {
-      const form = forms[index];
+  runtime.getPlayerFactionId = function getPlayerFactionId() {
+    const fromState = runtime.state && runtime.state.profileFaction
+      ? runtime.normalizeFactionId(runtime.state.profileFaction)
+      : 'neutral';
+    if (fromState !== 'neutral') return fromState;
+
+    const fromMultiplayer = runtime.multiplayer && runtime.multiplayer.playerFaction
+      ? runtime.normalizeFactionId(runtime.multiplayer.playerFaction)
+      : 'neutral';
+    if (fromMultiplayer !== 'neutral') return fromMultiplayer;
+
+    return 'neutral';
+  };
+
+  runtime.getEvolutionForLevel = function getEvolutionForLevel(level, factionId) {
+    const targetLevel = Math.max(1, Math.floor(Number(level) || 1));
+    if (targetLevel < 10) {
+      return (runtime.EVOLUTION_LIBRARY.neutral && runtime.EVOLUTION_LIBRARY.neutral[0]) || null;
+    }
+
+    const normalizedFaction = runtime.normalizeFactionId(factionId || runtime.getPlayerFactionId());
+    const pool = runtime.EVOLUTION_LIBRARY[normalizedFaction] || runtime.EVOLUTION_LIBRARY.neutral || [];
+    let selected = pool[0] || (runtime.EVOLUTION_LIBRARY.neutral && runtime.EVOLUTION_LIBRARY.neutral[0]) || null;
+
+    for (let index = 0; index < pool.length; index += 1) {
+      const form = pool[index];
       if (!form) continue;
       const minLevel = Math.max(1, Math.floor(Number(form.minLevel) || 1));
       if (targetLevel >= minLevel) selected = form;
@@ -370,20 +457,21 @@
     return selected || {
       id: 'jelly-seed',
       name: 'Żelkowy Pąk',
-      emoji: '🟢',
       minLevel: 1,
       color: '#A8EB12',
+      faction: 'neutral',
       bonuses: { hpMax: 0, regenMultiplier: 1, foodXpMultiplier: 1, hungerDrainMultiplier: 1 },
     };
   };
 
   runtime.getCurrentEvolution = function getCurrentEvolution() {
     const level = runtime.state ? runtime.state.level : 1;
-    return runtime.getEvolutionForLevel(level);
+    const faction = runtime.getPlayerFactionId ? runtime.getPlayerFactionId() : 'neutral';
+    return runtime.getEvolutionForLevel(level, faction);
   };
 
-  runtime.getEvolutionBonuses = function getEvolutionBonuses(level) {
-    const evolution = runtime.getEvolutionForLevel(level);
+  runtime.getEvolutionBonuses = function getEvolutionBonuses(level, factionId) {
+    const evolution = runtime.getEvolutionForLevel(level, factionId);
     const source = evolution && evolution.bonuses && typeof evolution.bonuses === 'object'
       ? evolution.bonuses
       : {};
@@ -395,31 +483,35 @@
     };
   };
 
-  runtime.getEffectiveHpMaxForLevel = function getEffectiveHpMaxForLevel(level) {
-    const bonuses = runtime.getEvolutionBonuses(level);
+  runtime.getEffectiveHpMaxForLevel = function getEffectiveHpMaxForLevel(level, factionId) {
+    const bonuses = runtime.getEvolutionBonuses(level, factionId);
     return Math.max(1, Math.round((Number(runtime.CONFIG.HP_MAX) || 100) + bonuses.hpMax));
   };
 
   runtime.getEffectiveHpMax = function getEffectiveHpMax() {
     const level = runtime.state ? runtime.state.level : 1;
-    return runtime.getEffectiveHpMaxForLevel(level);
+    const faction = runtime.state ? runtime.state.profileFaction : undefined;
+    return runtime.getEffectiveHpMaxForLevel(level, faction);
   };
 
   runtime.getEffectiveHpRegenAmount = function getEffectiveHpRegenAmount() {
     const level = runtime.state ? runtime.state.level : 1;
-    const bonuses = runtime.getEvolutionBonuses(level);
+    const faction = runtime.state ? runtime.state.profileFaction : undefined;
+    const bonuses = runtime.getEvolutionBonuses(level, faction);
     return Math.max(0.1, (Number(runtime.CONFIG.HP_REGEN_AMOUNT) || 0) * bonuses.regenMultiplier);
   };
 
   runtime.getEffectiveFoodXp = function getEffectiveFoodXp(baseXp) {
     const level = runtime.state ? runtime.state.level : 1;
-    const bonuses = runtime.getEvolutionBonuses(level);
+    const faction = runtime.state ? runtime.state.profileFaction : undefined;
+    const bonuses = runtime.getEvolutionBonuses(level, faction);
     return Math.max(0, Math.round((Number(baseXp) || 0) * bonuses.foodXpMultiplier));
   };
 
   runtime.getEffectiveHungerDrainRate = function getEffectiveHungerDrainRate() {
     const level = runtime.state ? runtime.state.level : 1;
-    const bonuses = runtime.getEvolutionBonuses(level);
+    const faction = runtime.state ? runtime.state.profileFaction : undefined;
+    const bonuses = runtime.getEvolutionBonuses(level, faction);
     return Math.max(0, (Number(runtime.CONFIG.HUNGER_DRAIN_RATE) || 0) * bonuses.hungerDrainMultiplier);
   };
 

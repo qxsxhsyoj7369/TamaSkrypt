@@ -28,7 +28,7 @@
       R.showLevelUp();
       const nextEvolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
       if (prevEvolution && nextEvolution && prevEvolution.id !== nextEvolution.id && R.showMessage) {
-        R.showMessage(`✨ Ewolucja! ${nextEvolution.emoji || '🧬'} ${nextEvolution.name}`, 3600);
+        R.showMessage(`✨ Ewolucja! ${nextEvolution.name}`, 3600);
       }
     }
   };
@@ -375,9 +375,14 @@
   R.initGame = function initGame() {
     R.bindUIEvents();
     if (R.multiplayer && typeof R.multiplayer.init === 'function') {
-      R.multiplayer.init().catch((error) => {
+      R.multiplayer.init().then(() => {
+        if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
+        if (R.updateUI) R.updateUI();
+      }).catch((error) => {
         console.warn('[Gelek] Multiplayer init failed:', error && error.message ? error.message : String(error));
       });
+    } else {
+      if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
     }
     R.updateUI();
     if (R.fetchLeaderboard) {

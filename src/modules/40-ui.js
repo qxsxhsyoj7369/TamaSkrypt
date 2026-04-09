@@ -60,12 +60,33 @@
     const bonuses = R.getEvolutionBonuses && R.state ? R.getEvolutionBonuses(R.state.level) : null;
     if (!evolution || !bonuses) return '<span>Forma: podstawowa</span>';
 
+    const factionId = (R.normalizeFactionId && R.state)
+      ? R.normalizeFactionId(R.state.profileFaction)
+      : String((R.state && R.state.profileFaction) || 'neutral').toLowerCase();
+    const accentMap = {
+      neon: '#ff00ff',
+      toxic: '#00ff00',
+      plasma: '#00ffff',
+      neutral: 'rgba(255,255,255,.5)',
+    };
+
     const hpBonus = Math.round(bonuses.hpMax || 0);
+    const regenBonusPct = Math.round(((bonuses.regenMultiplier || 1) - 1) * 100);
     const foodBonusPct = Math.round(((bonuses.foodXpMultiplier || 1) - 1) * 100);
     const drainReductionPct = Math.round((1 - (bonuses.hungerDrainMultiplier || 1)) * 100);
+
+    const perkParts = [];
+    if (hpBonus > 0) perkParts.push(`+${hpBonus} HP`);
+    if (regenBonusPct > 0) perkParts.push(`+${regenBonusPct}% Regen`);
+    if (foodBonusPct > 0) perkParts.push(`+${foodBonusPct}% XP jedzenia`);
+    if (drainReductionPct > 0) perkParts.push(`-${drainReductionPct}% głodu`);
+
+    const hasPerks = perkParts.length > 0;
+    const accentColor = accentMap[factionId] || accentMap.neutral;
+
     return `
-      <div class="__ts_evo_card__">
-        <span class="__ts_evo_icon__" aria-hidden="true">
+      <div class="__ts_class_badge__" style="--ts-class-accent:${accentColor}">
+        <span class="__ts_class_icon__" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 4C11 6 13 10 17 12C13 14 11 18 7 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             <path d="M17 4C13 6 11 10 7 12C11 14 13 18 17 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -73,8 +94,12 @@
             <circle cx="15.8" cy="16" r="1.25" fill="currentColor"/>
           </svg>
         </span>
-        <span class="__ts_evo_badge__">${evolution.name}</span>
-        <span class="__ts_evo_meta__">+${hpBonus} HP • +${foodBonusPct}% XP z jedzenia • -${drainReductionPct}% głodu</span>
+        <div class="__ts_class_text__">
+          <span class="__ts_class_name__">Klasa: ${evolution.name}</span>
+          ${hasPerks
+            ? `<span class="__ts_class_perks__">${perkParts.join(' • ')}</span>`
+            : ''}
+        </div>
       </div>
     `;
   };
@@ -858,18 +883,19 @@
       #__ts_territory_status__.__ts_status_enemy__ { color: oklch(83% 0.13 24); }
       #__ts_territory_actions__ { display: flex; justify-content: flex-end; }
       #__ts_territory_action_btn__ { min-width: 94px; }
-      .__ts_evo_card__ {
+      .__ts_class_badge__ {
         display: flex;
         align-items: center;
-        gap: 7px;
-        padding: 5px 8px;
+        gap: 8px;
+        padding: 6px 9px;
         border-radius: 12px;
-        background: linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
-        border: 1px solid rgba(255,255,255,.2);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 18px rgba(10,10,22,.25);
-        backdrop-filter: blur(10px) saturate(1.15);
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255,255,255,.16);
+        border-left: 2px solid var(--ts-class-accent, rgba(255,255,255,.52));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 8px 18px rgba(0,0,0,.28);
+        backdrop-filter: blur(10px) saturate(1.12);
       }
-      .__ts_evo_icon__ {
+      .__ts_class_icon__ {
         width: 16px;
         height: 16px;
         color: rgba(255,255,255,.95);
@@ -879,7 +905,27 @@
         filter: drop-shadow(0 0 6px rgba(255,255,255,.48));
         flex-shrink: 0;
       }
-      .__ts_evo_icon__ svg { width: 100%; height: 100%; }
+      .__ts_class_icon__ svg { width: 100%; height: 100%; }
+      .__ts_class_text__ {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .__ts_class_name__ {
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1.2;
+        color: rgba(255,255,255,.96);
+      }
+      .__ts_class_perks__ {
+        font-size: 9px;
+        color: rgba(255,255,255,.72);
+        line-height: 1.2;
+      }
+      .__ts_class_perks_muted__ {
+        color: rgba(255,255,255,.58);
+      }
       .__ts_evo_badge__,
       .__ts_evo_badge {
         display:inline-flex;

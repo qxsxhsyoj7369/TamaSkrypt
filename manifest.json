@@ -1,7 +1,7 @@
 {
-  "version": "3.28.1",
+  "version": "3.28.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix UX+MMO: karta ewolucji bez emoji (SVG), neonowe kropki frakcji w rankingu oraz uszczelniona logika przypisania Władcy Domeny i payloadu podboju.",
+  "changelog": "Audyt Ewolucji: klasy zależne od poziomu i frakcji, realne bonusy aktywne w gameplayu, Class Badge bez zer na niskim poziomie oraz bezpieczne spięcie ze stanem profilu.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.12.0",
-      "hash": "dc099db24942c30b65e47cf01512a64d5985d2855c292b54a3e08788ac726a1d",
+      "version": "3.28.2",
+      "hash": "4571cea135020208895e63f3271aa7946cc0a673b401b08a5e65393a63bd808f",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.12.0",
-      "hash": "b340e9af3256413a156ad5a3e072787fdb6b9008bed9c4e284b8c0b8bc649100",
+      "version": "3.28.2",
+      "hash": "ec03ef80d3601c27208218270519f31a52ffe9ddc2be0ccb2faffaf0a082cef5",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.28.2",
-      "hash": "eed199e9209882b74d1d1177f41db5af84ca866ac2c3c8029330f43e973e9b12",
+      "version": "3.28.3",
+      "hash": "6c3aba4dc0723d61afe501250077f307e3d4e2bdd4485b966a565d606005459f",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.27.4",
-      "hash": "7430ce9741330e996e99b80636278706ef1b412313de375c10b72ca4efd5463f",
+      "version": "3.28.2",
+      "hash": "d9ec023fc2f5e4408e0447d6f7d740e7211ccdbfb58d2cbcbf7ecc6c84e0e9c5",
       "execute": "raw",
       "required": true
     },
