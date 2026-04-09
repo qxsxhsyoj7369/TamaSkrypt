@@ -336,25 +336,138 @@
         if (R.ui && R.ui.openSeamlessModal) {
           R.ui.openSeamlessModal(modalTitle, modalContent);
         }
+        return;
+      }
+
+      // Territory trigger
+      if (target.closest('#__ts_territory_trigger')) {
+        event.preventDefault();
+        event.stopPropagation();
+        const hostname = (window.location && window.location.hostname) ? window.location.hostname : 'unknown';
+        const kingEl = R.getElById('__ts_territory_king__');
+        const statusEl = R.getElById('__ts_territory_status__');
+        const actionsEl = R.getElById('__ts_territory_actions__');
+        const king = kingEl ? kingEl.textContent : 'Władca: —';
+        const status = statusEl ? statusEl.textContent : 'Status: skanowanie...';
+        const actionBtn = actionsEl ? actionsEl.querySelector('#__ts_territory_action_btn__') : null;
+        const claimBtn = actionsEl ? actionsEl.querySelector('#__ts_btn_claim_neutral__') : null;
+        const actionBtnHTML = actionBtn
+          ? `<button class="__ts_forum_btn__" id="__ts_territory_action_btn__" data-action="${actionBtn.getAttribute('data-action') || ''}" ${actionBtn.disabled ? 'disabled' : ''}>${actionBtn.textContent}</button>`
+          : '';
+        const claimBtnHTML = claimBtn && claimBtn.style.display !== 'none'
+          ? `<button class="__ts_forum_btn__" id="__ts_btn_claim_neutral__">🌐 Zajmij (Darmowe)</button>`
+          : '';
+        const territoryContent = `
+          <div class="__ts_card__" style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:11px;opacity:0.7;">🌐 ${hostname}</div>
+            <div id="__ts_territory_king__">${king}</div>
+            <div id="__ts_territory_status__">${status}</div>
+            <div id="__ts_territory_actions__" style="display:flex;gap:6px;flex-wrap:wrap;">${actionBtnHTML}${claimBtnHTML}</div>
+          </div>
+        `;
+        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('🌍 Terytorium', territoryContent);
+        return;
+      }
+
+      // Skill trigger
+      if (target.closest('#__ts_skill_trigger')) {
+        event.preventDefault();
+        event.stopPropagation();
+        const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
+        const cooldownRemaining = skill && R.getActiveSkillCooldownRemaining ? R.getActiveSkillCooldownRemaining(skill) : 0;
+        const effectRemaining = skill && R.getActiveSkillEffectRemaining ? R.getActiveSkillEffectRemaining(skill) : 0;
+        const alive = R.state ? R.state.alive !== false : true;
+        const canUse = skill && alive && cooldownRemaining <= 0;
+        const icon = skill ? (skill.emoji || '✨') : '✨';
+        const name = skill ? skill.name : 'Umiejętność formy';
+        const desc = skill ? (skill.description || 'Aktywna umiejętność formy.') : 'Brak aktywnej umiejętności dla tej formy.';
+        const cooldownText = cooldownRemaining > 0 ? `⏳ Cooldown: ${R.formatTime(cooldownRemaining)}` : '';
+        const effectText = effectRemaining > 0 ? `✅ Efekt aktywny: ${R.formatTime(effectRemaining)}` : '';
+        const skillContent = `
+          <div class="__ts_card__" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:20px;">${icon}</span>
+              <div>
+                <div style="font-weight:800;font-size:13px;">${name}</div>
+                <div style="font-size:10px;opacity:0.7;">${desc}</div>
+              </div>
+            </div>
+            ${cooldownText ? `<div style="font-size:10px;color:#a651ff;">${cooldownText}</div>` : ''}
+            ${effectText ? `<div style="font-size:10px;color:#37e9ff;">${effectText}</div>` : ''}
+            ${canUse ? `<button class="__ts_forum_btn__" id="__ts_skill_use_btn_modal__">Użyj umiejętności</button>` : ''}
+          </div>
+        `;
+        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('✨ Umiejętność', skillContent);
+        // Wire the use button after modal DOM is ready
+        if (canUse) {
+          setTimeout(() => {
+            const useBtn = R.getElById('__ts_skill_use_btn_modal__');
+            if (useBtn && R.useActiveSkill) {
+              useBtn.addEventListener('click', () => {
+                R.useActiveSkill();
+                const overlayEl = R.getElById('__ts_forum_overlay__');
+                if (overlayEl) overlayEl.remove();
+                const bodyEl = R.getElById('__ts_body__');
+                if (bodyEl) { bodyEl.style.opacity = ''; bodyEl.style.filter = ''; }
+              });
+            }
+          }, 50);
+        }
+        return;
+      }
+
+      // Missions trigger
+      if (target.closest('#__ts_missions_trigger')) {
+        event.preventDefault();
+        event.stopPropagation();
+        const goalsHTML = R.renderHourlyGoalRows ? R.renderHourlyGoalRows() : '<div>Brak misji.</div>';
+        const questRewards = R.getHourlyQuestRewards && R.state ? R.getHourlyQuestRewards(R.state.dailyQuest) : { coins: 0, xp: 0 };
+        const canClaimDaily = R.isDailyQuestCompleted && R.state ? (R.isDailyQuestCompleted() && !R.state.dailyQuest.claimed) : false;
+        const claimedAlready = R.state && R.state.dailyQuest ? R.state.dailyQuest.claimed : false;
+        const missionsContent = `
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${goalsHTML}
+            <div style="font-size:10px;color:#6b5a8f;margin:4px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
+            <button class="__ts_forum_btn__" id="__ts_claim_daily_modal__" ${canClaimDaily ? '' : 'disabled'}>${claimedAlready ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+          </div>
+        `;
+        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('⏱️ Misje Godzinowe', missionsContent);
+        if (canClaimDaily) {
+          setTimeout(() => {
+            const claimBtn = R.getElById('__ts_claim_daily_modal__');
+            if (claimBtn && R.claimDailyReward) {
+              claimBtn.addEventListener('click', () => {
+                R.claimDailyReward();
+                const overlayEl = R.getElById('__ts_forum_overlay__');
+                if (overlayEl) overlayEl.remove();
+                const bodyEl = R.getElById('__ts_body__');
+                if (bodyEl) { bodyEl.style.opacity = ''; bodyEl.style.filter = ''; }
+              });
+            }
+          }, 50);
+        }
+        return;
       }
     }, true);
   };
 
   R.renderActiveSkillCard = function renderActiveSkillCard() {
+    const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
+    const icon = skill ? (skill.emoji || '✨') : '✨';
+    const name = skill ? skill.name : 'Umiejętność formy';
+    const cooldownRemaining = skill && R.getActiveSkillCooldownRemaining ? R.getActiveSkillCooldownRemaining(skill) : 0;
+    const isReady = skill && cooldownRemaining <= 0;
+    const metaText = isReady ? 'Gotowe ▶' : (skill ? '⏳ Cooldown' : 'Brak umiejętności');
+    const readyClass = isReady ? ' __ts_skill_banner_ready__' : '';
     return `
       <div id="__ts_skill_card__" class="__ts_skill_card__">
-        <div class="__ts_smart_banner__" style="margin-bottom:6px; cursor:default;">
+        <div class="__ts_smart_banner__${readyClass}" id="__ts_skill_trigger" style="cursor:pointer;">
           <div class="__ts_smart_banner_content__">
-            <span class="__ts_skill_icon__" id="__ts_skill_title_icon__">✨</span>
-            <span id="__ts_skill_title__" class="__ts_skill_title__" style="margin:0;font-size:11px;">Umiejętność formy</span>
+            <span id="__ts_skill_title_icon__">${icon}</span>
+            <span id="__ts_skill_title__" style="margin-left:6px;font-size:11px;">${name}</span>
           </div>
-          <div class="__ts_smart_banner_right__" id="__ts_skill_meta__">—</div>
+          <div class="__ts_smart_banner_right__" id="__ts_skill_meta__">${metaText}</div>
         </div>
-        <div id="__ts_skill_desc__" class="__ts_skill_desc__">Brak aktywnej umiejętności.</div>
-        <button id="__ts_active_skill_btn__" type="button" class="__ts_btn__ __ts_skill_btn__" disabled>
-          <span class="__ts_skill_btn_icon__">✨</span>
-          <span class="__ts_skill_btn_label__">Brak</span>
-        </button>
       </div>
     `;
   };
@@ -367,25 +480,19 @@
 
   R.refreshActiveSkillUI = function refreshActiveSkillUI() {
     const card = R.getElById('__ts_skill_card__');
+    const triggerEl = R.getElById('__ts_skill_trigger');
     const titleEl = R.getElById('__ts_skill_title__');
     const iconEl = R.getElById('__ts_skill_title_icon__');
-    const descEl = R.getElById('__ts_skill_desc__');
     const metaEl = R.getElById('__ts_skill_meta__');
-    const buttonEl = R.getElById('__ts_active_skill_btn__');
-    if (!card || !titleEl || !descEl || !metaEl || !buttonEl) return;
+    if (!card || !titleEl || !metaEl) return;
 
     const skill = R.getCurrentActiveSkill ? R.getCurrentActiveSkill() : null;
     if (!skill) {
       if (iconEl) iconEl.textContent = '✨';
       titleEl.textContent = 'Umiejętność formy';
-      descEl.textContent = 'Brak aktywnej umiejętności dla tej formy.';
-      metaEl.textContent = 'Odblokuj wyższą formę Gelka.';
-      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '✨', 'Brak');
-      buttonEl.disabled = true;
+      metaEl.textContent = 'Brak umiejętności';
+      if (triggerEl) triggerEl.classList.remove('__ts_skill_banner_ready__');
       card.classList.remove('__ts_skill_spark__');
-      buttonEl.classList.remove('__ts_skill_cooling__');
-      buttonEl.style.removeProperty('--ts-energy-ratio');
-      buttonEl.classList.remove('__ts_skill_ready__');
       return;
     }
 
@@ -393,54 +500,33 @@
       if (iconEl) { iconEl.className = '__ts_neon_bolt__'; iconEl.textContent = '⚡'; }
       titleEl.textContent = 'Iskrzący Zgryz';
     } else {
-      if (iconEl) { iconEl.className = '__ts_skill_icon__'; iconEl.textContent = skill.emoji || '✨'; }
+      if (iconEl) { iconEl.className = ''; iconEl.textContent = skill.emoji || '✨'; }
       titleEl.textContent = skill.name;
     }
-    descEl.textContent = skill.description || 'Aktywna umiejętność formy.';
     card.classList.toggle('__ts_skill_spark__', skill.id === 'spark-xp');
 
     const cooldownRemaining = R.getActiveSkillCooldownRemaining ? R.getActiveSkillCooldownRemaining(skill) : 0;
     const effectRemaining = R.getActiveSkillEffectRemaining ? R.getActiveSkillEffectRemaining(skill) : 0;
     const alive = R.state ? R.state.alive !== false : true;
-    const cooldownTotal = Math.max(1, Number(skill.cooldownMs) || 1);
-    const energyRatio = cooldownRemaining > 0
-      ? (1 - (cooldownRemaining / cooldownTotal))
-      : 1;
-    const ratio = R.clamp(energyRatio, 0, 1);
-    const energyHue = Math.round(282 + ((48 - 282) * ratio));
-    const energyHue2 = Math.max(36, energyHue - 14);
-    buttonEl.style.setProperty('--ts-energy-ratio', String(ratio));
-    buttonEl.style.setProperty('--ts-energy-start', `hsl(${energyHue} 86% 60%)`);
-    buttonEl.style.setProperty('--ts-energy-end', `hsl(${energyHue2} 92% 62%)`);
-    buttonEl.style.setProperty('--ts-energy-glow', `hsl(${energyHue} 90% 62%)`);
 
     if (!alive) {
-      metaEl.textContent = 'Umiejętność niedostępna gdy Gelek nie żyje.';
-      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '💀', 'Niedostępna');
-      buttonEl.disabled = true;
-      buttonEl.classList.remove('__ts_skill_cooling__');
-      buttonEl.classList.remove('__ts_skill_ready__');
+      metaEl.textContent = '💀 Niedostępna';
+      if (triggerEl) triggerEl.classList.remove('__ts_skill_banner_ready__');
       return;
     }
 
     if (cooldownRemaining > 0) {
       metaEl.textContent = effectRemaining > 0
-        ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Cooldown: ${R.formatTime(cooldownRemaining)}`
-        : `Cooldown: ${R.formatTime(cooldownRemaining)}`;
-      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '⏳', R.formatTime(cooldownRemaining));
-      buttonEl.disabled = true;
-      buttonEl.classList.add('__ts_skill_cooling__');
-      buttonEl.classList.remove('__ts_skill_ready__');
+        ? `Efekt: ${R.formatTime(effectRemaining)} • ⏳ ${R.formatTime(cooldownRemaining)}`
+        : `⏳ ${R.formatTime(cooldownRemaining)}`;
+      if (triggerEl) triggerEl.classList.remove('__ts_skill_banner_ready__');
       return;
     }
 
     metaEl.textContent = effectRemaining > 0
-      ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Umiejętność gotowa`
-      : 'Gotowe do użycia';
-    if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, skill.emoji || '✨', skill.id === 'seed-heal' ? 'Aktywuj regenerację' : 'Użyj umiejętności');
-    buttonEl.disabled = false;
-    buttonEl.classList.remove('__ts_skill_cooling__');
-    buttonEl.classList.add('__ts_skill_ready__');
+      ? `Efekt aktywny • Gotowe ▶`
+      : 'Gotowe ▶';
+    if (triggerEl) triggerEl.classList.add('__ts_skill_banner_ready__');
   };
 
   R.renderHourlyGoalRows = function renderHourlyGoalRows() {
@@ -2100,6 +2186,15 @@
       }
       .__ts_badge_lvl__ { color: #37e9ff; border-color: rgba(55, 233, 255, 0.3); }
       .__ts_badge_online__ { color: #a651ff; border-color: rgba(166, 81, 255, 0.3); }
+      .__ts_skill_banner_ready__ {
+        border-color: rgba(55, 233, 255, 0.5) !important;
+        box-shadow: 0 0 12px rgba(55, 233, 255, 0.25), inset 0 0 8px rgba(55, 233, 255, 0.08) !important;
+        animation: __ts_skill_pulse__ 1.8s ease-in-out infinite;
+      }
+      @keyframes __ts_skill_pulse__ {
+        0%, 100% { box-shadow: 0 0 10px rgba(55, 233, 255, 0.2), inset 0 0 6px rgba(55, 233, 255, 0.06); }
+        50% { box-shadow: 0 0 20px rgba(55, 233, 255, 0.45), inset 0 0 12px rgba(55, 233, 255, 0.14); }
+      }
     `;
     styleHost.appendChild(style);
   };
@@ -2147,32 +2242,24 @@
           <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
 
           <div id="__ts_territory_card__">
-            <div id="__ts_territory_toggle__" class="__ts_smart_banner__" style="margin-bottom:0;">
+            <div class="__ts_smart_banner__" id="__ts_territory_trigger" style="cursor:pointer;">
               <div class="__ts_smart_banner_content__">🌍 Terytorium</div>
               <div class="__ts_smart_banner_right__" id="__ts_territory_domain__">${window.location && window.location.hostname ? window.location.hostname : 'unknown'}</div>
-              <span id="__ts_territory_arrow__" style="margin-left:6px;opacity:0.5;transition:transform .25s;font-size:9px;">▼</span>
             </div>
-            <div id="__ts_territory_content__">
-              <div id="__ts_territory_king__">Władca: —</div>
-              <div id="__ts_territory_status__">Status: skanowanie...</div>
-              <div id="__ts_territory_actions__">
-                <button id="__ts_territory_action_btn__" class="__ts_btn__" data-action="" disabled>Brak akcji</button>
-                <button id="__ts_btn_claim_neutral__" class="__ts_btn__" style="display:none">🌐 Zajmij (Darmowe)</button>
-              </div>
+            <div id="__ts_territory_king__" style="display:none">Władca: —</div>
+            <div id="__ts_territory_status__" style="display:none">Status: skanowanie...</div>
+            <div id="__ts_territory_actions__" style="display:none">
+              <button id="__ts_territory_action_btn__" class="__ts_btn__" data-action="" disabled>Brak akcji</button>
+              <button id="__ts_btn_claim_neutral__" class="__ts_btn__" style="display:none">🌐 Zajmij (Darmowe)</button>
             </div>
           </div>
           <div id="__ts_evolution_line__">${R.renderEvolutionSummary ? R.renderEvolutionSummary() : ''}</div>
           ${R.renderActiveSkillCard ? R.renderActiveSkillCard() : ''}
           <div id="__ts_diag__"><span id="__ts_diag_badge__" title="source: ${diagnostics.source}"><span id="__ts_diag_mode__">${diagnostics.mode}</span><span id="__ts_diag_version__">v${diagnostics.manifestVersion}</span></span></div>
-          <div id="__ts_hourly_box__" class="__ts_card__">
-            <div id="__ts_missions_toggle__" class="__ts_smart_banner__" style="cursor:pointer; margin-bottom:0;">
-              <div class="__ts_smart_banner_content__">🕐 Misje godzinowe</div>
-              <div class="__ts_smart_banner_right__"><span id="__ts_missions_arrow__" style="transition: transform 0.3s;">▼</span></div>
-            </div>
-            <div id="__ts_missions_content__" style="display:none; margin-top:8px;">
-              ${R.renderHourlyGoalRows()}
-              <div id="__ts_hourly_reward_total__" style="font-size:10px;color:#6b5a8f;margin:4px 0 6px 0;text-align:center;">Suma nagrody: +${questRewards.coins} 🪙, +${questRewards.xp} XP</div>
-              <button id="__ts_claim_daily__" class="__ts_btn__" ${canClaimDaily ? '' : 'disabled'}>${state.dailyQuest.claimed ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
+          <div id="__ts_hourly_box__">
+            <div class="__ts_smart_banner__" id="__ts_missions_trigger" style="cursor:pointer;">
+              <div class="__ts_smart_banner_content__">⏱️ Misje Godzinowe</div>
+              <div class="__ts_smart_banner_right__">Sprawdź &gt;&gt;</div>
             </div>
           </div>
           <div class="__ts_nav_grid__">

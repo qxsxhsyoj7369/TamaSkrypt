@@ -1,7 +1,7 @@
 {
-  "version": "3.34.2",
+  "version": "3.34.3",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.2: UX Cleanup — usunięto stary pasek Poziom/Monety/Online, dodano eleganckie pigułki LVL+ONLINE pod levitującym Gelkiem.",
+  "changelog": "Release 3.34.3: UX KROK 2 — Terytorium, Umiejętność i Misje przeniesione do Seamless Modals. Główne menu = czyste Smart Bannery.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.2",
-      "hash": "b93a738c171c6062daf62bf2ce7adfcc67a5b05639b1fd25fa4daeff8f5c15fa",
+      "version": "3.34.3",
+      "hash": "c54e30ae5a354e2ec1638747455bbb34069f9f66b0fba1e4b9866c9eb2a3560f",
       "execute": "raw",
       "required": true
     },
