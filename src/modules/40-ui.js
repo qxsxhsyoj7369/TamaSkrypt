@@ -63,7 +63,20 @@
     const hpBonus = Math.round(bonuses.hpMax || 0);
     const foodBonusPct = Math.round(((bonuses.foodXpMultiplier || 1) - 1) * 100);
     const drainReductionPct = Math.round((1 - (bonuses.hungerDrainMultiplier || 1)) * 100);
-    return `<span class="__ts_evo_badge__">${evolution.emoji || '🧬'} ${evolution.name}</span><span class="__ts_evo_meta__">+${hpBonus} HP • +${foodBonusPct}% XP z jedzenia • -${drainReductionPct}% głodu</span>`;
+    return `
+      <div class="__ts_evo_card__">
+        <span class="__ts_evo_icon__" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 4C11 6 13 10 17 12C13 14 11 18 7 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M17 4C13 6 11 10 7 12C11 14 13 18 17 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="8.2" cy="8" r="1.25" fill="currentColor"/>
+            <circle cx="15.8" cy="16" r="1.25" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="__ts_evo_badge__">${evolution.name}</span>
+        <span class="__ts_evo_meta__">+${hpBonus} HP • +${foodBonusPct}% XP z jedzenia • -${drainReductionPct}% głodu</span>
+      </div>
+    `;
   };
 
   R.renderActiveSkillCard = function renderActiveSkillCard() {
@@ -845,24 +858,68 @@
       #__ts_territory_status__.__ts_status_enemy__ { color: oklch(83% 0.13 24); }
       #__ts_territory_actions__ { display: flex; justify-content: flex-end; }
       #__ts_territory_action_btn__ { min-width: 94px; }
+      .__ts_evo_card__ {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 8px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
+        border: 1px solid rgba(255,255,255,.2);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 18px rgba(10,10,22,.25);
+        backdrop-filter: blur(10px) saturate(1.15);
+      }
+      .__ts_evo_icon__ {
+        width: 16px;
+        height: 16px;
+        color: rgba(255,255,255,.95);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 0 6px rgba(255,255,255,.48));
+        flex-shrink: 0;
+      }
+      .__ts_evo_icon__ svg { width: 100%; height: 100%; }
       .__ts_evo_badge__,
       .__ts_evo_badge {
         display:inline-flex;
         align-items:center;
         gap:4px;
-        padding:3px 8px;
-        border-radius:999px;
+        padding:0;
+        border-radius:0;
         font-size:9px;
-        font-weight:700;
-        background: linear-gradient(135deg, oklch(65% 0.25 310 / 0.35), oklch(73% 0.18 292 / 0.25));
-        border: 1px solid oklch(100% 0 0 / 0.24);
-        color: oklch(96% 0.01 300);
+        font-weight:800;
+        background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(215,198,255,.9));
+        -webkit-background-clip:text;
+        background-clip:text;
+        -webkit-text-fill-color:transparent;
+        color: transparent;
+        letter-spacing: .01em;
       }
       .__ts_evo_meta__,
       .__ts_evo_meta {
         font-size:9px;
-        color: var(--ts-text-muted);
+        color: rgba(255,255,255,.6);
         text-align:right;
+      }
+      .__ts_faction_dot__ {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+      .__ts_faction_dot_neon__ {
+        background: #ff00ff;
+        box-shadow: 0 0 7px #ff00ff, 0 0 14px rgba(255, 0, 255, .75);
+      }
+      .__ts_faction_dot_toxic__ {
+        background: #00ff00;
+        box-shadow: 0 0 7px #00ff00, 0 0 14px rgba(0, 255, 0, .75);
+      }
+      .__ts_faction_dot_plasma__ {
+        background: #00ffff;
+        box-shadow: 0 0 7px #00ffff, 0 0 14px rgba(0, 255, 255, .75);
       }
 
       .__ts_skill_card__,

@@ -21,6 +21,17 @@
     return (level * 1000) + (xp * 2) + (foodsEaten * 5) + coins;
   }
 
+  function resolveFactionId(value) {
+    const key = String(value || '').toLowerCase();
+    if (key === 'neon' || key === 'toxic' || key === 'plasma') return key;
+    return 'neon';
+  }
+
+  function factionDot(id) {
+    const factionId = resolveFactionId(id);
+    return `<span class="__ts_faction_dot__ __ts_faction_dot_${factionId}__"></span>`;
+  }
+
   R.ranking = R.ranking || {
     scope: 'allTime',
     loading: false,
@@ -254,7 +265,10 @@
       : '<span style="height:100%;width:100%;background:rgba(160,160,160,.45);display:inline-block;"></span>';
 
     const dominanceLegend = hasDominanceData
-      ? dominance.factions.map((entry) => `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.08);font-size:9px;">${escapeHtml(entry.emoji || '⚑')} ${escapeHtml(entry.name || entry.id)} ${Number(entry.percent || 0).toFixed(1)}%</span>`).join('')
+      ? dominance.factions.map((entry) => {
+          const id = resolveFactionId(entry.id || entry.name);
+          return `<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.08);font-size:9px;">${factionDot(id)} ${escapeHtml(entry.name || entry.id)} ${Number(entry.percent || 0).toFixed(1)}%</span>`;
+        }).join('')
       : '<span style="font-size:9px;opacity:.85;">Internet czeka na podbój!</span>';
 
     const factionRows = ['neon', 'toxic', 'plasma'].map((factionId) => {
@@ -268,12 +282,12 @@
             </div>
           `).join('')
         : '<div style="font-size:9px;opacity:.72;">Brak króla</div>';
-      return `<div class="__ts_card__" style="padding:5px 6px;margin-bottom:4px;"><div style="font-size:10px;font-weight:700;margin-bottom:3px;">⚑ ${escapeHtml(title)}</div>${body}</div>`;
+      return `<div class="__ts_card__" style="padding:5px 6px;margin-bottom:4px;"><div style="font-size:10px;font-weight:700;margin-bottom:3px;display:inline-flex;align-items:center;gap:5px;">${factionDot(factionId)} ${escapeHtml(title)}</div>${body}</div>`;
     }).join('');
 
     const header = `
       <div class="__ts_card__" style="padding:6px 7px;margin-bottom:6px;">
-        <div style="font-size:10px;font-weight:700;margin-bottom:4px;">🌐 Pasek Dominacji</div>
+        <div style="font-size:10px;font-weight:700;margin-bottom:4px;">Pasek Dominacji</div>
         <div style="height:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);display:flex;">${dominanceSegments}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">${dominanceLegend}</div>
       </div>

@@ -1,7 +1,7 @@
 {
-  "version": "3.28.0",
+  "version": "3.28.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "UX auth: premium karty wyboru frakcji (Neon/Toxic/Plasma) w rejestracji — przebudowa HTML/CSS bez zmian logiki logowania.",
+  "changelog": "Hotfix UX+MMO: karta ewolucji bez emoji (SVG), neonowe kropki frakcji w rankingu oraz uszczelniona logika przypisania Władcy Domeny i payloadu podboju.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.28.1",
-      "hash": "fbaa6b3602a3b7a845c29c8689ba5868ebe80a15b3655446ca114f46236e9f58",
+      "version": "3.28.2",
+      "hash": "eed199e9209882b74d1d1177f41db5af84ca866ac2c3c8029330f43e973e9b12",
       "execute": "raw",
       "required": true
     },
@@ -97,16 +97,16 @@
     {
       "name": "ranking",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/85-ranking.js",
-      "version": "3.27.3",
-      "hash": "dd081959cfbe96721052bd9036229345e1269c675d41c95a2bbbe44556b3739b",
+      "version": "3.28.1",
+      "hash": "a5ccfb55d839fefcb10c93e6ee40a07a8ee3b649db3031fdd0439730acfdb2df",
       "execute": "raw",
       "required": true
     },
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.27.9",
-      "hash": "ec310767c0e99e25699dfabbd88e1a30902f9debed5f1ba0f2d88e22f3e5ca96",
+      "version": "3.28.1",
+      "hash": "7c3c0be61eb49146305bf8fe19da97d29833322b967f492f0d82bc783cab2fdf",
       "execute": "raw",
       "required": true
     },

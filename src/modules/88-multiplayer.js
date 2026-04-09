@@ -333,6 +333,7 @@
   function clearDomainCache(hostname) {
     if (!hostname) return;
     safeSessionStorageRemove(getDomainCacheKey(hostname));
+    safeSessionStorageRemove(`ts_domain_cache_${hostname}`);
   }
 
   function readWarCache() {
@@ -383,6 +384,26 @@
       return getFactionOrDefault('neon');
     }
   };
+
+  async function resolvePlayerFactionId() {
+    const fromState = R.state && R.state.profileFaction ? String(R.state.profileFaction).toLowerCase() : '';
+    if (FACTIONS[fromState]) return fromState;
+
+    const fromRuntime = multiplayer.playerFaction ? String(multiplayer.playerFaction).toLowerCase() : '';
+    if (FACTIONS[fromRuntime]) return fromRuntime;
+
+    try {
+      const profile = await R.firebaseRead(`users/${R.currentUid}/profile`);
+      const fromProfile = profile && profile.faction ? String(profile.faction).toLowerCase() : '';
+      if (FACTIONS[fromProfile]) {
+        multiplayer.playerFaction = fromProfile;
+        if (R.state) R.state.profileFaction = fromProfile;
+        return fromProfile;
+      }
+    } catch (_) {}
+
+    return 'neon';
+  }
 
   multiplayer.hideStash = async function hideStash(itemType, amount) {
     if (!isAuthenticated()) {
@@ -548,10 +569,9 @@
     const hostname = getCurrentDomain();
     if (!hostname) throw new Error('Brak hosta domeny');
 
-    const factionFromState = R.state && R.state.profileFaction ? String(R.state.profileFaction) : '';
-    const playerFaction = (FACTIONS[factionFromState] ? factionFromState : null)
-      || multiplayer.playerFaction
-      || 'neon';
+    const playerFaction = await resolvePlayerFactionId();
+    const kingUid = String(R.currentUid || '');
+    const kingName = String(R.currentUser || kingUid);
     const db = getFirestoreDb();
     let claimed;
     if (db && typeof db.collection === 'function') {
@@ -566,14 +586,15 @@
 
         const payload = {
           hostname,
-          kingUid: String(R.currentUid),
-          kingName: String(R.currentUser || R.currentUid),
+          kingUid,
+          kingName,
           faction: playerFaction,
           defensePoints: 100,
           collectedTax: 0,
+          conquestPoints: 0,
           timeSpent: normalizePositive(current.timeSpent, 0),
           timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
-          conquestByUid: current.conquestByUid && typeof current.conquestByUid === 'object' ? current.conquestByUid : {},
+          conquestByUid: {},
           updatedAt: getServerTimestamp(),
         };
 
@@ -585,14 +606,15 @@
       if (current.kingUid) throw new Error('Domena już ma władcę');
       claimed = {
         hostname,
-        kingUid: String(R.currentUid),
-        kingName: String(R.currentUser || R.currentUid),
+        kingUid,
+        kingName,
         faction: playerFaction,
         defensePoints: 100,
         collectedTax: 0,
+        conquestPoints: 0,
         timeSpent: normalizePositive(current.timeSpent, 0),
         timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
-        conquestByUid: current.conquestByUid && typeof current.conquestByUid === 'object' ? current.conquestByUid : {},
+        conquestByUid: {},
         updatedAt: Date.now(),
       };
       await writeDomainToRtdb(hostname, claimed);
@@ -616,6 +638,7 @@
 
     emitEvent('multiplayer:domain_updated', nextState);
     emitEvent('multiplayer:domain_conquered', nextState);
+    if (typeof R.updateUI === 'function') R.updateUI();
     return nextState;
   };
 
@@ -828,7 +851,7 @@
     const hostname = getCurrentDomain();
     if (!hostname) return null;
 
-    const playerFaction = multiplayer.getPlayerFaction().id;
+    const playerFaction = await resolvePlayerFactionId();
     const result = await db.runTransaction(async (tx) => {
       const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
       const snap = await tx.get(ref);
@@ -851,7 +874,8 @@
         kingUid = currentUid;
         kingName = String(R.currentUser || currentUid);
         faction = playerFaction;
-        defensePoints = Math.max(30, points + 10);
+        defensePoints = 100;
+        Object.keys(conquestByUid).forEach((uid) => { conquestByUid[uid] = 0; });
         conquestByUid[currentUid] = 0;
         captured = true;
       } else if (kingUid !== currentUid) {
@@ -860,7 +884,8 @@
           kingUid = currentUid;
           kingName = String(R.currentUser || currentUid);
           faction = playerFaction;
-          defensePoints = Math.max(28, Math.round(contenderPoints * 0.72));
+          defensePoints = 100;
+          Object.keys(conquestByUid).forEach((uid) => { conquestByUid[uid] = 0; });
           conquestByUid[currentUid] = 0;
           captured = true;
         }
@@ -875,6 +900,7 @@
         faction,
         defensePoints,
         collectedTax: normalizePositive(previous.collectedTax, 0),
+        conquestPoints: captured ? 0 : normalizePositive(previous.conquestPoints, 0),
         timeSpent: normalizePositive(previous.timeSpent, 0),
         timeByUid: previous.timeByUid && typeof previous.timeByUid === 'object' ? previous.timeByUid : {},
         conquestByUid,
@@ -897,7 +923,9 @@
     emitEvent('multiplayer:domain_updated', domainState);
 
     if (result._captured) {
+      clearDomainCache(hostname);
       emitEvent('multiplayer:domain_conquered', domainState);
+      if (typeof R.updateUI === 'function') R.updateUI();
     }
 
     return domainState;
