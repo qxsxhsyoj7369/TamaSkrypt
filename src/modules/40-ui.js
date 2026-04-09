@@ -109,9 +109,18 @@
         <div id="__ts_skill_title__" class="__ts_skill_title__"><span class="__ts_skill_icon__">✨</span>Umiejętność formy</div>
         <div id="__ts_skill_desc__" class="__ts_skill_desc__">Brak aktywnej umiejętności.</div>
         <div id="__ts_skill_meta__" class="__ts_skill_meta__">—</div>
-        <button id="__ts_active_skill_btn__" class="__ts_btn__ __ts_skill_btn__" disabled>Brak</button>
+        <button id="__ts_active_skill_btn__" type="button" class="__ts_btn__ __ts_skill_btn__" disabled>
+          <span class="__ts_skill_btn_icon__">✨</span>
+          <span class="__ts_skill_btn_label__">Brak</span>
+        </button>
       </div>
     `;
+  };
+
+  R.setActiveSkillButtonContent = function setActiveSkillButtonContent(buttonEl, icon, label) {
+    if (!buttonEl) return;
+    buttonEl.innerHTML = `<span class="__ts_skill_btn_icon__">${icon || '✨'}</span><span class="__ts_skill_btn_label__">${label || 'Brak'}</span>`;
+    buttonEl.setAttribute('aria-label', String(label || 'Brak'));
   };
 
   R.refreshActiveSkillUI = function refreshActiveSkillUI() {
@@ -127,7 +136,7 @@
       titleEl.innerHTML = '<span class="__ts_skill_icon__">✨</span>Umiejętność formy';
       descEl.textContent = 'Brak aktywnej umiejętności dla tej formy.';
       metaEl.textContent = 'Odblokuj wyższą formę Gelka.';
-      buttonEl.textContent = 'Brak';
+      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '✨', 'Brak');
       buttonEl.disabled = true;
       card.classList.remove('__ts_skill_spark__');
       buttonEl.classList.remove('__ts_skill_cooling__');
@@ -161,7 +170,7 @@
 
     if (!alive) {
       metaEl.textContent = 'Umiejętność niedostępna gdy Gelek nie żyje.';
-      buttonEl.textContent = '💀 Niedostępna';
+      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '💀', 'Niedostępna');
       buttonEl.disabled = true;
       buttonEl.classList.remove('__ts_skill_cooling__');
       buttonEl.classList.remove('__ts_skill_ready__');
@@ -172,7 +181,7 @@
       metaEl.textContent = effectRemaining > 0
         ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Cooldown: ${R.formatTime(cooldownRemaining)}`
         : `Cooldown: ${R.formatTime(cooldownRemaining)}`;
-      buttonEl.textContent = `⏳ ${R.formatTime(cooldownRemaining)}`;
+      if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, '⏳', R.formatTime(cooldownRemaining));
       buttonEl.disabled = true;
       buttonEl.classList.add('__ts_skill_cooling__');
       buttonEl.classList.remove('__ts_skill_ready__');
@@ -182,7 +191,7 @@
     metaEl.textContent = effectRemaining > 0
       ? `Efekt aktywny: ${R.formatTime(effectRemaining)} • Umiejętność gotowa`
       : 'Gotowe do użycia';
-    buttonEl.textContent = '✨ Użyj umiejętności';
+    if (R.setActiveSkillButtonContent) R.setActiveSkillButtonContent(buttonEl, skill.emoji || '✨', skill.id === 'seed-heal' ? 'Aktywuj regenerację' : 'Użyj umiejętności');
     buttonEl.disabled = false;
     buttonEl.classList.remove('__ts_skill_cooling__');
     buttonEl.classList.add('__ts_skill_ready__');
@@ -1064,6 +1073,23 @@
       .__ts_skill_desc__ { font-size:9px; color: var(--ts-text-muted); margin-bottom:3px; }
       .__ts_skill_meta__ { font-size:9px; color: oklch(84% 0.02 296); margin-bottom:6px; }
       .__ts_skill_icon__ { display:inline-flex; margin-right:4px; }
+      .__ts_skill_btn_icon__ {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        flex-shrink: 0;
+        filter: drop-shadow(0 0 8px rgba(255,255,255,.24));
+      }
+      .__ts_skill_btn_label__ {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        letter-spacing: -.01em;
+      }
       .__ts_neon_bolt__ {
         display:inline-flex;
         margin-right:4px;
@@ -1089,15 +1115,20 @@
       }
       .__ts_skill_btn__ {
         width:100%;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         position: relative;
         isolation: isolate;
         overflow: hidden;
         background:
-          linear-gradient(140deg, oklch(42% 0.08 282 / 0.85), oklch(33% 0.06 278 / 0.9)) padding-box,
-          linear-gradient(120deg, oklch(65% 0.25 310), oklch(80% 0.14 90), oklch(75% 0.14 230), oklch(65% 0.25 310)) border-box;
+          linear-gradient(180deg, oklch(37% 0.05 282 / 0.92), oklch(29% 0.04 278 / 0.96)) padding-box,
+          linear-gradient(120deg, oklch(67% 0.14 286 / 0.9), oklch(82% 0.09 86 / 0.78), oklch(75% 0.1 228 / 0.76), oklch(67% 0.14 286 / 0.9)) border-box;
         background-size: 100% 100%, 220% 220%;
         animation: __ts_shiny_border__ 4s linear infinite;
-        box-shadow: 0 0 14px oklch(65% 0.25 310 / 0.35), 0 10px 22px oklch(8% 0.03 280 / 0.45);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 20px oklch(8% 0.03 280 / 0.34);
       }
       .__ts_skill_btn__::before {
         content: '';
@@ -1113,8 +1144,8 @@
       }
       .__ts_skill_btn__.__ts_skill_ready__ {
         background:
-          linear-gradient(140deg, oklch(58% 0.22 300 / 0.88), oklch(66% 0.2 322 / 0.85)) padding-box,
-          linear-gradient(120deg, oklch(65% 0.25 310), oklch(82% 0.16 85), oklch(65% 0.25 310)) border-box;
+          linear-gradient(180deg, oklch(62% 0.18 292 / 0.92), oklch(56% 0.18 312 / 0.92)) padding-box,
+          linear-gradient(120deg, oklch(84% 0.08 84), oklch(72% 0.21 305), oklch(84% 0.08 84)) border-box;
         animation: __ts_skill_ready_pulse__ 1.6s ease-in-out infinite;
       }
       .__ts_skill_btn__.__ts_skill_cooling__ {
@@ -1600,6 +1631,9 @@
     }
     if (R.refreshActiveSkillUI) {
       R.refreshActiveSkillUI();
+    }
+    if (R.bindActiveSkillButton) {
+      R.bindActiveSkillButton();
     }
 
     const goals = state.dailyQuest && Array.isArray(state.dailyQuest.goals) ? state.dailyQuest.goals : [];

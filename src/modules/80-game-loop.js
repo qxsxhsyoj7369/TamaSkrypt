@@ -213,8 +213,17 @@
       });
     }
 
-    const activeSkillBtn = R.getElById ? R.getElById('__ts_active_skill_btn__') : document.getElementById('__ts_active_skill_btn__');
-    if (activeSkillBtn) activeSkillBtn.addEventListener('click', R.useActiveSkill);
+    R.bindActiveSkillButton = function bindActiveSkillButton() {
+      const activeSkillBtn = R.getElById ? R.getElById('__ts_active_skill_btn__') : document.getElementById('__ts_active_skill_btn__');
+      if (!activeSkillBtn || activeSkillBtn.dataset.tsBound === '1') return;
+      activeSkillBtn.dataset.tsBound = '1';
+      activeSkillBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        R.useActiveSkill();
+      });
+    };
+
+    R.bindActiveSkillButton();
 
     const territoryToggle = R.getElById ? R.getElById('__ts_territory_toggle__') : document.getElementById('__ts_territory_toggle__');
     const territoryContent = R.getElById ? R.getElById('__ts_territory_content__') : document.getElementById('__ts_territory_content__');
