@@ -1,7 +1,7 @@
 {
-  "version": "3.38.0",
+  "version": "3.38.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.38.0: Sklep 2.0 — ceny skalowane po liczbie zakupów, nowy asortyment personalny i domenowy, aktywne efekty zakupów, pasywka Gold Fever oraz butik z kategoriami i dynamicznymi cenami.",
+  "changelog": "Release 3.38.1: Hotfix Seamless Modal — modal osadzony w document.body z viewport-fixed, bez rozpychania layoutu gry; poprawiona delegacja kliknięć dla akcji w modalu.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.38.0",
-      "hash": "33283d17100d7cae38b8aa2bde58a5300c4e4497dac4745c7bb21dabd3d01cab",
+      "version": "3.38.1",
+      "hash": "dc52eb652413c93390e43cf6dee316a83ddf1ea28cf6c2193ca2eb1346f5008b",
       "execute": "raw",
       "required": true
     },

@@ -210,17 +210,171 @@
   };
 
   R.ui = R.ui || {};
+
+  R.ui.ensureGlobalModalStyles = function ensureGlobalModalStyles() {
+    const styleId = '__ts_forum_global_styles__';
+    const head = document.head || document.documentElement;
+    if (!head) return;
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .__ts_forum_overlay__ {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 2147483646 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 14px !important;
+        box-sizing: border-box !important;
+      }
+      .__ts_forum_backdrop__ {
+        position: absolute;
+        inset: 0;
+        background: transparent !important;
+        backdrop-filter: none !important;
+      }
+      .__ts_forum_window__ {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 258px);
+        max-height: min(74vh, 360px);
+        overflow: hidden;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background:
+          radial-gradient(120% 120% at 8% 0%, rgba(166, 81, 255, 0.16), transparent 60%),
+          radial-gradient(90% 120% at 100% 100%, rgba(55, 233, 255, 0.12), transparent 58%),
+          rgba(12, 15, 26, 0.86);
+        box-shadow: 0 22px 52px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+        backdrop-filter: blur(24px) saturate(1.25);
+      }
+      .__ts_forum_head__ {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .__ts_forum_title__ {
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.01em;
+      }
+      .__ts_forum_close__ {
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        cursor: pointer;
+        line-height: 1;
+        font-size: 12px;
+      }
+      .__ts_forum_body__ {
+        padding: 9px 8px 10px;
+        overflow-y: auto;
+        max-height: min(62vh, 300px);
+      }
+      .__ts_forum_btn__ {
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(140deg, oklch(58% 0.19 299 / 0.72), oklch(50% 0.16 282 / 0.78));
+        box-shadow: 0 0 12px oklch(65% 0.24 310 / 0.24), 0 8px 18px oklch(8% 0.03 280 / 0.35);
+      }
+      .__ts_card__ {
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+        color: #f5f5f5;
+      }
+      .__ts_shop_section_title__ {
+        font-size: 11px;
+        font-weight: bold;
+        color: #a651ff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(166, 81, 255, 0.3);
+        margin: 15px 0 10px 0;
+        padding-bottom: 4px;
+        width: 100%;
+      }
+      .__ts_shop_grid__ {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+        padding-bottom: 10px;
+      }
+      .__ts_shop_item_card__ {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+      .__ts_shop_item_header__ {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .__ts_shop_item_icon__ { font-size: 16px; }
+      .__ts_shop_item_name__ {
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .__ts_shop_item_desc__ {
+        font-size: 10px;
+        color: #aaa;
+        margin-bottom: 10px;
+        flex: 1;
+      }
+      .__ts_shop_item_footer__ {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 8px;
+      }
+      .__ts_shop_item_price__ {
+        font-family: Consolas, monospace;
+        font-weight: bold;
+        color: #ffd700;
+      }
+      .__ts_shop_buy_btn__ {
+        padding: 4px 10px !important;
+        font-size: 10px !important;
+      }
+    `;
+    head.appendChild(style);
+  };
+
   R.ui.openSeamlessModal = function openSeamlessModal(title, contentHTML, windowStyles = '', contentStyles = '') {
     const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
-    if (!root) return;
-
-    const widgetShell = root.getElementById('__tamaskrypt_widget__');
-    if (!widgetShell) return;
-
-    const existing = widgetShell.querySelector('#__ts_forum_overlay__');
+    const existing = document.getElementById('__ts_forum_overlay__') || (root ? root.querySelector('#__ts_forum_overlay__') : null);
     if (existing) existing.remove();
 
-    const windowStyle = ` style="width: 100%; max-height: 90vh; display: flex; flex-direction: column; ${windowStyles || ''}"`;
+    if (R.ui && typeof R.ui.ensureGlobalModalStyles === 'function') {
+      R.ui.ensureGlobalModalStyles();
+    }
+
+    const windowStyle = ` style="width: min(100%, 258px); max-height: min(74vh, 360px); display: flex; flex-direction: column; ${windowStyles || ''}"`;
     const bodyStyle = contentStyles ? 'overflow: visible; max-height: none;' : '';
     const overlay = document.createElement('div');
     overlay.id = '__ts_forum_overlay__';
@@ -237,7 +391,7 @@
     `;
 
     const closeModal = function closeModal() {
-      const mainBody = root.querySelector('#__ts_body__');
+      const mainBody = root ? root.querySelector('#__ts_body__') : null;
       if (mainBody) {
         mainBody.style.opacity = '1';
         mainBody.style.filter = 'none';
@@ -254,9 +408,13 @@
       }
     });
 
-    widgetShell.appendChild(overlay);
+    if (document.body) {
+      document.body.appendChild(overlay);
+    } else {
+      document.documentElement.appendChild(overlay);
+    }
 
-    const mainBody = root.querySelector('#__ts_body__');
+    const mainBody = root ? root.querySelector('#__ts_body__') : null;
     if (mainBody) {
       mainBody.style.transition = 'opacity 0.4s ease, filter 0.4s ease';
       mainBody.style.opacity = '0.05';
@@ -270,7 +428,7 @@
     if (!root || root.__tsWidgetDelegationBound__) return;
     root.__tsWidgetDelegationBound__ = true;
 
-    root.addEventListener('click', (event) => {
+    const delegatedClickHandler = (event) => {
       const target = event.target;
       if (!target || typeof target.closest !== 'function') return;
 
@@ -500,7 +658,13 @@
         if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('⏱️ Misje Godzinowe', R.renderHourlyGoalRows ? R.renderHourlyGoalRows() : '<div>Brak misji.</div>', '', 'overflow: visible; height: auto;');
         return;
       }
-    }, true);
+    };
+
+    root.addEventListener('click', delegatedClickHandler, true);
+    if (root !== document && !document.__tsWidgetDelegationBoundGlobal__) {
+      document.__tsWidgetDelegationBoundGlobal__ = true;
+      document.addEventListener('click', delegatedClickHandler, true);
+    }
   };
 
   R.getTerritoryActionCosts = function getTerritoryActionCosts() {
