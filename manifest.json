@@ -1,7 +1,7 @@
 {
-  "version": "3.31.9",
+  "version": "3.31.10",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.31.9: rewamp do REST RTDB — zamiana Firestore SDK na R.firebaseRead/R.firebaseWrite, modal w document.body (omija updateUI), Cybercore CSS do head.",
+  "changelog": "Release 3.31.10: Shadow DOM modal fix — modal osadzony bezpośrednia w ShadowRoot (dostęp do CSS), position: fixed !important, closeModal szuka w ShadowRoot.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "mini-forum",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/82-mini-forum.js",
-      "version": "3.31.9",
-      "hash": "8e92c9f975ed83c191c284eda9f57eb1a9606edff0ac5ff8a0f9e8eb6414d2c1",
+      "version": "3.31.10",
+      "hash": "6f3113573f5b9a473730f06a5bdfa638386e6be3f14d4fad81759fc988c58f9e",
       "execute": "raw",
       "required": true
     },

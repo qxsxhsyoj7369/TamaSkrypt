@@ -103,16 +103,16 @@
     style.id = FORUM_STYLE_ID;
     style.textContent = `
       #${MODAL_ID} {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        width: 100vw; height: 100vh;
-        z-index: 2147483647;
-        background: rgba(3, 8, 18, 0.58);
+        position: fixed !important;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+        width: 100vw !important; height: 100vh !important;
+        z-index: 2147483647 !important;
+        background: rgba(3, 8, 18, 0.75) !important;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 16px;
-        pointer-events: auto;
+        pointer-events: auto !important;
       }
       #${MODAL_ID} .__ts_forum_window__ {
         width: min(700px, 96vw);
@@ -378,7 +378,8 @@
   }
 
   function closeModal() {
-    const modal = document.getElementById(MODAL_ID);
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document;
+    const modal = root.querySelector('#' + MODAL_ID);
     if (modal) modal.remove();
   }
 
@@ -433,10 +434,17 @@
       if (event.target === modal) closeModal();
     });
 
-    document.body.appendChild(modal);
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.body;
+    
+    // Usuń stary modal, jeśli istnieje (aby się nie dublowały)
+    const existingModal = root.querySelector('#' + MODAL_ID);
+    if (existingModal) existingModal.remove();
 
-    const root = modal.querySelector('#__ts_forum_root__');
-    if (!root) return;
+    // Doczep nowy modal BEZPOŚREDNIO do ShadowRoot
+    root.appendChild(modal);
+
+    const root2 = modal.querySelector('#__ts_forum_root__');
+    if (!root2) return;
 
     const threads = await listThreads();
     const activeThread = threads.find((item) => item.id === activeThreadId) || null;
@@ -480,7 +488,7 @@
       `
       : '';
 
-    root.innerHTML = `
+    root2.innerHTML = `
       <form class="__ts_forum_form cyber-card __ts_forum_card__" data-form="thread">
         <input class="cyber-input" type="text" name="title" maxlength="${LIMITS.title}" placeholder="Tytuł (max ${LIMITS.title})" required />
         <input class="cyber-input" type="text" name="content" maxlength="${LIMITS.thread}" placeholder="Treść (max ${LIMITS.thread})" required />
@@ -490,13 +498,13 @@
       ${detailBlock}
     `;
 
-    root.querySelectorAll('button[data-action="open-thread"]').forEach((button) => {
+    root2.querySelectorAll('button[data-action="open-thread"]').forEach((button) => {
       button.addEventListener('click', async () => {
         await renderModal(button.getAttribute('data-thread-id'));
       });
     });
 
-    root.querySelectorAll('button[data-action="delete-thread"]').forEach((button) => {
+    root2.querySelectorAll('button[data-action="delete-thread"]').forEach((button) => {
       button.addEventListener('click', async () => {
         try {
           await deleteThread(button.getAttribute('data-thread-id'));
@@ -508,7 +516,7 @@
       });
     });
 
-    root.querySelectorAll('button[data-action="edit-thread"]').forEach((button) => {
+    root2.querySelectorAll('button[data-action="edit-thread"]').forEach((button) => {
       button.addEventListener('click', async () => {
         const threadId = button.getAttribute('data-thread-id');
         const existing = threads.find((item) => item.id === threadId);
@@ -527,7 +535,7 @@
       });
     });
 
-    root.querySelectorAll('button[data-action="delete-comment"]').forEach((button) => {
+    root2.querySelectorAll('button[data-action="delete-comment"]').forEach((button) => {
       button.addEventListener('click', async () => {
         const threadId = button.getAttribute('data-thread-id');
         const commentId = button.getAttribute('data-comment-id');
@@ -541,7 +549,7 @@
       });
     });
 
-    root.querySelectorAll('button[data-action="edit-comment"]').forEach((button) => {
+    root2.querySelectorAll('button[data-action="edit-comment"]').forEach((button) => {
       button.addEventListener('click', async () => {
         const threadId = button.getAttribute('data-thread-id');
         const commentId = button.getAttribute('data-comment-id');
@@ -557,7 +565,7 @@
       });
     });
 
-    const threadForm = root.querySelector('form[data-form="thread"]');
+    const threadForm = root2.querySelector('form[data-form="thread"]');
     if (threadForm) {
       threadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -577,7 +585,7 @@
       });
     }
 
-    const commentForm = root.querySelector('form[data-form="comment"]');
+    const commentForm = root2.querySelector('form[data-form="comment"]');
     if (commentForm) {
       commentForm.addEventListener('submit', async (event) => {
         event.preventDefault();
