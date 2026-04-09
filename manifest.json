@@ -1,7 +1,7 @@
 {
-  "version": "3.31.3",
+  "version": "3.31.4",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.31.3: poprawa UI triggera Holo-Pagera — CYBERCORE button [ PAGER ] obok lewituj\u0105cego Gelka i styl .__ts_pager_btn__.",
+  "changelog": "Release 3.31.4: hotfix widoczności pagera — trigger [ PAGER ] przeniesiony wewnątrz panelu, poprawione pozycjonowanie i warstwa z-index.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "mini-forum",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/82-mini-forum.js",
-      "version": "3.31.3",
-      "hash": "212f3da65a634a5c704c87f42564e44e595c146ea97d8bf449934ba7dc0862eb",
+      "version": "3.31.4",
+      "hash": "33849b60b89447b9224eba5ca12c994d1a18abb7f88130531b2722d7ac007300",
       "execute": "raw",
       "required": true
     },

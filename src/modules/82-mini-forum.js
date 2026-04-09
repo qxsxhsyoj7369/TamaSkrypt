@@ -197,15 +197,23 @@
       }
       .__ts_pager_btn__ {
         position: absolute;
-        right: -70px;
+        right: 15px;
         top: 50%;
         transform: translateY(-50%);
         font-family: Consolas, 'Courier New', monospace;
         font-size: 11px;
         padding: 6px 10px;
         cursor: pointer;
-        z-index: 20;
-        box-shadow: 0 0 10px rgba(55, 233, 255, 0.2);
+        z-index: 9999;
+        background: rgba(10, 20, 30, 0.7);
+        border: 1px solid #37e9ff;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(55, 233, 255, 0.4);
+        transition: all 0.2s ease-in-out;
+      }
+      .__ts_pager_btn__:hover {
+        background: rgba(55, 233, 255, 0.2);
+        box-shadow: 0 0 15px rgba(55, 233, 255, 0.8);
       }
       #${MODAL_ID} .text-glow { text-shadow: 0 0 9px currentColor; }
     `;
@@ -381,13 +389,9 @@
   }
 
   function ensureTrigger() {
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
-    const targetContainer = root && typeof root.querySelector === 'function'
-      ? root.querySelector('#__ts_zelek_floe_container__')
-      : null;
-    const widgetRoot = root && typeof root.querySelector === 'function'
-      ? root.querySelector('#__tamaskrypt_widget__')
-      : null;
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document;
+    let targetContainer = root.querySelector('#__ts_zelek_floe_container__');
+    const widgetRoot = root.querySelector('#__tamaskrypt_widget__');
 
     const existing = findTriggerInShadow();
     if (existing && targetContainer && targetContainer.contains(existing)) return existing;
@@ -399,20 +403,19 @@
     trigger.type = 'button';
     trigger.className = 'cyber-button variant-ghost neon-border __ts_pager_btn__';
     trigger.title = 'Holo-Pager';
-    trigger.innerHTML = '<span class="text-glow" style="color: #37e9ff;">[ PAGER ]</span>';
-    trigger.addEventListener('click', function onForumTriggerClick(e) {
+    trigger.innerHTML = '<span class="text-glow" style="color: #37e9ff; font-weight: bold;">[ PAGER ]</span>';
+    trigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (R.forum && typeof R.forum.open === 'function') {
-        R.forum.open();
-      }
+      if (R.forum && typeof R.forum.open === 'function') R.forum.open();
     });
 
     if (targetContainer) {
+      targetContainer.style.position = 'relative';
       targetContainer.appendChild(trigger);
     } else if (widgetRoot) {
       widgetRoot.appendChild(trigger);
     } else {
-      (document.body || document.documentElement).appendChild(trigger);
+      document.body.appendChild(trigger);
     }
     return trigger;
   }
