@@ -358,16 +358,24 @@
     await ref.delete();
   }
 
-  function ensureTrigger() {
-    // Szukaj najpierw w Shadow DOM widgetu (header), potem w document
+  function findTriggerInShadow() {
+    // ShadowRoot nie ma getElementById – używamy querySelector
     const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
-    if (root) {
-      const existing = root.getElementById(TRIGGER_ID);
-      if (existing) return existing;
-    } else {
-      const existing = document.getElementById(TRIGGER_ID);
-      if (existing) return existing;
+    if (root && typeof root.querySelector === 'function') {
+      const el = root.querySelector('#' + TRIGGER_ID);
+      if (el) return el;
     }
+    return document.getElementById(TRIGGER_ID);
+  }
+
+  function ensureTrigger() {
+    // Jeśli trigger istnieje i jest WEWNĄTRZ headera widgetu – zostaw go
+    const header = R.getElById ? R.getElById('__ts_header__') : null;
+    const existing = findTriggerInShadow();
+    if (existing && header && header.contains(existing)) return existing;
+
+    // Usuń stary trigger (np. z fallback body lub z poprzedniego rendera)
+    if (existing) existing.remove();
 
     const trigger = document.createElement('button');
     trigger.id = TRIGGER_ID;
@@ -383,17 +391,18 @@
       'opacity:.9',
       'line-height:1',
       'vertical-align:middle',
+      'color:#fff',
     ].join(';');
-    trigger.addEventListener('click', () => {
-      R.forum && R.forum.open && R.forum.open();
+    trigger.addEventListener('click', function onForumTriggerClick(e) {
+      e.stopPropagation();
+      if (R.forum && typeof R.forum.open === 'function') {
+        R.forum.open();
+      }
     });
 
-    // Wstaw do headera widgetu w Shadow DOM
-    const header = R.getElById ? R.getElById('__ts_header__') : null;
     if (header) {
       header.appendChild(trigger);
     } else {
-      // Fallback: bezpośrednio do body — rzadki przypadek przed montażem
       (document.body || document.documentElement).appendChild(trigger);
     }
     return trigger;
@@ -638,15 +647,11 @@
   }
 
   function init() {
-    if (R.forum && R.forum.__initialized__) return;
-
     ensureCybercoreCss();
     ensureForumStyles();
     ensureStateUid();
-    ensureTrigger();
-    syncTriggerPosition();
-    bindRepositionEvents();
 
+    // Upewnij się że R.forum.open jest zawsze świeżo ustawiony
     R.forum = R.forum || {};
     R.forum.__initialized__ = true;
     R.forum.init = init;
@@ -659,6 +664,9 @@
       }
     };
     R.forum.close = closeModal;
+
+    // Trigger dodajemy po ustawieniu R.forum.open
+    ensureTrigger();
   }
 
   function installInitHook() {

@@ -1,7 +1,7 @@
 {
-  "version": "3.31.1",
+  "version": "3.31.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.31.1: fix triggera forum \u2013 przycisk 📟 przeniesiony do headera widgetu, stale widoczny i klikalny.",
+  "changelog": "Release 3.31.2: fix klikni\u0119cia forum \u2013 naprawa ShadowRoot.getElementById, kolejno\u015b\u0107 init i re-render triggera po mountWidget.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "mini-forum",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/82-mini-forum.js",
-      "version": "3.31.1",
-      "hash": "0f8922b1288ac760f85d6a3e1f9a418788b281e8bc041f1edab3111c52b3c075",
+      "version": "3.31.2",
+      "hash": "ca6d89c26b00f3e8665c9f6746be6344bc946741615827e3e84c0c5508aea1e9",
       "execute": "raw",
       "required": true
     },
