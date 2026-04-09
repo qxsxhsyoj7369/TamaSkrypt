@@ -114,15 +114,16 @@
         max-height: 85vh;
         z-index: 2147483647;
         overflow: hidden;
-        background: rgba(8, 14, 28, 0.85);
-        backdrop-filter: blur(25px) saturate(160%);
-        border: 1px solid rgba(115, 169, 255, 0.15);
+        background: rgba(12, 15, 26, 0.75);
+        backdrop-filter: blur(28px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
         color: #fff;
         display: flex;
         flex-direction: column;
         pointer-events: auto;
+        font-family: system-ui, -apple-system, sans-serif;
       }
       #${MODAL_ID}.__dragging__ .__ts_forum_header__ {
         cursor: grabbing;
@@ -132,21 +133,27 @@
         max-height: 100%;
         min-height: 300px;
         overflow: auto;
+        background: rgba(12, 15, 26, 0.75);
+        backdrop-filter: blur(28px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        background: linear-gradient(180deg, rgba(8, 14, 28, 0.96), rgba(8, 14, 28, 0.9));
-        border: 1px solid rgba(115, 169, 255, 0.22);
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #fff;
         padding: 14px;
+        box-sizing: border-box;
       }
       #${MODAL_ID} .__ts_forum_header__ {
         display: flex;
         align-items: center;
         gap: 8px;
         cursor: grab;
-        background: rgba(255, 255, 255, 0.03);
-        border-bottom: 1px solid rgba(115, 169, 255, 0.1);
-        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding: 0 0 10px 0;
         margin: -14px -14px 12px -14px;
+        padding-left: 14px;
+        padding-right: 14px;
+        padding-top: 14px;
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
         user-select: none;
@@ -160,21 +167,23 @@
       }
       #${MODAL_ID} .__ts_forum_close__ {
         margin-left: auto;
-        background: none;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 50%;
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 15px;
+        color: #fff;
         opacity: 0.7;
         transition: all 0.2s;
+        cursor: pointer;
       }
       #${MODAL_ID} .__ts_forum_close__:hover {
-        background: rgba(255, 63, 191, 0.3);
-        border-color: #ff3fbf;
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.22);
         opacity: 1;
       }
       #${MODAL_ID} .__ts_forum_split__ {
@@ -183,11 +192,14 @@
         gap: 10px;
       }
       #${MODAL_ID} .__ts_forum_card__ {
-        padding: 8px;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
       }
       #${MODAL_ID} .__ts_forum_empty__ {
-        font-family: Consolas, 'Courier New', monospace;
+        font-family: system-ui, -apple-system, sans-serif;
         font-size: 11px;
         opacity: .86;
         padding: 8px;
@@ -217,21 +229,54 @@
         display: inline-flex;
         gap: 4px;
       }
+      #${MODAL_ID} .__ts_forum_btn__ {
+        background: linear-gradient(135deg, #a651ff, #ff3fbf);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-weight: bold;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      #${MODAL_ID} .__ts_forum_btn__:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+      }
       #${MODAL_ID} .__ts_forum_btn_tiny__ {
         min-width: 22px;
         height: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
         cursor: pointer;
       }
-      #${MODAL_ID} .__ts_forum_form__ {
+      #${MODAL_ID} .__ts_forum_form {
         display: grid;
         gap: 6px;
       }
       #${MODAL_ID} .__ts_forum_inline__ {
         display: flex;
         gap: 6px;
+        align-items: center;
       }
-      #${MODAL_ID} .__ts_forum_inline__ > .cyber-input {
+      #${MODAL_ID} .__ts_forum_input__ {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #fff;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      #${MODAL_ID} .__ts_forum_input__:focus {
+        border-color: rgba(55, 233, 255, 0.75);
+        box-shadow: 0 0 0 3px rgba(55, 233, 255, 0.12);
+      }
+      #${MODAL_ID} .__ts_forum_inline__ > .__ts_forum_input__ {
         flex: 1;
       }
       #${MODAL_ID} .__ts_forum_comments__ {
@@ -242,11 +287,11 @@
       }
       #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar,
       #${MODAL_ID} .__ts_forum_comments__::-webkit-scrollbar {
-        width: 5px;
+        width: 6px;
       }
       #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar-thumb,
       #${MODAL_ID} .__ts_forum_comments__::-webkit-scrollbar-thumb {
-        background: rgba(255, 63, 191, 0.5);
+        background: rgba(255, 255, 255, 0.16);
         border-radius: 4px;
       }
       #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar-track,
@@ -333,7 +378,7 @@
     if (!current) throw new Error('Wątek nie istnieje');
     if (!isOwner(current.authorUid)) throw new Error('Brak uprawnień');
     
-    const next = { ...current };
+    const next = Object.assign({}, current);
     if (payload.title) next.title = normalizeText(payload.title, LIMITS.title);
     if (payload.content) next.content = normalizeText(payload.content, LIMITS.thread);
     next.editedAt = Date.now();
@@ -379,7 +424,7 @@
     const cleanContent = normalizeText(content, LIMITS.comment);
     if (!cleanContent) throw new Error('Komentarz jest wymagany');
     
-    const next = { ...current, content: cleanContent, editedAt: Date.now() };
+    const next = Object.assign({}, current, { content: cleanContent, editedAt: Date.now() });
     await R.firebaseWrite(`pager_comments/${threadId}/${commentId}`, next);
   }
 
@@ -555,11 +600,11 @@
     return comments.map((comment) => {
       const mine = String(comment.authorUid || '') === myUid && isOwner(comment.authorUid);
       const actions = mine
-        ? `<span class="__ts_forum_actions__"><button type="button" class="__ts_forum_btn_tiny__ cyber-button variant-ghost" data-action="edit-comment" data-thread-id="${escapeHtml(thread.id)}" data-comment-id="${escapeHtml(comment.id)}">E</button><button type="button" class="__ts_forum_btn_tiny__ cyber-button variant-ghost" data-action="delete-comment" data-thread-id="${escapeHtml(thread.id)}" data-comment-id="${escapeHtml(comment.id)}">X</button></span>`
+        ? `<span class="__ts_forum_actions__"><button type="button" class="__ts_forum_btn_tiny__" data-action="edit-comment" data-thread-id="${escapeHtml(thread.id)}" data-comment-id="${escapeHtml(comment.id)}">E</button><button type="button" class="__ts_forum_btn_tiny__" data-action="delete-comment" data-thread-id="${escapeHtml(thread.id)}" data-comment-id="${escapeHtml(comment.id)}">X</button></span>`
         : '';
 
       return `
-        <div class="cyber-card glitch-hover __ts_forum_card__">
+        <div class="__ts_forum_card__">
           <div class="__ts_forum_row__">
             <div class="__ts_forum_text__">${escapeHtml(comment.content)}</div>
             ${actions}
@@ -575,12 +620,12 @@
 
     const modal = document.createElement('div');
     modal.id = MODAL_ID;
-    modal.className = 'cyber-scanlines';
+    modal.className = '__ts_forum_wrapper__';
     modal.innerHTML = `
       <div class="__ts_forum_window__">
         <div class="__ts_forum_header__">
           <h4>📟 Holo-Pager</h4>
-          <button type="button" class="cyber-button variant-ghost __ts_forum_close__" data-action="close">Zamknij</button>
+          <button type="button" class="__ts_forum_close__" data-action="close">✕</button>
         </div>
         <div id="__ts_forum_root__" class="__ts_forum_split__"></div>
       </div>
@@ -609,13 +654,13 @@
       ? threads.map((thread) => {
         const mine = String(thread.authorUid || '') === myUid && isOwner(thread.authorUid);
         const actions = mine
-          ? `<span class="__ts_forum_actions__"><button type="button" class="__ts_forum_btn_tiny__ cyber-button variant-ghost" data-action="edit-thread" data-thread-id="${escapeHtml(thread.id)}">E</button><button type="button" class="__ts_forum_btn_tiny__ cyber-button variant-ghost" data-action="delete-thread" data-thread-id="${escapeHtml(thread.id)}">X</button></span>`
+          ? `<span class="__ts_forum_actions__"><button type="button" class="__ts_forum_btn_tiny__" data-action="edit-thread" data-thread-id="${escapeHtml(thread.id)}">E</button><button type="button" class="__ts_forum_btn_tiny__" data-action="delete-thread" data-thread-id="${escapeHtml(thread.id)}">X</button></span>`
           : '';
 
         return `
-          <div class="cyber-card glitch-hover __ts_forum_card__">
+          <div class="__ts_forum_card__">
             <div class="__ts_forum_row__">
-              <button type="button" class="cyber-button variant-ghost" data-action="open-thread" data-thread-id="${escapeHtml(thread.id)}">${escapeHtml(thread.title)}</button>
+              <button type="button" class="__ts_forum_btn__" data-action="open-thread" data-thread-id="${escapeHtml(thread.id)}">${escapeHtml(thread.title)}</button>
               ${actions}
             </div>
             <div class="__ts_forum_text__">${escapeHtml(thread.content)}</div>
@@ -628,15 +673,15 @@
     const detailComments = activeThread ? await renderThreadDetails(activeThread) : '';
     const detailBlock = activeThread
       ? `
-        <div class="cyber-card __ts_forum_card__">
+        <div class="__ts_forum_card__">
           <div class="__ts_forum_title__">${escapeHtml(activeThread.title)}</div>
           <div class="__ts_forum_text__">${escapeHtml(activeThread.content)}</div>
           <div class="__ts_forum_meta__">${renderAuthorTag(activeThread.authorName, activeThread.authorFaction)} • ${escapeHtml(formatTime(activeThread.timestamp))}</div>
           <div class="__ts_forum_comments__">${detailComments}</div>
-          <form class="__ts_forum_form__" data-form="comment" data-thread-id="${escapeHtml(activeThread.id)}">
+          <form class="__ts_forum_form" data-form="comment" data-thread-id="${escapeHtml(activeThread.id)}">
             <div class="__ts_forum_inline__">
-              <input class="cyber-input" type="text" name="comment" maxlength="${LIMITS.comment}" placeholder="Komentarz (max ${LIMITS.comment})" required />
-              <button type="submit" class="cyber-button variant-ghost">Wyślij</button>
+              <input class="__ts_forum_input__" type="text" name="comment" maxlength="${LIMITS.comment}" placeholder="Komentarz (max ${LIMITS.comment})" required />
+              <button type="submit" class="__ts_forum_btn__">Wyślij</button>
             </div>
           </form>
         </div>
@@ -644,10 +689,10 @@
       : '';
 
     root2.innerHTML = `
-      <form class="__ts_forum_form cyber-card __ts_forum_card__" data-form="thread">
-        <input class="cyber-input" type="text" name="title" maxlength="${LIMITS.title}" placeholder="Tytuł (max ${LIMITS.title})" required />
-        <input class="cyber-input" type="text" name="content" maxlength="${LIMITS.thread}" placeholder="Treść (max ${LIMITS.thread})" required />
-        <button type="submit" class="cyber-button variant-ghost">Nadaj transmisję</button>
+      <form class="__ts_forum_form __ts_forum_card__" data-form="thread">
+        <input class="__ts_forum_input__" type="text" name="title" maxlength="${LIMITS.title}" placeholder="Tytuł (max ${LIMITS.title})" required />
+        <input class="__ts_forum_input__" type="text" name="content" maxlength="${LIMITS.thread}" placeholder="Treść (max ${LIMITS.thread})" required />
+        <button type="submit" class="__ts_forum_btn__">Nadaj transmisję</button>
       </form>
       <div>${listHtml}</div>
       ${detailBlock}
