@@ -1,7 +1,7 @@
 {
-  "version": "3.34.3",
+  "version": "3.34.4",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.3: UX KROK 2 — Terytorium, Umiejętność i Misje przeniesione do Seamless Modals. Główne menu = czyste Smart Bannery.",
+  "changelog": "Release 3.34.4: Pakiet 1 — żelazny Smart Banner (flex fix + ellipsis), __ts_skill_active_glow__ (fioletowy puls przy efekcie), Terytorium: cyber-grid + bezpieczne znaki.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.3",
-      "hash": "c54e30ae5a354e2ec1638747455bbb34069f9f66b0fba1e4b9866c9eb2a3560f",
+      "version": "3.34.4",
+      "hash": "892406c2b11d2e8522ea6bdb17decabb7c13493a072df036ca8578d30e7b4a92",
       "execute": "raw",
       "required": true
     },

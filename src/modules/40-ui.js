@@ -358,11 +358,15 @@
           ? `<button class="__ts_forum_btn__" id="__ts_btn_claim_neutral__">🌐 Zajmij (Darmowe)</button>`
           : '';
         const territoryContent = `
-          <div class="__ts_card__" style="display:flex;flex-direction:column;gap:8px;">
-            <div style="font-size:11px;opacity:0.7;">🌐 ${hostname}</div>
-            <div id="__ts_territory_king__">${king}</div>
-            <div id="__ts_territory_status__">${status}</div>
-            <div id="__ts_territory_actions__" style="display:flex;gap:6px;flex-wrap:wrap;">${actionBtnHTML}${claimBtnHTML}</div>
+          <div style="position:relative;padding:14px;border-radius:10px;
+            background:linear-gradient(180deg,rgba(3,8,18,0.9),rgba(12,15,26,0.9)),
+            repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px),
+            repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px);
+            display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:10px;color:#37e9ff;letter-spacing:0.5px;opacity:0.8;">&#9711; ${hostname}</div>
+            <div style="font-size:11px;"><span style="color:#a651ff;font-weight:bold;">[W&#321;ADCA]</span> ${king.replace(/W\u0142adca:\s*/i,'')}</div>
+            <div style="font-size:11px;"><span style="color:#37e9ff;font-weight:bold;">[STATUS]</span> ${status.replace(/Status:\s*/i,'')}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">${actionBtnHTML}${claimBtnHTML}</div>
           </div>
         `;
         if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('🌍 Terytorium', territoryContent);
@@ -510,8 +514,11 @@
     const alive = R.state ? R.state.alive !== false : true;
 
     if (!alive) {
-      metaEl.textContent = '💀 Niedostępna';
-      if (triggerEl) triggerEl.classList.remove('__ts_skill_banner_ready__');
+      metaEl.textContent = '&#128128; Niedostępna';
+      if (triggerEl) {
+        triggerEl.classList.remove('__ts_skill_banner_ready__');
+        triggerEl.classList.remove('__ts_skill_active_glow__');
+      }
       return;
     }
 
@@ -519,14 +526,20 @@
       metaEl.textContent = effectRemaining > 0
         ? `Efekt: ${R.formatTime(effectRemaining)} • ⏳ ${R.formatTime(cooldownRemaining)}`
         : `⏳ ${R.formatTime(cooldownRemaining)}`;
-      if (triggerEl) triggerEl.classList.remove('__ts_skill_banner_ready__');
+      if (triggerEl) {
+        triggerEl.classList.remove('__ts_skill_banner_ready__');
+        triggerEl.classList.toggle('__ts_skill_active_glow__', effectRemaining > 0);
+      }
       return;
     }
 
     metaEl.textContent = effectRemaining > 0
       ? `Efekt aktywny • Gotowe ▶`
       : 'Gotowe ▶';
-    if (triggerEl) triggerEl.classList.add('__ts_skill_banner_ready__');
+    if (triggerEl) {
+      triggerEl.classList.add('__ts_skill_banner_ready__');
+      triggerEl.classList.toggle('__ts_skill_active_glow__', effectRemaining > 0);
+    }
   };
 
   R.renderHourlyGoalRows = function renderHourlyGoalRows() {
@@ -2021,10 +2034,20 @@
         position: absolute; left: 0; top: 0; bottom: 0; opacity: 0.2; z-index: 1; pointer-events: none;
       }
       .__ts_smart_banner_content__ {
-        position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; font-weight: 600; width: 100%;
+        position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; font-weight: 600;
+        flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .__ts_smart_banner_right__ {
         position: relative; z-index: 2; opacity: 0.8; font-family: Consolas, monospace; font-size: 10px; margin-left: auto;
+        white-space: nowrap; flex-shrink: 0; text-align: right;
+      }
+      .__ts_skill_active_glow__ {
+        animation: __ts_pulse_neon__ 2s infinite alternate;
+        border-color: #a651ff !important;
+      }
+      @keyframes __ts_pulse_neon__ {
+        from { box-shadow: 0 0 5px rgba(166, 81, 255, 0.2); }
+        to { box-shadow: 0 0 20px rgba(166, 81, 255, 0.6); }
       }
 
       /* ── MENU 2x2 GRID ──────────────────────────────────────────── */
