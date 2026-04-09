@@ -109,12 +109,15 @@
         top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
         width: 100vw !important; height: 100vh !important;
         z-index: 2147483647 !important;
-        background: rgba(3, 8, 18, 0.75) !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
+        background: rgba(3, 8, 18, 0.85) !important;
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 16px !important;
         pointer-events: auto !important;
+        backdrop-filter: blur(8px) !important;
       }
       #${MODAL_ID} .__ts_forum_window__ {
         width: min(700px, 96vw);
@@ -418,7 +421,7 @@
 
     const modal = document.createElement('div');
     modal.id = MODAL_ID;
-    modal.className = 'cyber-modal cyber-scanlines';
+    modal.className = 'cyber-scanlines';
     modal.innerHTML = `
       <div class="__ts_forum_window__">
         <div class="__ts_forum_header__">
@@ -436,7 +439,8 @@
     const existingModal = document.getElementById(MODAL_ID);
     if (existingModal) existingModal.remove();
 
-    document.body.appendChild(modal);
+    (document.documentElement || document.body).appendChild(modal);
+    console.log('[Holo-Pager] Modal wstrzyknięty do DOM:', modal);
 
     const root2 = modal.querySelector('#__ts_forum_root__');
     if (!root2) return;
