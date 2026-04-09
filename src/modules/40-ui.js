@@ -2089,6 +2089,17 @@
         overflow-y: auto;
         max-height: min(62vh, 300px);
       }
+      .__ts_gelek_badges__ {
+        position: absolute; bottom: -20px; display: flex; gap: 8px; z-index: 15;
+      }
+      .__ts_badge__ {
+        background: rgba(12, 15, 26, 0.8); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+        padding: 4px 10px; font-size: 10px; font-weight: bold; color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); letter-spacing: 0.5px;
+      }
+      .__ts_badge_lvl__ { color: #37e9ff; border-color: rgba(55, 233, 255, 0.3); }
+      .__ts_badge_online__ { color: #a651ff; border-color: rgba(166, 81, 255, 0.3); }
     `;
     styleHost.appendChild(style);
   };
@@ -2117,6 +2128,10 @@
         <div id="__ts_zelek__" title="${mood.label}">
           <div id="__ts_zelek_floe_container__">
             <div id="__ts_zelek_shadow__"></div>
+            <div class="__ts_gelek_badges__">
+              <span class="__ts_badge__ __ts_badge_lvl__">LVL: ${state.level}</span>
+              <span class="__ts_badge__ __ts_badge_online__">ONLINE: <span id="__ts_online_time__">${R.formatTime(onlineMs)}</span></span>
+            </div>
             <div id="__ts_zelek_floe__">
               <div id="__ts_zelek_content_wrapper__">
                 <span id="__ts_mood_emoji__" aria-hidden="true">${mood.emoji || '😐'}</span>
@@ -2130,7 +2145,7 @@
           <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
-          <div id="__ts_info__"><span>Poziom: <strong>${state.level}</strong></span><span>Monety: <strong id="__ts_coins__">${state.coins}</strong> 🪙</span><span>Online: <strong id="__ts_online__">${R.formatTime(onlineMs)}</strong></span></div>
+
           <div id="__ts_territory_card__">
             <div id="__ts_territory_toggle__" class="__ts_smart_banner__" style="margin-bottom:0;">
               <div class="__ts_smart_banner_content__">🌍 Terytorium</div>
@@ -2224,7 +2239,7 @@
     const state = R.state;
     const mood = R.getMood();
 
-    const onlineEl = R.getElById('__ts_online__');
+    const onlineEl = R.getElById('__ts_online_time__');
     const svgEl = R.getElById('__ts_body_svg__');
     const zelekEl = R.getElById('__ts_zelek__');
     const moodEmojiEl = R.getElById('__ts_mood_emoji__');
