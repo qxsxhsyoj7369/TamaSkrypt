@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TamaSkrypt – Launcher (Firebase)
 // @namespace    https://github.com/qxsxhsyoj7369/TamaSkrypt
-// @version      3.2.0
+// @version      3.2.1
 // @description  Modułowy launcher TamaSkrypt: pobiera manifest, weryfikuje hash, ładuje moduły i uruchamia grę.
 // @author       TamaSkrypt / Gelek
 // @match        *://*/*
@@ -95,14 +95,28 @@
     return code.replace(/\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==/m, '');
   }
 
-  function runCode(code, label) {
+  function makeModuleBlobUrl(code, label) {
+    const safeLabel = String(label || 'module').replace(/[^a-z0-9._-]+/gi, '_');
+    const source = `${stripHeader(code)}\n//# sourceURL=tamaskrypt_${safeLabel}.js`;
+    const blob = new Blob([source], { type: 'text/javascript' });
+    return URL.createObjectURL(blob);
+  }
+
+  async function runCode(code, label) {
+    let blobUrl = '';
     try {
-      // eslint-disable-next-line no-eval
-      eval(stripHeader(code));
+      blobUrl = makeModuleBlobUrl(code, label);
+      await import(blobUrl);
       return true;
     } catch (error) {
       console.error('[TamaSkrypt Launcher] Błąd wykonania:', label, error);
       return false;
+    } finally {
+      if (blobUrl) {
+        setTimeout(() => {
+          try { URL.revokeObjectURL(blobUrl); } catch (_) {}
+        }, 0);
+      }
     }
   }
 
@@ -238,7 +252,11 @@
       const sha = data && data.object && typeof data.object.sha === 'string' ? data.object.sha : '';
       return sha || '';
     } catch (error) {
-      console.warn('[TamaSkrypt Launcher] GitHub ref API unavailable:', error.message);
+      if (/HTTP 403/i.test(String(error && error.message))) {
+        console.info('[TamaSkrypt Launcher] GitHub ref API rate-limited; using branch/CDN fallback.');
+      } else {
+        console.warn('[TamaSkrypt Launcher] GitHub ref API unavailable:', error.message);
+      }
       return '';
     }
   }
@@ -318,7 +336,7 @@
       window.GelekModules = window.GelekModules || {};
       for (const mod of moduleList) {
         const code = resolvedCode[mod.name];
-        if (!runCode(code, mod.name) && mod.required) {
+        if (!(await runCode(code, mod.name)) && mod.required) {
           throw new Error(`Nie udało się uruchomić modułu ${mod.name}`);
         }
       }
@@ -368,7 +386,7 @@
         source: 'cache',
         commitSha: manifest && manifest.__commitSha ? manifest.__commitSha : GM_getValue(KEY_COMMIT_SHA, ''),
       });
-      return runCode(cachedCode, 'legacy-cache');
+      return await runCode(cachedCode, 'legacy-cache');
     }
 
     if (!manifest.scriptUrl) return false;
@@ -385,7 +403,7 @@
       GM_setValue(KEY_COMMIT_SHA, String(manifest.__commitSha || ''));
       GM_setValue(KEY_CHECKED, Date.now());
       GM_setValue(KEY_MODE, 'legacy');
-      return runCode(code, 'legacy-download');
+      return await runCode(code, 'legacy-download');
     } catch (error) {
       console.warn('[TamaSkrypt Launcher] Legacy download failed:', error.message);
       setLauncherDiagnostics({
@@ -394,7 +412,7 @@
         source: 'cache-fallback',
         commitSha: GM_getValue(KEY_COMMIT_SHA, ''),
       });
-      return cachedCode ? runCode(cachedCode, 'legacy-cache-fallback') : false;
+      return cachedCode ? await runCode(cachedCode, 'legacy-cache-fallback') : false;
     }
   }
 
@@ -411,7 +429,7 @@
       source: 'cache',
       commitSha: GM_getValue(KEY_COMMIT_SHA, ''),
     });
-    return code ? runCode(code, 'legacy-cache') : false;
+    return code ? await runCode(code, 'legacy-cache') : false;
   }
 
   async function fetchManifest() {
