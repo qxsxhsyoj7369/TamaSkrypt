@@ -520,7 +520,13 @@
           event.preventDefault();
           event.stopPropagation();
 
-          const itemId = String(actionEl.getAttribute('data-id') || target.getAttribute('data-id') || '');
+          const itemId = String(
+            (actionEl.dataset && actionEl.dataset.id)
+            || (target.dataset && target.dataset.id)
+            || actionEl.getAttribute('data-id')
+            || target.getAttribute('data-id')
+            || ''
+          );
           if (!itemId) return;
 
           (async () => {

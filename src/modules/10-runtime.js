@@ -222,13 +222,13 @@
   ];
 
   runtime.SHOP_ITEMS = [
-    { id: 'xp_boost', category: 'personal', name: 'Mądrość Gelka', icon: '🧠', desc: 'Podwaja zdobywane XP przez 5 minut.', basePrice: 150, priceMult: 1.15 },
-    { id: 'magnet_loot', category: 'personal', name: 'Magnes Neodymowy', icon: '🧲', desc: 'Przyciąga surowce! Skraca czas spawnu lootu o 20% (Pasywne).', basePrice: 500, priceMult: 1.25 },
-    { id: 'gold_fever', category: 'personal', name: 'Złota Gorączka', icon: '✨', desc: '+50% więcej monet z każdego kliknięcia w loot (Pasywne).', basePrice: 1000, priceMult: 1.30 },
-    { id: 'snack_box_plus', category: 'personal', name: 'Snack Box+', icon: '🍱', desc: 'Natychmiastowo leczy 100% Głodu i daje duży zastrzyk XP.', basePrice: 50, priceMult: 1.05 },
+    { id: 'xp_boost', category: 'personal', type: 'buff', name: 'Mądrość Gelka', icon: '🧠', desc: 'Podwaja zdobywane XP przez 5 minut.', basePrice: 150, priceMult: 1.15, effect: { key: 'xp_boost', durationMs: 5 * 60 * 1000 } },
+    { id: 'magnet_loot', category: 'personal', type: 'passive', name: 'Magnes Neodymowy', icon: '🧲', desc: 'Przyciąga surowce! Skraca czas spawnu lootu o 20% (Pasywne).', basePrice: 500, priceMult: 1.25 },
+    { id: 'gold_fever', category: 'personal', type: 'passive', name: 'Złota Gorączka', icon: '✨', desc: '+50% więcej monet z każdego kliknięcia w loot (Pasywne).', basePrice: 1000, priceMult: 1.30 },
+    { id: 'snack_box_plus', category: 'personal', type: 'consume', name: 'Snack Box+', icon: '🍱', desc: 'Leczy 100% Głodu i daje zastrzyk XP po użyciu z ekwipunku.', basePrice: 50, priceMult: 1.05, effect: { hunger: 100, xp: 150 } },
 
-    { id: 'domain_shield', category: 'faction', name: 'Żelazna Kurtyna', icon: '🛡️', desc: 'Natychmiast dodaje +50 DEF do obecnej domeny (Wymaga zajętej strony).', basePrice: 800, priceMult: 1.10 },
-    { id: 'domain_nuke', category: 'faction', name: 'Wirus Sabotażowy', icon: '☣️', desc: 'Niszczy 50 DEF wrogiej domeny! (Szybki atak bez złota).', basePrice: 1500, priceMult: 1.12 },
+    { id: 'domain_shield', category: 'faction', type: 'domain', name: 'Żelazna Kurtyna', icon: '🛡️', desc: 'Natychmiast dodaje +50 DEF do obecnej domeny (Wymaga zajętej strony).', basePrice: 800, priceMult: 1.10 },
+    { id: 'domain_nuke', category: 'faction', type: 'domain', name: 'Wirus Sabotażowy', icon: '☣️', desc: 'Niszczy 50 DEF wrogiej domeny! (Szybki atak bez złota).', basePrice: 1500, priceMult: 1.12 },
   ];
 
   runtime.getShopItemPrice = function getShopItemPrice(itemId) {

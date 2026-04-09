@@ -123,42 +123,38 @@
   };
 
   R.buyShopItem = async function buyShopItem(itemId) {
-    if (!R.state) return;
+    if (!R.state) return false;
     const item = R.getShopItem(itemId);
-    if (!item) return;
+    if (!item) return false;
 
     if (!R.state.purchases || typeof R.state.purchases !== 'object') {
       R.state.purchases = {};
+    }
+    if (!R.state.inventory || typeof R.state.inventory !== 'object') {
+      R.state.inventory = {};
     }
 
     const price = R.getShopItemPrice ? R.getShopItemPrice(itemId) : Math.max(0, Number(item.basePrice) || 0);
 
     if ((Number(R.state.coins) || 0) < price) {
       R.showMessage('❌ Za mało monet!');
-      return;
+      return false;
     }
 
     const prevCoins = Math.max(0, Number(R.state.coins) || 0);
     const prevOwned = Math.max(0, Number(R.state.purchases[itemId]) || 0);
+    const prevInventory = { ...(R.state.inventory || {}) };
 
     R.state.coins = prevCoins - price;
     R.state.purchases[itemId] = prevOwned + 1;
 
+    let inventoryChanged = false;
+
     try {
-      if (itemId === 'xp_boost') {
-        const durationMs = 5 * 60 * 1000;
-        if (!R.state.activeEffects || typeof R.state.activeEffects !== 'object') {
-          R.state.activeEffects = {};
-        }
-        R.state.activeEffects.xp_boost = R.now() + durationMs;
-      } else if (itemId === 'snack_box_plus') {
-        R.state.hunger = 100;
-        const xpBurst = Math.max(100, Math.floor((R.state.currentXpRequired || (R.CONFIG && R.CONFIG.XP_PER_LEVEL) || 100) * 0.5));
-        if (typeof R.gainXP === 'function') {
-          R.gainXP(xpBurst);
-        } else {
-          R.state.xp = Math.max(0, Number(R.state.xp) || 0) + xpBurst;
-        }
+      if (item.type === 'consume' || item.type === 'buff') {
+        const currentAmount = Math.max(0, Number(R.state.inventory[item.id]) || 0);
+        R.state.inventory[item.id] = currentAmount + 1;
+        inventoryChanged = true;
       } else if (itemId === 'domain_shield') {
         await adjustDomainDefense(50, 'own');
       } else if (itemId === 'domain_nuke') {
@@ -166,6 +162,7 @@
       }
     } catch (error) {
       R.state.coins = prevCoins;
+      R.state.inventory = prevInventory;
       if (prevOwned > 0) {
         R.state.purchases[itemId] = prevOwned;
       } else {
@@ -173,12 +170,33 @@
       }
       const message = error && error.message ? String(error.message) : 'Zakup nieudany';
       R.showMessage(`⚠️ ${message}`);
-      return;
+      return false;
     }
 
-    R.persistState();
+    const saveFn = typeof R.saveProgress === 'function'
+      ? R.saveProgress
+      : (typeof R.persistState === 'function' ? R.persistState : null);
+
+    try {
+      if (saveFn) {
+        await saveFn();
+      }
+    } catch (error) {
+      R.state.coins = prevCoins;
+      R.state.inventory = prevInventory;
+      if (prevOwned > 0) {
+        R.state.purchases[itemId] = prevOwned;
+      } else {
+        delete R.state.purchases[itemId];
+      }
+      const message = error && error.message ? String(error.message) : 'Błąd zapisu postępu';
+      R.showMessage(`⚠️ ${message}`);
+      return false;
+    }
+
     R.updateUI();
     R.showMessage(`🛒 Kupiono: ${item.name}`);
+    return inventoryChanged;
   };
 
   R.renderShopPanel = function renderShopPanel() {

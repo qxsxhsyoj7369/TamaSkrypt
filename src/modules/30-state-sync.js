@@ -79,10 +79,19 @@
   };
 
   R.persistState = function persistState() {
-    if (!R.state || !R.currentUid) return;
+    if (!R.state || !R.currentUid) return Promise.resolve(false);
     if (R.persistInFlight) {
       R.persistQueued = true;
-      return;
+      return new Promise((resolve, reject) => {
+        const waitForPersistSlot = () => {
+          if (!R.persistInFlight) {
+            Promise.resolve(R.persistState()).then(resolve).catch(reject);
+            return;
+          }
+          setTimeout(waitForPersistSlot, 50);
+        };
+        setTimeout(waitForPersistSlot, 50);
+      });
     }
 
     R.persistInFlight = true;
@@ -135,15 +144,17 @@
       },
     };
 
-    R.firebaseWrite(`users/${R.currentUid}`, payload, 'PATCH')
+    return R.firebaseWrite(`users/${R.currentUid}`, payload, 'PATCH')
       .then(() => {
         R.state.lastSave = savedAt;
         if (R.syncRanking) {
           R.syncRanking('persist-state').catch(() => {});
         }
+        return true;
       })
       .catch((error) => {
         console.warn('[Gelek] Sync error:', error.message);
+        throw error;
       })
       .finally(() => {
         R.persistInFlight = false;
@@ -152,6 +163,10 @@
           R.persistState();
         }
       });
+  };
+
+  R.saveProgress = function saveProgress() {
+    return R.persistState();
   };
 
   R.updateDailyQuestProgress = function updateDailyQuestProgress() {

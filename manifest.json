@@ -1,7 +1,7 @@
 {
-  "version": "3.38.1",
+  "version": "3.38.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.38.1: Hotfix Seamless Modal — modal osadzony w document.body z viewport-fixed, bez rozpychania layoutu gry; poprawiona delegacja kliknięć dla akcji w modalu.",
+  "changelog": "Release 3.38.2: Hotfix ekwipunku sklepu — zakupy buffów i consumables trafiają do inventory, zapis postępu czeka na persist, a buy-item poprawnie odczytuje data-id.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.38.0",
-      "hash": "4fec2f41ad62eb50d31e2e03d694cb9315ef062473d30e97be0d3736b73e3f06",
+      "version": "3.38.2",
+      "hash": "ca4910d00ae3696098e4e82ce98e2dd884f8731368b1779b48089bfc92e4db6d",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.38.0",
-      "hash": "dc88033acd43efebd163e77e56a908a2a8c296800933bd012a0c076629c4ed75",
+      "version": "3.38.2",
+      "hash": "4e0fa1306906d87c0fe825320b0fe3842c7a6ffca20b603459fe07e802a582c8",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.38.1",
-      "hash": "dc52eb652413c93390e43cf6dee316a83ddf1ea28cf6c2193ca2eb1346f5008b",
+      "version": "3.38.2",
+      "hash": "c0cb496ad19d26154fa0de050c681b2bca031ea6be345a617fe42d7eff55e70d",
       "execute": "raw",
       "required": true
     },
@@ -65,8 +65,8 @@
     {
       "name": "shop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/60-shop.js",
-      "version": "3.38.0",
-      "hash": "59d8711a767b0ba03328b93dda9c20213440b8ec95b2529044bfff04a435b15f",
+      "version": "3.38.2",
+      "hash": "9d30a9ddb1680b27b7c4ff9915a4fcb72508c72829342de41551f86f88c25770",
       "execute": "raw",
       "required": true
     },
