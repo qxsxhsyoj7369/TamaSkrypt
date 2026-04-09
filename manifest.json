@@ -1,7 +1,7 @@
 {
-  "version": "3.27.9",
+  "version": "3.28.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix RTDB 400: usunięty legacy fallback encodeURIComponent który powodował HTTP 400 przy kluczu z kropkami (np. www.mpcforum.pl).",
+  "changelog": "UX auth: premium karty wyboru frakcji (Neon/Toxic/Plasma) w rejestracji — przebudowa HTML/CSS bez zmian logiki logowania.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.28.0",
-      "hash": "9a372265fd0b1762e08f066d18dfe30d71a2da10c64226e05f189e8fd0f9b454",
+      "version": "3.28.1",
+      "hash": "fbaa6b3602a3b7a845c29c8689ba5868ebe80a15b3655446ca114f46236e9f58",
       "execute": "raw",
       "required": true
     },

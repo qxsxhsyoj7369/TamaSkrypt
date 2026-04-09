@@ -1047,14 +1047,255 @@
       .__ts_card__ h5 { margin:0 0 4px 0; font-size:11px; letter-spacing:-0.02em; }
       .ts_food_item { position: fixed; font-size: 28px; z-index: 2147483646; cursor: pointer; }
       #__ts_auth_modal__ { position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:2147483647; display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',Arial,sans-serif; }
-      #__ts_auth_card__ { background:#fff; border-radius:20px; padding:28px 24px 24px; width:min(340px, 92vw); box-shadow:0 12px 40px rgba(0,0,0,0.45); text-align:center; }
+      #__ts_auth_card__ {
+        background: linear-gradient(160deg, rgba(36, 24, 58, 0.95), rgba(23, 17, 40, 0.94));
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius:20px;
+        padding:28px 24px 24px;
+        width:min(560px, 94vw);
+        box-shadow:0 20px 52px rgba(0,0,0,0.56), inset 0 1px 0 rgba(255,255,255,0.16);
+        text-align:center;
+        backdrop-filter: blur(12px) saturate(1.15);
+      }
       #__ts_auth_tabs__ { display:flex; border-radius:10px; overflow:hidden; border:2px solid #764ba2; margin-bottom:18px; }
-      #__ts_auth_tabs__ button { flex:1; padding:9px 0; border:none; background:transparent; font-size:13px; font-weight:bold; color:#764ba2; cursor:pointer; }
+      #__ts_auth_tabs__ button { flex:1; padding:9px 0; border:none; background:transparent; font-size:13px; font-weight:bold; color:#b79cf1; cursor:pointer; }
       #__ts_auth_tabs__ button.active { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
       .__ts_field__ { text-align:left; margin-bottom:12px; }
-      .__ts_field__ input { width:100%; padding:10px 12px; border:1.5px solid #ddd; border-radius:10px; font-size:14px; box-sizing:border-box; }
-      #__ts_auth_err__ { color:#e74c3c; font-size:12px; min-height:18px; margin-bottom:8px; font-weight:bold; }
-      #__ts_auth_submit__ { width:100%; padding:12px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer; }
+      .__ts_field__ input {
+        width:100%;
+        padding:10px 12px;
+        border:1.5px solid rgba(255,255,255,0.2);
+        border-radius:10px;
+        font-size:14px;
+        box-sizing:border-box;
+        color:#f4ecff;
+        background:rgba(255,255,255,0.06);
+      }
+      .__ts_field__ input::placeholder { color: rgba(237, 227, 255, 0.58); }
+      .__ts_field__ input:focus {
+        outline:none;
+        border-color: rgba(184, 133, 255, 0.85);
+        box-shadow: 0 0 0 3px rgba(155, 97, 255, 0.2);
+      }
+      #__ts_auth_err__ { color:#ff8b8b; font-size:12px; min-height:18px; margin-bottom:8px; font-weight:bold; }
+      #__ts_auth_submit__ {
+        width:100%;
+        padding:12px;
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        color:#fff;
+        border:none;
+        border-radius:12px;
+        font-size:15px;
+        font-weight:bold;
+        cursor:pointer;
+      }
+      #__ts_faction_select_row__ {
+        display: none;
+        text-align: left;
+        margin: 4px 0 12px;
+      }
+      #__ts_faction_select_row__ .__ts_faction_label__ {
+        display:block;
+        margin-bottom:10px;
+        font-size:11px;
+        font-weight:700;
+        letter-spacing:.04em;
+        color:rgba(255,255,255,0.74);
+        text-transform:uppercase;
+      }
+      #__ts_faction_cards__ {
+        display:flex;
+        gap:15px;
+      }
+      #__ts_auth_faction__ {
+        position:absolute;
+        width:0;
+        height:0;
+        opacity:0;
+        pointer-events:none;
+      }
+      .__ts_faction_card {
+        position: relative;
+        flex: 1;
+        background: rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 20px 14px 14px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-height: 158px;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      .__ts_faction_card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+        pointer-events: none;
+      }
+      .__ts_faction_radio__ {
+        position:absolute;
+        opacity:0;
+        width:0;
+        height:0;
+        pointer-events:none;
+      }
+      .__ts_faction_card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255,255,255,0.24);
+        background: rgba(0, 0, 0, 0.48);
+      }
+      .__ts_faction_title__ {
+        margin-top: 10px;
+        color:#fff;
+        font-size:14px;
+        font-weight:800;
+        letter-spacing:.01em;
+      }
+      .__ts_faction_tagline__ {
+        margin-top:5px;
+        color:rgba(255,255,255,0.6);
+        font-size:11px;
+        line-height:1.35;
+      }
+      .__ts_faction_emblem__ {
+        width: 58px;
+        height: 58px;
+        position: relative;
+        margin: 0 auto;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius: 14px;
+        transition: transform .34s ease, box-shadow .34s ease, filter .34s ease;
+      }
+      .__ts_faction_card:hover .__ts_faction_emblem__ {
+        transform: translateY(-2px) scale(1.03);
+      }
+
+      .__ts_faction_card_neon__ .__ts_faction_title__ { text-shadow: 0 0 12px rgba(255, 0, 255, .45); }
+      .__ts_faction_emblem_neon__ {
+        background: radial-gradient(circle at 30% 20%, rgba(255,0,255,.2), rgba(0,0,0,.12) 75%);
+        box-shadow: 0 0 18px rgba(255,0,255,.45);
+      }
+      .__ts_faction_emblem_neon__::before,
+      .__ts_faction_emblem_neon__::after {
+        content: '';
+        position: absolute;
+        width: 34px;
+        height: 34px;
+        background: conic-gradient(from 220deg, #ff5cff, #ff00ff 42%, #b200ff 72%, #ff5cff);
+        clip-path: polygon(48% 0%, 64% 0%, 54% 39%, 76% 39%, 36% 100%, 46% 58%, 27% 58%);
+        filter: drop-shadow(0 0 10px rgba(255,0,255,.8));
+      }
+      .__ts_faction_emblem_neon__::after {
+        transform: scale(.72) translate(7px, -6px) rotate(12deg);
+        opacity:.86;
+      }
+      .__ts_faction_card_neon__:hover .__ts_faction_emblem_neon__ {
+        box-shadow: 0 0 24px rgba(255,0,255,.72), 0 0 42px rgba(255,0,255,.35);
+      }
+
+      .__ts_faction_card_toxic__ .__ts_faction_title__ { text-shadow: 0 0 12px rgba(0, 255, 0, .42); }
+      .__ts_faction_emblem_toxic__ {
+        background: radial-gradient(circle at 30% 25%, rgba(122,255,122,.36), rgba(16,42,16,.22) 74%);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        box-shadow: 0 0 16px rgba(0,255,0,.46), inset 0 -7px 14px rgba(0, 70, 0, .46);
+        filter: blur(.05px);
+      }
+      .__ts_faction_emblem_toxic__::before,
+      .__ts_faction_emblem_toxic__::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(175,255,175,.82);
+      }
+      .__ts_faction_emblem_toxic__::before {
+        width: 14px;
+        height: 14px;
+        top: 11px;
+        left: 10px;
+      }
+      .__ts_faction_emblem_toxic__::after {
+        width: 10px;
+        height: 10px;
+        right: 11px;
+        bottom: 12px;
+        filter: blur(.6px);
+      }
+      .__ts_faction_card_toxic__:hover .__ts_faction_emblem_toxic__ {
+        box-shadow: 0 0 22px rgba(0,255,0,.56), 0 0 38px rgba(0,255,0,.24), inset 0 -8px 16px rgba(0,90,0,.52);
+      }
+
+      .__ts_faction_card_plasma__ .__ts_faction_title__ { text-shadow: 0 0 12px rgba(0, 255, 255, .44); }
+      .__ts_faction_emblem_plasma__ {
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(190,255,255,.92) 0 26%, rgba(0,255,255,.72) 35%, rgba(0,0,0,.16) 68%);
+        box-shadow: 0 0 14px rgba(0,255,255,.62), 0 0 34px rgba(0,255,255,.26);
+        filter: drop-shadow(0 0 8px rgba(0,255,255,.7));
+      }
+      .__ts_faction_emblem_plasma__ .__ts_orbit__ {
+        position:absolute;
+        width: 46px;
+        height: 20px;
+        border: 2px solid rgba(136,255,255,.85);
+        border-radius: 50%;
+      }
+      .__ts_faction_emblem_plasma__ .__ts_orbit_1__ { transform: rotate(24deg); }
+      .__ts_faction_emblem_plasma__ .__ts_orbit_2__ { transform: rotate(-30deg); }
+      .__ts_faction_emblem_plasma__ .__ts_orbit_3__ { transform: rotate(88deg) scale(.9); }
+      .__ts_faction_card_plasma__:hover .__ts_faction_emblem_plasma__ {
+        box-shadow: 0 0 20px rgba(0,255,255,.74), 0 0 44px rgba(0,255,255,.3);
+      }
+
+      .__ts_faction_card_neon__:has(.__ts_faction_radio__:checked) {
+        border-color: #ff00ff;
+        background: rgba(255, 0, 255, 0.15);
+        box-shadow: 0 0 0 1px rgba(255,0,255,.52), 0 0 26px rgba(255,0,255,.38);
+      }
+      .__ts_faction_card_toxic__:has(.__ts_faction_radio__:checked) {
+        border-color: #00ff00;
+        background: rgba(0, 255, 0, 0.15);
+        box-shadow: 0 0 0 1px rgba(0,255,0,.5), 0 0 26px rgba(0,255,0,.34);
+      }
+      .__ts_faction_card_plasma__:has(.__ts_faction_radio__:checked) {
+        border-color: #00ffff;
+        background: rgba(0, 255, 255, 0.15);
+        box-shadow: 0 0 0 1px rgba(0,255,255,.5), 0 0 26px rgba(0,255,255,.35);
+      }
+
+      .__ts_faction_card:has(.__ts_faction_radio__:checked) .__ts_faction_emblem__ {
+        animation: __ts_faction_jitter__ .18s linear infinite alternate, __ts_faction_pulse__ .9s ease-in-out infinite;
+      }
+      .__ts_faction_card_neon__:has(.__ts_faction_radio__:checked) .__ts_faction_emblem__ {
+        box-shadow: 0 0 16px rgba(255,0,255,.92), 0 0 32px rgba(255,0,255,.66), 0 0 58px rgba(255,0,255,.35);
+      }
+      .__ts_faction_card_toxic__:has(.__ts_faction_radio__:checked) .__ts_faction_emblem__ {
+        box-shadow: 0 0 14px rgba(0,255,0,.86), 0 0 30px rgba(0,255,0,.58), 0 0 54px rgba(0,255,0,.3);
+      }
+      .__ts_faction_card_plasma__:has(.__ts_faction_radio__:checked) .__ts_faction_emblem__ {
+        box-shadow: 0 0 15px rgba(0,255,255,.9), 0 0 34px rgba(0,255,255,.62), 0 0 56px rgba(0,255,255,.34);
+      }
+
+      @keyframes __ts_faction_jitter__ {
+        from { transform: translateX(-0.6px); }
+        to { transform: translateX(0.6px); }
+      }
+      @keyframes __ts_faction_pulse__ {
+        0%, 100% { filter: brightness(1) saturate(1.02); }
+        50% { filter: brightness(1.16) saturate(1.28); }
+      }
+
+      @media (max-width: 560px) {
+        #__ts_faction_cards__ { flex-direction: column; }
+        .__ts_faction_card { min-height: 130px; }
+      }
     `;
     styleHost.appendChild(style);
   };
@@ -1421,47 +1662,7 @@
   R.buildAuthHTML = function buildAuthHTML() {
     return `
       <div id="__ts_auth_card__">
-        <style>
-          #__ts_faction_select_row__ {
-            display: none;
-            margin-bottom: 10px;
-          }
-          #__ts_auth_faction__ {
-            width: 100%;
-            padding: 9px 12px;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            color: #e2d9f3;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c3b1e1' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 30px;
-            transition: border-color .2s, box-shadow .2s;
-          }
-          #__ts_auth_faction__:focus {
-            border-color: rgba(182,110,255,0.6);
-            box-shadow: 0 0 0 3px rgba(182,110,255,0.18);
-          }
-          #__ts_auth_faction__ option {
-            background: #2d1b4e;
-            color: #e2d9f3;
-          }
-          #__ts_faction_select_row__ label {
-            display: block;
-            font-size: 11px;
-            color: #c3b1e1;
-            margin-bottom: 4px;
-            letter-spacing: .03em;
-          }
-        </style>
-        <div style="font-size:22px;font-weight:bold;color:#764ba2;margin-bottom:4px;">🟣 Gelek</div>
+        <div style="font-size:22px;font-weight:bold;color:#b995ff;margin-bottom:4px;">🟣 Gelek</div>
         <p style="font-size:13px;color:#888;margin:0 0 18px;">Twój wirtualny żelek czeka!</p>
         <div id="__ts_auth_tabs__">
           <button type="button" id="__ts_tab_login__" class="active">Zaloguj się</button>
@@ -1472,12 +1673,38 @@
           <div class="__ts_field__"><input id="__ts_auth_pass__" type="password" name="password" autocomplete="current-password" required placeholder="hasło" /></div>
           <div class="__ts_field__" id="__ts_confirm_row__" style="display:none"><input id="__ts_auth_confirm__" type="password" name="confirm" autocomplete="new-password" placeholder="powtórz hasło" /></div>
           <div id="__ts_faction_select_row__">
-            <label for="__ts_auth_faction__">⚑ Wybierz frakcję</label>
-            <select id="__ts_auth_faction__" name="faction">
-              <option value="neon">🟣 Neon (Fuksja)</option>
-              <option value="toxic">🟢 Toxic (Limonka)</option>
-              <option value="plasma">🔵 Plasma (Cyjan)</option>
+            <span class="__ts_faction_label__">⚑ Wybierz frakcję</span>
+            <select id="__ts_auth_faction__" name="faction" aria-hidden="true" tabindex="-1">
+              <option value="neon" selected>Neon</option>
+              <option value="toxic">Toxic</option>
+              <option value="plasma">Plasma</option>
             </select>
+            <div id="__ts_faction_cards__" role="radiogroup" aria-label="Wybór frakcji">
+              <label class="__ts_faction_card __ts_faction_card_neon__">
+                <input class="__ts_faction_radio__" type="radio" name="faction_card" value="neon" checked onchange="this.closest('#__ts_faction_select_row__').querySelector('#__ts_auth_faction__').value='neon'" />
+                <div class="__ts_faction_emblem__ __ts_faction_emblem_neon__"></div>
+                <div class="__ts_faction_title__">Neon</div>
+                <div class="__ts_faction_tagline__">Ewolucja i Styl</div>
+              </label>
+
+              <label class="__ts_faction_card __ts_faction_card_toxic__">
+                <input class="__ts_faction_radio__" type="radio" name="faction_card" value="toxic" onchange="this.closest('#__ts_faction_select_row__').querySelector('#__ts_auth_faction__').value='toxic'" />
+                <div class="__ts_faction_emblem__ __ts_faction_emblem_toxic__"></div>
+                <div class="__ts_faction_title__">Toxic</div>
+                <div class="__ts_faction_tagline__">Mutacja i Dominacja</div>
+              </label>
+
+              <label class="__ts_faction_card __ts_faction_card_plasma__">
+                <input class="__ts_faction_radio__" type="radio" name="faction_card" value="plasma" onchange="this.closest('#__ts_faction_select_row__').querySelector('#__ts_auth_faction__').value='plasma'" />
+                <div class="__ts_faction_emblem__ __ts_faction_emblem_plasma__">
+                  <span class="__ts_orbit__ __ts_orbit_1__"></span>
+                  <span class="__ts_orbit__ __ts_orbit_2__"></span>
+                  <span class="__ts_orbit__ __ts_orbit_3__"></span>
+                </div>
+                <div class="__ts_faction_title__">Plasma</div>
+                <div class="__ts_faction_tagline__">Technologia i Burza</div>
+              </label>
+            </div>
           </div>
           <div id="__ts_auth_err__"></div>
           <button type="submit" id="__ts_auth_submit__">Zaloguj się</button>
