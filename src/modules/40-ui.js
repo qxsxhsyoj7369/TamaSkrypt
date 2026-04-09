@@ -79,53 +79,26 @@
     const accentColor = accentMap[factionId] || accentMap.neutral;
     const factionLabel = factionLabelMap[factionId] || 'Neutral';
 
-    // Determine phase label based on level tier
-    let phaseLabel = 'Faza Larwalna';
-    if (level >= 20) phaseLabel = 'Forma Ostateczna';
-    else if (level >= 10) phaseLabel = 'Forma Zaawansowana';
-
-    // Build progress section: next form info and bar
-    let progressHTML = '';
-    if (level >= 20) {
-      progressHTML = `<div class="__ts_evo_max__">✦ Osiągnięto Formę Ostateczną</div>`;
-    } else {
-      const nextThreshold = level < 10 ? 10 : 20;
-      const prevThreshold = level < 10 ? 1 : 10;
-      const progressInTier = level - prevThreshold;
-      const tierSize = nextThreshold - prevThreshold;
-      const progressPct = Math.min(100, Math.round((progressInTier / tierSize) * 100));
-
-      // Get next form name from EVOLUTION_LIBRARY
-      let nextFormName = '???';
-      if (R.EVOLUTION_LIBRARY) {
-        const pool = R.EVOLUTION_LIBRARY[factionId] || [];
-        for (let i = 0; i < pool.length; i++) {
-          if (pool[i].minLevel === nextThreshold) {
-            nextFormName = pool[i].name;
-            break;
-          }
-        }
-      }
-
-      progressHTML = `
-        <div class="__ts_evo_progress_wrap__">
-          <div class="__ts_evo_next_info__">Cel: ${nextFormName} (poz. ${nextThreshold})</div>
-          <div class="__ts_bar_bg__">
-            <div class="__ts_bar_fill__" style="width:${progressPct}%;background:${accentColor};box-shadow:0 0 8px ${accentColor};"></div>
-          </div>
-          <div class="__ts_evo_progress_label__">${level}/${nextThreshold}</div>
-        </div>
-      `;
-    }
+    const nextThreshold = level < 10 ? 10 : 20;
+    const prevThreshold = level < 10 ? 1 : 10;
+    const progressInTier = level < 20 ? level - prevThreshold : nextThreshold - prevThreshold;
+    const tierSize = nextThreshold - prevThreshold;
+    const progressPct = level >= 20
+      ? 100
+      : Math.min(100, Math.max(0, Math.round((progressInTier / tierSize) * 100)));
 
     return `
-      <div class="__ts_evo_card__">
-        <div class="__ts_evo_header__">
-          <span class="__ts_faction_dot__" style="background:${accentColor};box-shadow:0 0 8px ${accentColor};"></span>
-          <span class="__ts_evo_faction_name__">[${factionLabel.toUpperCase()}] ${phaseLabel}</span>
+      <div class="__ts_evo_banner__" title="Ewolucja: kliknij w przyszłości, aby otworzyć drzewko">
+        <div class="__ts_evo_banner_bg__" style="width: ${progressPct}%; background-color: ${accentColor};"></div>
+        <div class="__ts_evo_banner_content__">
+          <div class="__ts_evo_banner_left__">
+            <span class="__ts_faction_dot__" style="background-color: ${accentColor}; box-shadow: 0 0 6px ${accentColor};"></span>
+            <span class="__ts_evo_name__">${evolution.name} <span class="__ts_evo_phase__">(${factionLabel})</span></span>
+          </div>
+          <div class="__ts_evo_banner_right__">
+            ${level < 20 ? `Cel: poz. ${nextThreshold}` : '<span style="color: #ffd700;">MAX</span>'}
+          </div>
         </div>
-        <div class="__ts_evo_class_name__">${evolution.name}</div>
-        ${progressHTML}
       </div>
     `;
   };
@@ -1530,82 +1503,72 @@
         .__ts_faction_card { min-height: 130px; }
       }
 
-      .__ts_evo_card__ {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 12px;
-        padding: 10px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        width: 100%;
-        box-sizing: border-box;
+      .__ts_evo_banner__ {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        margin-top: 8px;
+        height: 34px;
+        cursor: pointer;
+        transition: border-color 0.2s, transform 0.2s;
       }
-      .__ts_evo_header__ {
+      .__ts_evo_banner__:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+      }
+      .__ts_evo_banner_bg__ {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0.2;
+        transition: width 0.4s ease-out;
+        z-index: 1;
+      }
+      .__ts_evo_banner_content__ {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+        font-size: 11px;
+        color: #eee;
+      }
+      .__ts_evo_banner_left__ {
         display: flex;
         align-items: center;
         gap: 6px;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        opacity: 0.72;
+        min-width: 0;
+      }
+      .__ts_faction_dot__ {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+      .__ts_evo_name__ {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .__ts_evo_phase__ {
+        opacity: 0.5;
+        font-weight: normal;
+        font-size: 10px;
         text-transform: uppercase;
       }
-      .__ts_evo_faction_name__ {
-        color: rgba(255,255,255,0.85);
-        letter-spacing: 0.06em;
-      }
-      .__ts_evo_class_name__ {
-        font-size: 14px;
-        font-weight: 800;
-        color: #fff;
-        letter-spacing: -0.02em;
-        line-height: 1.2;
-      }
-      .__ts_evo_progress_wrap__ {
-        background: rgba(0,0,0,0.28);
-        border-radius: 8px;
-        padding: 7px 8px 6px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-top: 2px;
-      }
-      .__ts_evo_next_info__ {
-        font-size: 9px;
-        color: rgba(200,200,220,0.72);
-        text-align: center;
-        letter-spacing: 0.01em;
-      }
-      .__ts_bar_bg__ {
-        width: 100%;
-        height: 6px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.08);
-        overflow: hidden;
-      }
-      .__ts_bar_fill__ {
-        height: 100%;
-        border-radius: 999px;
-        transition: width 0.5s cubic-bezier(.2,.8,.2,1);
-      }
-      .__ts_evo_progress_label__ {
-        font-size: 9px;
-        color: rgba(200,200,220,0.5);
-        text-align: right;
-        margin-top: -1px;
-      }
-      .__ts_evo_max__ {
+      .__ts_evo_banner_right__ {
+        font-family: Consolas, monospace;
         font-size: 10px;
-        font-weight: 800;
-        background: linear-gradient(90deg, #ffd700, #ffaa00);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-        text-align: center;
-        padding: 4px 0;
-        letter-spacing: 0.02em;
+        opacity: 0.8;
+        flex-shrink: 0;
       }
     `;
     styleHost.appendChild(style);

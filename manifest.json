@@ -1,7 +1,7 @@
 {
-  "version": "3.33.0",
+  "version": "3.33.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.33.0: Karta Postępu Ewolucji — nowy renderEvolutionSummary z paskiem postępu, nazwą następnej formy i kolorem frakcji.",
+  "changelog": "Release 3.33.1: Smart Banner Ewolucji — ultra-kompaktowy banner postępu w `40-ui.js`, mniej scrollowania i smuklejszy widżet.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.33.0",
-      "hash": "9c24a0646e8eacd695744d0fd373ac4487334bb7c1029f84f04cef97c82f6ded",
+      "version": "3.33.1",
+      "hash": "ce7e354283f2a1a688ee69b8511fa47a4cc4cd6e86951d19b862884541f61597",
       "execute": "raw",
       "required": true
     },
