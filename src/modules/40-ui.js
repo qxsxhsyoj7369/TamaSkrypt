@@ -181,6 +181,12 @@
     `;
 
     const closeModal = function closeModal() {
+      const mainBody = root.querySelector('#__ts_body__');
+      if (mainBody) {
+        mainBody.style.opacity = '1';
+        mainBody.style.filter = 'none';
+        mainBody.style.pointerEvents = 'auto';
+      }
       overlay.remove();
     };
 
@@ -193,6 +199,14 @@
     });
 
     widgetShell.appendChild(overlay);
+
+    const mainBody = root.querySelector('#__ts_body__');
+    if (mainBody) {
+      mainBody.style.transition = 'opacity 0.4s ease, filter 0.4s ease';
+      mainBody.style.opacity = '0.05';
+      mainBody.style.filter = 'blur(4px)';
+      mainBody.style.pointerEvents = 'none';
+    }
   };
 
   R.bindWidgetDelegatedEvents = function bindWidgetDelegatedEvents() {
@@ -1694,8 +1708,8 @@
       .__ts_evo_tree_backdrop__ {
         position: absolute;
         inset: 0;
-        background: rgba(5, 7, 14, 0.62);
-        backdrop-filter: blur(12px) saturate(1.08);
+        background: transparent !important;
+        backdrop-filter: none !important;
       }
       .__ts_evo_tree_modal__ {
         position: relative;

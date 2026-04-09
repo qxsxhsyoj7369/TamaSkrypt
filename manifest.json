@@ -1,7 +1,7 @@
 {
-  "version": "3.33.2",
+  "version": "3.33.3",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.33.2: Smart Evolution Tree Modal — dynamiczne stany active/locked/unlocked dla etapów ewolucji w `40-ui.js`.",
+  "changelog": "Release 3.33.3: Seamless Transition dla Drzewka Ewolucji — przezroczysty backdrop, płynny fade-out panelu głównego przy otwarciu modala.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.33.2",
-      "hash": "7afe3a3257521a5a33001f1badb81cfc4e9c01e673fdf26411a8c76ada437971",
+      "version": "3.33.3",
+      "hash": "4188e04d9e33146bdb8e3f1c87af0a38fb95256f86197fdf3e56aa73d8ba811d",
       "execute": "raw",
       "required": true
     },
