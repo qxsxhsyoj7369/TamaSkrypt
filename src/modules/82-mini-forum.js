@@ -98,18 +98,6 @@
     const style = document.createElement('style');
     style.id = FORUM_STYLE_ID;
     style.textContent = `
-      #${TRIGGER_ID} {
-        position: fixed;
-        z-index: 2147483646;
-        min-width: 36px;
-        min-height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-        border-radius: 12px;
-        cursor: pointer;
-      }
       #${MODAL_ID} {
         position: fixed;
         inset: 0;
@@ -371,37 +359,49 @@
   }
 
   function ensureTrigger() {
-    let trigger = document.getElementById(TRIGGER_ID);
-    if (trigger) return trigger;
+    // Szukaj najpierw w Shadow DOM widgetu (header), potem w document
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (root) {
+      const existing = root.getElementById(TRIGGER_ID);
+      if (existing) return existing;
+    } else {
+      const existing = document.getElementById(TRIGGER_ID);
+      if (existing) return existing;
+    }
 
-    trigger = document.createElement('button');
+    const trigger = document.createElement('button');
     trigger.id = TRIGGER_ID;
     trigger.type = 'button';
-    trigger.className = 'cyber-button variant-ghost neon-border';
     trigger.title = 'Holo-Pager';
     trigger.textContent = '📟';
+    trigger.style.cssText = [
+      'background:none',
+      'border:none',
+      'cursor:pointer',
+      'font-size:16px',
+      'padding:0 4px',
+      'opacity:.9',
+      'line-height:1',
+      'vertical-align:middle',
+    ].join(';');
     trigger.addEventListener('click', () => {
       R.forum && R.forum.open && R.forum.open();
     });
-    (document.body || document.documentElement).appendChild(trigger);
+
+    // Wstaw do headera widgetu w Shadow DOM
+    const header = R.getElById ? R.getElById('__ts_header__') : null;
+    if (header) {
+      header.appendChild(trigger);
+    } else {
+      // Fallback: bezpośrednio do body — rzadki przypadek przed montażem
+      (document.body || document.documentElement).appendChild(trigger);
+    }
     return trigger;
   }
 
   function syncTriggerPosition() {
-    const trigger = ensureTrigger();
-    const floe = R.getElById ? R.getElById('__ts_zelek_floe_container__') : null;
-    const anchor = floe && floe.getBoundingClientRect ? floe.getBoundingClientRect() : null;
-    const host = R.widgetEl && R.widgetEl.getBoundingClientRect ? R.widgetEl.getBoundingClientRect() : null;
-    if (!trigger || (!anchor && !host)) return;
-
-    const top = anchor
-      ? Math.round(anchor.top + 4)
-      : Math.round(host.top + 56);
-    const left = anchor
-      ? Math.round(anchor.left - 42)
-      : Math.round(host.left - 44);
-    trigger.style.top = `${Math.max(8, top)}px`;
-    trigger.style.left = `${Math.max(8, left)}px`;
+    // Trigger jest teraz wewnątrz headera widgetu, nie potrzeba ręcznego pozycjonowania
+    ensureTrigger();
   }
 
   function closeModal() {
@@ -634,10 +634,7 @@
   }
 
   function bindRepositionEvents() {
-    if (window.__ts_forum_resize_bound__) return;
-    window.__ts_forum_resize_bound__ = true;
-    window.addEventListener('resize', () => syncTriggerPosition());
-    window.addEventListener('scroll', () => syncTriggerPosition(), { passive: true });
+    // Trigger jest w headerze widgetu – nie wymaga ręcznego repozycjonowania
   }
 
   function init() {
