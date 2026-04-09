@@ -1,7 +1,7 @@
 {
-  "version": "3.33.3",
+  "version": "3.34.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.33.3: Seamless Transition dla Drzewka Ewolucji — przezroczysty backdrop, płynny fade-out panelu głównego przy otwarciu modala.",
+  "changelog": "Release 3.34.0: UI Overhaul — Smart Bannery, siatka 2x2 i Seamless Modal Engine (delegacja nav + transparentny modal).",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.33.3",
-      "hash": "4188e04d9e33146bdb8e3f1c87af0a38fb95256f86197fdf3e56aa73d8ba811d",
+      "version": "3.34.0",
+      "hash": "bd51adbbc4493c0833169d6385288be42a8714f9bc06895cf38ee10245e5405f",
       "execute": "raw",
       "required": true
     },
