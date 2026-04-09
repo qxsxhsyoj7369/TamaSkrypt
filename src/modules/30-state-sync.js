@@ -28,7 +28,7 @@
 
     const profileFaction = (R.normalizeFactionId
       ? R.normalizeFactionId(profile?.faction)
-      : String(profile?.faction || '').toLowerCase()) || 'neutral';
+      : String(profile?.faction || '').toLowerCase()) || 'neon';
 
     R.state = {
       hunger: R.clamp(Number(pet?.hunger) || 100, 0, 100),

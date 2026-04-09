@@ -420,21 +420,21 @@
   runtime.normalizeFactionId = function normalizeFactionId(value) {
     const key = String(value || '').toLowerCase();
     if (key === 'neon' || key === 'toxic' || key === 'plasma') return key;
-    return 'neutral';
+    return 'neon';
   };
 
   runtime.getPlayerFactionId = function getPlayerFactionId() {
     const fromState = runtime.state && runtime.state.profileFaction
       ? runtime.normalizeFactionId(runtime.state.profileFaction)
-      : 'neutral';
-    if (fromState !== 'neutral') return fromState;
+      : 'neon';
+    if (fromState === 'neon' || fromState === 'toxic' || fromState === 'plasma') return fromState;
 
     const fromMultiplayer = runtime.multiplayer && runtime.multiplayer.playerFaction
       ? runtime.normalizeFactionId(runtime.multiplayer.playerFaction)
-      : 'neutral';
-    if (fromMultiplayer !== 'neutral') return fromMultiplayer;
+      : 'neon';
+    if (fromMultiplayer === 'neon' || fromMultiplayer === 'toxic' || fromMultiplayer === 'plasma') return fromMultiplayer;
 
-    return 'neutral';
+    return 'neon';
   };
 
   runtime.getEvolutionForLevel = function getEvolutionForLevel(level, factionId) {

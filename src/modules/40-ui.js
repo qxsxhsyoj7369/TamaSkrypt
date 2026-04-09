@@ -57,7 +57,8 @@
 
   R.renderEvolutionSummary = function renderEvolutionSummary() {
     const evolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
-    const bonuses = R.getEvolutionBonuses && R.state ? R.getEvolutionBonuses(R.state.level) : null;
+    const level = Math.max(1, Number(R.state && R.state.level) || 1);
+    const bonuses = R.getEvolutionBonuses && R.state ? R.getEvolutionBonuses(level, R.state.profileFaction) : null;
     if (!evolution || !bonuses) return '<span>Forma: podstawowa</span>';
 
     const factionId = (R.normalizeFactionId && R.state)
@@ -81,7 +82,7 @@
     if (foodBonusPct > 0) perkParts.push(`+${foodBonusPct}% XP jedzenia`);
     if (drainReductionPct > 0) perkParts.push(`-${drainReductionPct}% głodu`);
 
-    const hasPerks = perkParts.length > 0;
+    const hasPerks = level >= 10 && perkParts.length > 0;
     const accentColor = accentMap[factionId] || accentMap.neutral;
 
     return `
@@ -96,9 +97,7 @@
         </span>
         <div class="__ts_class_text__">
           <span class="__ts_class_name__">Klasa: ${evolution.name}</span>
-          ${hasPerks
-            ? `<span class="__ts_class_perks__">${perkParts.join(' • ')}</span>`
-            : ''}
+          ${hasPerks ? `<span class="__ts_class_perks__">${perkParts.join(' • ')}</span>` : ''}
         </div>
       </div>
     `;
