@@ -292,11 +292,11 @@
 
         if (targetKey === 'status') {
           modalTitle = 'Status';
-          modalContent = `
+          modalContent = R.renderStatusPanel ? R.renderStatusPanel() : `
             <div class="__ts_card__">
               <h5>📊 Status Gelka</h5>
               <div>Poziom: <strong>${R.state && Number.isFinite(R.state.level) ? R.state.level : 1}</strong></div>
-              <div>Monety: <strong>${R.state && Number.isFinite(R.state.coins) ? R.state.coins : 0}</strong> 🪙</div>
+              <div>Monety: <strong>🪙 ${R.formatNum ? R.formatNum(R.state && Number.isFinite(R.state.coins) ? R.state.coins : 0) : (R.state && Number.isFinite(R.state.coins) ? R.state.coins : 0)}</strong></div>
               <div>Nastrój: <strong>${R.getMood ? (R.getMood().label || 'Neutralny') : 'Neutralny'}</strong></div>
             </div>
           `;
@@ -311,9 +311,12 @@
           modalTitle = 'Ekwipunek';
           if (R.renderInventoryPanel) R.renderInventoryPanel();
           const panelInventory = R.getElById('__ts_panel_inventory__');
-          modalContent = panelInventory && panelInventory.innerHTML
+          const inventoryHTML = panelInventory && panelInventory.innerHTML
             ? panelInventory.innerHTML
             : '<div class="__ts_card__">Ekwipunek jest pusty.</div>';
+          modalContent = R.enrichInventoryModalHTML
+            ? R.enrichInventoryModalHTML(inventoryHTML)
+            : inventoryHTML;
         } else if (targetKey === 'ranking') {
           // Open immediately with spinner, then inject real data
           if (R.ui && R.ui.openSeamlessModal) {
@@ -543,21 +546,27 @@
 
     const missionsHTML = goals.map((goal) => {
       const pct = R.clamp(R.getHourlyGoalPercent ? R.getHourlyGoalPercent(goal) : 0, 0, 100);
-      const progressLabel = R.formatGoalProgress ? R.formatGoalProgress(goal) : '0/0';
       const goalLabel = goal.displayLabel || goal.label || goal.id;
       const icon = goal.icon || '🎯';
       const rarity = String(goal.rarity || 'common').toLowerCase();
       const rarityLabel = goal.rarityLabel || 'Pospolite';
       const rarityClass = rarity === 'legendary' ? 'epic' : (rarity === 'epic' || rarity === 'rare' ? rarity : 'common');
-      const rewardText = `+${goal.rewardCoins || 0} 🪙, +${goal.rewardXp || 0} XP`;
-      const parts = String(progressLabel || '0/0').split('/');
-      const current = (parts[0] || '0').trim();
-      const req = (parts[1] || '0').trim();
+      const rewardCoins = Number(goal.rewardCoins) || 0;
+      const rewardXp = Number(goal.rewardXp) || 0;
+      const rewardText = `+${R.formatNum ? R.formatNum(rewardCoins) : rewardCoins} 🪙, +${R.formatNum ? R.formatNum(rewardXp) : rewardXp} XP`;
+      const targetRaw = Math.max(1, Number(goal.target) || 1);
+      const progressRaw = R.clamp(Number(goal.progress) || 0, 0, targetRaw);
+      const isTimeGoal = goal.unit === 'ms';
+      const currentDisplay = isTimeGoal ? Math.floor(progressRaw / 60000) : progressRaw;
+      const reqDisplay = isTimeGoal ? Math.max(1, Math.round(targetRaw / 60000)) : targetRaw;
+      const progressUnit = isTimeGoal ? 'm' : '';
+      const current = R.formatNum ? R.formatNum(currentDisplay) : String(currentDisplay);
+      const req = R.formatNum ? R.formatNum(reqDisplay) : String(reqDisplay);
       return `
         <div class="__ts_mission_card__ __ts_mission_${rarityClass}">
           <div class="__ts_mission_top__">
             <span class="__ts_mission_name__">${icon} ${goalLabel}</span>
-            <span class="__ts_mission_progress_text__">${current}/${req}</span>
+            <span class="__ts_mission_progress_text__">${current}/${req}${progressUnit}</span>
           </div>
           <div class="__ts_mission_bar_bg__">
             <div class="__ts_mission_bar_fill__" style="width: ${pct}%"></div>
@@ -577,8 +586,44 @@
     return `
       ${missionsHTML}
       <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; text-align: center;">
-        <div id="__ts_hourly_reward_total__" style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Suma nagrody: +${rewards.coins} 🪙, +${rewards.xp} XP</div>
+        <div id="__ts_hourly_reward_total__" style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Suma nagrody: +${R.formatNum ? R.formatNum(rewards.coins) : rewards.coins} 🪙, +${R.formatNum ? R.formatNum(rewards.xp) : rewards.xp} XP</div>
         ${canClaim ? '<button class="__ts_forum_btn__" data-action="claim-hourly-quest" style="width: 100%; font-size: 14px; padding: 10px; background: linear-gradient(135deg, #a651ff, #ff3fbf);">🎁 Odbierz nagrodę</button>' : ''}
+      </div>
+    `;
+  };
+
+  R.renderInventoryResourcesSummary = function renderInventoryResourcesSummary() {
+    const resources = (R.state && R.state.resources && typeof R.state.resources === 'object')
+      ? R.state.resources
+      : { wood: 0, iron: 0, gold: 0 };
+    const format = R.formatNum ? R.formatNum : (value) => String(Math.floor(Number(value) || 0));
+
+    return `
+      <div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+        <span title="Drewno" style="font-family: Consolas, monospace;">🪵 ${format(resources.wood || 0)}</span>
+        <span title="Żelazo" style="font-family: Consolas, monospace;">⛓️ ${format(resources.iron || 0)}</span>
+        <span title="Złoto" style="font-family: Consolas, monospace;">👑 ${format(resources.gold || 0)}</span>
+      </div>
+    `;
+  };
+
+  R.enrichInventoryModalHTML = function enrichInventoryModalHTML(content) {
+    const baseContent = String(content || '<div class="__ts_card__">Ekwipunek jest pusty.</div>');
+    const resourcesSummary = R.renderInventoryResourcesSummary ? R.renderInventoryResourcesSummary() : '';
+    return `${resourcesSummary}${baseContent}`;
+  };
+
+  R.renderStatusPanel = function renderStatusPanel() {
+    const level = R.state && Number.isFinite(R.state.level) ? R.state.level : 1;
+    const coins = R.state && Number.isFinite(R.state.coins) ? R.state.coins : 0;
+    const moodLabel = R.getMood ? (R.getMood().label || 'Neutralny') : 'Neutralny';
+    const format = R.formatNum ? R.formatNum : (value) => String(Math.floor(Number(value) || 0));
+    return `
+      <div class="__ts_card__">
+        <h5>📊 Status Gelka</h5>
+        <div>Poziom: <strong>${level}</strong></div>
+        <div>Monety: <strong>🪙 ${format(coins)}</strong></div>
+        <div>Nastrój: <strong>${moodLabel}</strong></div>
       </div>
     `;
   };
@@ -2292,7 +2337,8 @@
     const state = R.state;
     const mood = R.getMood();
     const onlineMs = state.totalOnline + (R.now() - state.sessionStart);
-    const xpPct = Math.round((state.xp / R.CONFIG.XP_PER_LEVEL) * 100);
+    const currentXpRequired = state.currentXpRequired || R.CONFIG.XP_PER_LEVEL;
+    const xpPct = Math.round((state.xp / Math.max(1, currentXpRequired)) * 100);
     const hungerPct = R.clamp(state.hunger, 0, 100);
     const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
     const hpPct = R.clamp(Math.round((state.hp / Math.max(1, hpMax)) * 100), 0, 100);
@@ -2328,7 +2374,7 @@
           <div id="__ts_levelup_inline__"></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">❤️ HP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hp_bar__" style="width:${hpPct}%"></div></div><span class="__ts_val__">${hpDisplay}/${hpMax}</span></div>
           <div class="__ts_stat_row__"><span class="__ts_label__">🍬 Głód</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_hunger_bar__" style="width:${hungerPct}%"></div></div><span class="__ts_val__">${state.hunger}/100</span></div>
-          <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${state.xp}/${R.CONFIG.XP_PER_LEVEL}</span></div>
+          <div class="__ts_stat_row__"><span class="__ts_label__">⭐ XP</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ __ts_xp_bar__" style="width:${xpPct}%"></div></div><span class="__ts_val__">${R.formatNum ? R.formatNum(state.xp) : state.xp}/${R.formatNum ? R.formatNum(currentXpRequired) : currentXpRequired}</span></div>
 
           <div id="__ts_territory_card__">
             <div class="__ts_smart_banner__" id="__ts_territory_trigger" style="cursor:pointer;">
@@ -2427,9 +2473,10 @@
 
     const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
     const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
+    const currentXpRequired = state.currentXpRequired || R.CONFIG.XP_PER_LEVEL;
     R.updateBar('__ts_hp_bar__', state.hp, hpMax, `${hpDisplay}/${hpMax}`);
     R.updateBar('__ts_hunger_bar__', state.hunger, 100, `${state.hunger}/100`);
-    R.updateBar('__ts_xp_bar__', state.xp, R.CONFIG.XP_PER_LEVEL, `${state.xp}/${R.CONFIG.XP_PER_LEVEL}`);
+    R.updateBar('__ts_xp_bar__', state.xp, currentXpRequired, `${R.formatNum ? R.formatNum(state.xp) : state.xp}/${R.formatNum ? R.formatNum(currentXpRequired) : currentXpRequired}`);
 
     const evolutionLine = R.getElById('__ts_evolution_line__');
     if (evolutionLine && R.renderEvolutionSummary) {
@@ -2455,11 +2502,11 @@
     const rewardTotalEl = R.getElById('__ts_hourly_reward_total__');
     if (rewardTotalEl && R.getHourlyQuestRewards) {
       const rewards = R.getHourlyQuestRewards(state.dailyQuest);
-      rewardTotalEl.textContent = `Suma nagrody: +${rewards.coins} 🪙, +${rewards.xp} XP`;
+      rewardTotalEl.textContent = `Suma nagrody: +${R.formatNum ? R.formatNum(rewards.coins) : rewards.coins} 🪙, +${R.formatNum ? R.formatNum(rewards.xp) : rewards.xp} XP`;
     }
 
     const coinsEl = R.getElById('__ts_coins__');
-    if (coinsEl) coinsEl.textContent = String(state.coins);
+    if (coinsEl) coinsEl.textContent = R.formatNum ? R.formatNum(state.coins) : String(state.coins);
 
     const domainState = (R.multiplayer && typeof R.multiplayer.getCurrentDomainState === 'function')
       ? R.multiplayer.getCurrentDomainState()

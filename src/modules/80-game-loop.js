@@ -10,6 +10,62 @@
     return status && status.status === 'hostile';
   }
 
+  if (!R.__hourlyRewardsScaledOverrideApplied__) {
+    R.__hourlyRewardsScaledOverrideApplied__ = true;
+
+    const baseGetHourlyQuestRewards = typeof R.getHourlyQuestRewards === 'function'
+      ? R.getHourlyQuestRewards
+      : null;
+
+    const baseMakeHourlyQuest = typeof R.makeHourlyQuest === 'function'
+      ? R.makeHourlyQuest
+      : null;
+
+    R.getHourlyQuestRewards = function getHourlyQuestRewardsWithLevelCoins(quest) {
+      const baseRewards = baseGetHourlyQuestRewards
+        ? baseGetHourlyQuestRewards(quest)
+        : { coins: 0, xp: 0 };
+      const safeLevel = Math.max(1, Math.floor(Number(R.state && R.state.level) || 1));
+      const levelMultiplier = Math.pow(1.25, Math.max(0, safeLevel - 1));
+      const scaledCoins = Math.max(0, Math.floor((Number(baseRewards.coins) || 0) * levelMultiplier));
+      return {
+        coins: scaledCoins,
+        xp: Math.max(0, Number(baseRewards.xp) || 0),
+      };
+    };
+
+    R.makeHourlyQuest = function makeHourlyQuestWithScaledTargets() {
+      if (!baseMakeHourlyQuest) {
+        return {
+          hourKey: R.getHourKey ? R.getHourKey() : '',
+          questVersion: R.HOURLY_QUEST_VERSION || 1,
+          goals: [],
+          rewardCoins: 0,
+          rewardXp: 0,
+          claimed: false,
+        };
+      }
+
+      const quest = baseMakeHourlyQuest();
+      const safeLevel = Math.max(1, Math.floor(Number(R.state && R.state.level) || 1));
+      const targetMultiplier = Math.min(2.2, 1 + (safeLevel - 1) * 0.03);
+      const goals = Array.isArray(quest && quest.goals) ? quest.goals : [];
+
+      goals.forEach((goal) => {
+        if (!goal) return;
+        const baseTarget = Math.max(1, Number(goal.target) || 1);
+        const scaledTarget = Math.max(1, Math.round(baseTarget * targetMultiplier));
+        goal.target = scaledTarget;
+        goal.progress = R.clamp ? R.clamp(Number(goal.progress) || 0, 0, scaledTarget) : Math.min(Math.max(Number(goal.progress) || 0, 0), scaledTarget);
+      });
+
+      const rewards = R.getHourlyQuestRewards ? R.getHourlyQuestRewards({ goals }) : { coins: 0, xp: 0 };
+      quest.rewardCoins = rewards.coins;
+      quest.rewardXp = rewards.xp;
+      return quest;
+    };
+  }
+
   R.gainXP = function gainXP(amount) {
     if (!R.state || !R.state.alive) return;
     const gain = Math.max(0, Number(amount) || 0);
