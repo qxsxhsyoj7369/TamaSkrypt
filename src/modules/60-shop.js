@@ -37,23 +37,29 @@
 
   R.renderShopPanel = function renderShopPanel() {
     const panel = R.getElById ? R.getElById('__ts_panel_shop__') : document.getElementById('__ts_panel_shop__');
-    if (!panel || panel.style.display === 'none') return;
+    if (!panel) return;
 
-    panel.innerHTML = R.SHOP_ITEMS.map((item) => {
+    const cards = R.SHOP_ITEMS.map((item) => {
+      const itemDescription = item.description || item.desc || '';
       return `
-        <div class="__ts_card__">
-          <h5>${item.name}</h5>
-          <div>${item.desc}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-            <span>💰 ${item.price}</span>
-            <button class="__ts_btn__" data-buy-item="${item.id}">Kup</button>
+        <div class="__ts_shop_item_card__">
+          <div class="__ts_shop_item_header__">
+            <span class="__ts_shop_item_icon__">🛍️</span>
+            <span class="__ts_shop_item_name__">${item.name}</span>
+          </div>
+          <div class="__ts_shop_item_desc__">${itemDescription}</div>
+          <div class="__ts_shop_item_footer__">
+            <span class="__ts_shop_item_price__">🪙 ${item.price}</span>
+            <button class="__ts_forum_btn__ __ts_shop_buy_btn__" data-action="buy-item" data-id="${item.id}">Kup</button>
           </div>
         </div>
       `;
     }).join('');
 
-    panel.querySelectorAll('[data-buy-item]').forEach((btn) => {
-      btn.addEventListener('click', () => R.buyShopItem(btn.getAttribute('data-buy-item')));
+    panel.innerHTML = `<div class="__ts_shop_grid__">${cards}</div>`;
+
+    panel.querySelectorAll('[data-action="buy-item"]').forEach((btn) => {
+      btn.addEventListener('click', () => R.buyShopItem(btn.getAttribute('data-id')));
     });
   };
 })();

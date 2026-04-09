@@ -1953,6 +1953,81 @@
       .__ts_nav_btn__:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.2); transform: scale(1.02); }
       .__ts_nav_btn__.__ts_tab_active__ { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.22); }
 
+      .__ts_forum_btn__ {
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(140deg, oklch(58% 0.19 299 / 0.72), oklch(50% 0.16 282 / 0.78));
+        box-shadow: 0 0 12px oklch(65% 0.24 310 / 0.24), 0 8px 18px oklch(8% 0.03 280 / 0.35);
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+      .__ts_forum_btn__:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+      }
+
+      .__ts_shop_grid__ {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+        padding-bottom: 10px;
+      }
+      .__ts_shop_item_card__ {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .__ts_shop_item_card__:hover {
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateY(-2px);
+      }
+      .__ts_shop_item_header__ {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .__ts_shop_item_icon__ {
+        font-size: 16px;
+        filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+      }
+      .__ts_shop_item_name__ {
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .__ts_shop_item_desc__ {
+        font-size: 10px;
+        color: #aaa;
+        margin-bottom: 10px;
+        flex: 1;
+      }
+      .__ts_shop_item_footer__ {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 8px;
+      }
+      .__ts_shop_item_price__ {
+        font-family: Consolas, monospace;
+        font-weight: bold;
+        color: #ffd700;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+      }
+      .__ts_shop_buy_btn__ {
+        padding: 4px 10px !important;
+        font-size: 10px !important;
+      }
+
       .__ts_forum_overlay__ {
         position: absolute;
         inset: 0;

@@ -1,7 +1,7 @@
 {
-  "version": "3.34.0",
+  "version": "3.34.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.0: UI Overhaul — Smart Bannery, siatka 2x2 i Seamless Modal Engine (delegacja nav + transparentny modal).",
+  "changelog": "Release 3.34.1: Glassmorphism 2026 Shop UI w Seamless Modal — szklane karty, siatka itemów i nowy styl przycisku kupna.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.0",
-      "hash": "bd51adbbc4493c0833169d6385288be42a8714f9bc06895cf38ee10245e5405f",
+      "version": "3.34.1",
+      "hash": "9f1b68a93826c75462ae94cd62017b12b977d2ce544dfff4b4b6e88e3ccb65bd",
       "execute": "raw",
       "required": true
     },
@@ -65,8 +65,8 @@
     {
       "name": "shop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/60-shop.js",
-      "version": "3.13.0",
-      "hash": "35304ca8879f97d21b04926f42cfa52b1b1f3d7e432f43d90cdfc4cad546d6ec",
+      "version": "3.34.1",
+      "hash": "c3d5d8d4b5c59f6f7815126f028cbbbcf88a75227a910bc333a8e40b331aa4f1",
       "execute": "raw",
       "required": true
     },
