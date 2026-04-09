@@ -314,24 +314,21 @@
             ? panelInventory.innerHTML
             : '<div class="__ts_card__">Ekwipunek jest pusty.</div>';
         } else if (targetKey === 'ranking') {
-          modalTitle = 'Ranking';
-          if (R.ranking) R.ranking.loading = true;
-          if (R.renderRankingPanel) R.renderRankingPanel();
-          const panelRanking = R.getElById('__ts_panel_ranking__');
-          modalContent = panelRanking && panelRanking.innerHTML
-            ? panelRanking.innerHTML
-            : '<div class="__ts_card__">Ranking ładuje się...</div>';
-          if (R.fetchLeaderboard) {
-            Promise.resolve(R.fetchLeaderboard(true))
-              .then(() => {
-                if (R.renderRankingPanel) R.renderRankingPanel();
-                const overlayEl = R.getElById('__ts_forum_overlay__');
-                const bodyEl = overlayEl ? overlayEl.querySelector('.__ts_forum_body__') : null;
-                const rankingEl = R.getElById('__ts_panel_ranking__');
-                if (bodyEl && rankingEl) bodyEl.innerHTML = rankingEl.innerHTML || bodyEl.innerHTML;
-              })
-              .catch(() => {});
+          // Open immediately with spinner, then inject real data
+          if (R.ui && R.ui.openSeamlessModal) {
+            R.ui.openSeamlessModal('&#127942; Ranking Globalny', '<div id="__ts_rank_content__" style="text-align:center;padding:30px;"><div class="__ts_spinner__"></div><div style="font-size:11px;opacity:0.7;margin-top:8px;">Skanowanie bazy...</div></div>');
           }
+          setTimeout(async () => {
+            try {
+              const html = R.generateRankingHTML ? await R.generateRankingHTML() : '<p style="text-align:center;opacity:0.6;">Brak funkcji rankingu.</p>';
+              const container = R.getElById('__ts_rank_content__') || (R.widgetShadowRoot ? R.widgetShadowRoot.getElementById('__ts_rank_content__') : null);
+              if (container) container.outerHTML = html;
+            } catch (e) {
+              const container = R.getElById('__ts_rank_content__') || (R.widgetShadowRoot ? R.widgetShadowRoot.getElementById('__ts_rank_content__') : null);
+              if (container) container.innerHTML = '<div style="color:#ff3fbf;text-align:center;padding:20px;">&#9888; B&#322;&#261;d sygna&#322;u.</div>';
+            }
+          }, 100);
+          return;
         }
 
         if (R.ui && R.ui.openSeamlessModal) {
@@ -2224,6 +2221,18 @@
       }
       .__ts_badge_lvl__ { color: #37e9ff; border-color: rgba(55, 233, 255, 0.3); }
       .__ts_badge_online__ { color: #a651ff; border-color: rgba(166, 81, 255, 0.3); }
+      .__ts_spinner__ {
+        border: 2px solid rgba(255,255,255,0.1);
+        border-top: 2px solid #37e9ff;
+        border-radius: 50%;
+        width: 20px; height: 20px;
+        animation: __ts_spin__ 1s linear infinite;
+        margin: 0 auto 10px auto;
+      }
+      @keyframes __ts_spin__ {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
       .__ts_skill_banner_ready__ {
         border-color: rgba(55, 233, 255, 0.5) !important;
         box-shadow: 0 0 12px rgba(55, 233, 255, 0.25), inset 0 0 8px rgba(55, 233, 255, 0.08) !important;

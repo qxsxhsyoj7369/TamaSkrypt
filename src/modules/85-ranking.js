@@ -248,9 +248,61 @@
     }
   };
 
+  R.generateRankingHTML = async function generateRankingHTML() {
+    // Fetch fresh data
+    await R.fetchLeaderboard(true);
+    const scope = R.ranking.scope || 'allTime';
+    const rows = scope === 'daily' ? R.ranking.daily : R.ranking.allTime;
+    const myUid = R.currentUid;
+
+    if (!rows || !rows.length) {
+      return '<div style="text-align:center;padding:20px;opacity:0.6;font-size:11px;">Brak danych rankingu. Zagraj chwil&#281;, aby zapisa&#263; wynik!</div>';
+    }
+
+    const scopeBtn = (s, label) =>
+      `<button style="flex:1;padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:${scope === s ? 'rgba(166,81,255,0.25)' : 'rgba(255,255,255,0.05)'};color:#fff;cursor:pointer;font-size:10px;" onclick="window.__gelekRankScope_='${s}';this.closest('.__ts_forum_body__') && (window.__gelekRankReload_ && window.__gelekRankReload_())">${label}</button>`;
+
+    const podiumStyles = [
+      'background:linear-gradient(90deg,rgba(255,215,0,0.2),transparent);border-left:4px solid #ffd700;',
+      'background:linear-gradient(90deg,rgba(192,192,192,0.15),transparent);border-left:4px solid #c0c0c0;',
+      'background:linear-gradient(90deg,rgba(205,127,50,0.15),transparent);border-left:4px solid #cd7f32;',
+    ];
+    const podiumMedals = ['&#129351;', '&#129352;', '&#129353;'];
+
+    let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
+
+    // Scope switcher
+    html += `<div style="display:flex;gap:6px;margin-bottom:4px;">${scopeBtn('daily','Dzienny')}${scopeBtn('allTime','All-time')}</div>`;
+
+    rows.forEach((player, index) => {
+      const isMe = player.uid === myUid;
+      const medal = index < 3 ? podiumMedals[index] + ' ' : `#${index + 1} `;
+      const style = index < 3 ? podiumStyles[index] : 'background:rgba(255,255,255,0.03);border-left:1px solid rgba(255,255,255,0.08);';
+      const highlight = isMe ? 'outline:1px solid #a651ff;' : '';
+      html += `<div style="${style}${highlight}padding:10px 12px;border-radius:6px;">`;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">`;
+      html += `<span style="font-size:12px;font-weight:700;">${medal}${escapeHtml(player.username || player.uid)}${isMe ? ' <span style="color:#a651ff;font-size:9px;">(Ty)</span>' : ''}</span>`;
+      html += `<span style="font-size:10px;opacity:0.8;">${player.score || 0} pkt</span>`;
+      html += `</div>`;
+      html += `<div style="font-size:9px;opacity:0.6;margin-top:3px;">Lvl ${player.level || 1} &bull; XP ${player.xp || 0} &bull; Monety ${player.coins || 0}</div>`;
+      html += `</div>`;
+    });
+
+    if (R.ranking.lastError) {
+      html += `<div style="font-size:9px;color:#ff6b6b;text-align:center;margin-top:4px;">B&#322;&#261;d: ${escapeHtml(R.ranking.lastError)}</div>`;
+    }
+    html += `<div style="font-size:9px;opacity:0.4;text-align:center;margin-top:2px;">&#377;r.: ${escapeHtml(R.ranking.source || '—')}`;
+    if (R.ranking.lastFetchedAt) {
+      html += ` &bull; ${new Date(R.ranking.lastFetchedAt).toLocaleTimeString()}`;
+    }
+    html += '</div>';
+    html += '</div>';
+    return html;
+  };
+
   R.renderRankingPanel = function renderRankingPanel() {
     const panel = R.getElById ? R.getElById('__ts_panel_ranking__') : document.getElementById('__ts_panel_ranking__');
-    if (!panel || panel.style.display === 'none') return;
+    if (!panel) return;
 
     const scope = R.ranking.scope || 'allTime';
     const rows = scope === 'daily' ? R.ranking.daily : R.ranking.allTime;
