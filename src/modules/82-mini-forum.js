@@ -105,36 +105,53 @@
     style.id = FORUM_STYLE_ID;
     style.textContent = `
       #${MODAL_ID} {
-        position: fixed !important;
-        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-        width: 100vw !important; height: 100vh !important;
-        z-index: 2147483647 !important;
-        background: rgba(3, 8, 18, 0.85) !important;
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 16px !important;
-        pointer-events: auto !important;
-        backdrop-filter: blur(8px) !important;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        left: auto;
+        bottom: auto;
+        width: min(400px, 92vw);
+        max-height: 85vh;
+        z-index: 2147483647;
+        overflow: hidden;
+        background: rgba(8, 14, 28, 0.85);
+        backdrop-filter: blur(25px) saturate(160%);
+        border: 1px solid rgba(115, 169, 255, 0.15);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        pointer-events: auto;
+      }
+      #${MODAL_ID}.__dragging__ .__ts_forum_header__ {
+        cursor: grabbing;
       }
       #${MODAL_ID} .__ts_forum_window__ {
-        width: min(700px, 96vw);
-        max-height: min(84vh, 760px);
+        width: 100%;
+        max-height: 100%;
         min-height: 300px;
         overflow: auto;
-        border-radius: 14px;
+        border-radius: 20px;
         background: linear-gradient(180deg, rgba(8, 14, 28, 0.96), rgba(8, 14, 28, 0.9));
-        border: 1px solid rgba(115, 169, 255, 0.34);
+        border: 1px solid rgba(115, 169, 255, 0.22);
         box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
-        padding: 12px;
+        padding: 14px;
       }
       #${MODAL_ID} .__ts_forum_header__ {
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 10px;
+        cursor: grab;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(115, 169, 255, 0.1);
+        padding: 10px 14px;
+        margin: -14px -14px 12px -14px;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
       }
       #${MODAL_ID} .__ts_forum_header__ h4 {
         margin: 0;
@@ -143,6 +160,22 @@
       }
       #${MODAL_ID} .__ts_forum_close__ {
         margin-left: auto;
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        opacity: 0.7;
+        transition: all 0.2s;
+      }
+      #${MODAL_ID} .__ts_forum_close__:hover {
+        background: rgba(255, 63, 191, 0.3);
+        border-color: #ff3fbf;
+        opacity: 1;
       }
       #${MODAL_ID} .__ts_forum_split__ {
         display: grid;
@@ -206,6 +239,27 @@
         gap: 6px;
         max-height: 200px;
         overflow: auto;
+      }
+      #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar,
+      #${MODAL_ID} .__ts_forum_comments__::-webkit-scrollbar {
+        width: 5px;
+      }
+      #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar-thumb,
+      #${MODAL_ID} .__ts_forum_comments__::-webkit-scrollbar-thumb {
+        background: rgba(255, 63, 191, 0.5);
+        border-radius: 4px;
+      }
+      #${MODAL_ID} .__ts_forum_window__::-webkit-scrollbar-track,
+      #${MODAL_ID} .__ts_forum_comments__::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      @media (max-width: 640px) {
+        #${MODAL_ID} {
+          width: 96vw;
+          max-height: 90vh;
+          top: 10px;
+          right: 2vw;
+        }
       }
       .__ts_pager_btn__ {
         position: absolute;
@@ -380,6 +434,106 @@
     ensureTrigger();
   }
 
+  function makeElementDraggable(element, handle) {
+    if (!element || !handle) return;
+
+    function getPoint(event) {
+      if (event.touches && event.touches.length) {
+        return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+      }
+      if (event.changedTouches && event.changedTouches.length) {
+        return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+      }
+      if (typeof event.clientX === 'number' && typeof event.clientY === 'number') {
+        return { x: event.clientX, y: event.clientY };
+      }
+      return null;
+    }
+
+    function clampPosition(left, top) {
+      const maxLeft = Math.max(0, window.innerWidth - element.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - element.offsetHeight);
+      return {
+        left: Math.min(Math.max(0, left), maxLeft),
+        top: Math.min(Math.max(0, top), maxTop),
+      };
+    }
+
+    function applyPosition(left, top) {
+      const next = clampPosition(left, top);
+      element.style.left = `${next.left}px`;
+      element.style.top = `${next.top}px`;
+      element.style.right = 'auto';
+      element.style.bottom = 'auto';
+    }
+
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let originLeft = 0;
+    let originTop = 0;
+
+    function onPointerMove(event) {
+      if (!isDragging) return;
+      const point = getPoint(event);
+      if (!point) return;
+      if (event.cancelable) event.preventDefault();
+      const nextLeft = originLeft + (point.x - startX);
+      const nextTop = originTop + (point.y - startY);
+      applyPosition(nextLeft, nextTop);
+    }
+
+    function onPointerUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      element.classList.remove('__dragging__');
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+      document.removeEventListener('touchcancel', onPointerUp);
+    }
+
+    function onPointerDown(event) {
+      if (event.target && typeof event.target.closest === 'function' && event.target.closest('.__ts_forum_close__')) {
+        return;
+      }
+      const point = getPoint(event);
+      if (!point) return;
+
+      const rect = element.getBoundingClientRect();
+      originLeft = rect.left;
+      originTop = rect.top;
+      startX = point.x;
+      startY = point.y;
+      isDragging = true;
+      element.classList.add('__dragging__');
+
+      applyPosition(originLeft, originTop);
+
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('mouseup', onPointerUp);
+      document.addEventListener('touchmove', onPointerMove, { passive: false });
+      document.addEventListener('touchend', onPointerUp);
+      document.addEventListener('touchcancel', onPointerUp);
+
+      if (event.cancelable) event.preventDefault();
+    }
+
+    handle.addEventListener('mousedown', onPointerDown);
+    handle.addEventListener('touchstart', onPointerDown, { passive: false });
+
+    const onResize = () => {
+      if (!document.documentElement.contains(element)) {
+        window.removeEventListener('resize', onResize);
+        return;
+      }
+      const rect = element.getBoundingClientRect();
+      applyPosition(rect.left, rect.top);
+    };
+    window.addEventListener('resize', onResize);
+  }
+
   function closeModal() {
     const modal = document.getElementById(MODAL_ID);
     if (modal) modal.remove();
@@ -441,6 +595,8 @@
 
     (document.documentElement || document.body).appendChild(modal);
     console.log('[Holo-Pager] Modal wstrzyknięty do DOM:', modal);
+
+    makeElementDraggable(modal, modal.querySelector('.__ts_forum_header__'));
 
     const root2 = modal.querySelector('#__ts_forum_root__');
     if (!root2) return;

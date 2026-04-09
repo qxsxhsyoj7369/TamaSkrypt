@@ -1,7 +1,7 @@
 {
-  "version": "3.31.12",
+  "version": "3.32.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.31.12: brutal visibility fix — modal bez klasy cyber-modal, agresywne wymuszenia display/visibility/opacity, injection do documentElement.",
+  "changelog": "Release 3.32.0: premium draggable widget UI — kompaktowy glassmorphism widget, custom cyberpunk scrollbary, header grab-handle, mouse/touch drag z viewport bounds, mobile scaling.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "mini-forum",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/82-mini-forum.js",
-      "version": "3.31.12",
-      "hash": "c3d9b76ad48d6d8f11301c05725d17249589832e004e0ce9310670b658458e1b",
+      "version": "3.32.0",
+      "hash": "634f4366ef28fc7f0f1fbf64b9c023b8e0f10dea82dc0c098fb82a1f37384832",
       "execute": "raw",
       "required": true
     },
