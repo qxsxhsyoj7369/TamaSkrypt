@@ -36,6 +36,13 @@
       level: Math.max(1, Number(pet?.level) || 1),
       xp: Math.max(0, Number(pet?.xp) || 0),
       coins: Math.max(0, Number(progress?.coins) || 0),
+      resources: (progress && progress.resources && typeof progress.resources === 'object')
+        ? {
+          wood: Math.max(0, Number(progress.resources.wood) || 0),
+          iron: Math.max(0, Number(progress.resources.iron) || 0),
+          gold: Math.max(0, Number(progress.resources.gold) || 0),
+        }
+        : { wood: 0, iron: 0, gold: 0 },
       foodCollected: Math.max(0, Number(pet?.foodCollected) || 0),
       totalOnline: Math.max(0, Number(stats?.totalOnlineMs) || 0),
       sessionStart: R.now(),
@@ -109,7 +116,12 @@
         updatedAt: savedAt,
       },
       progress: {
-        coins: R.state.coins,
+        coins: Math.max(0, Number(R.state.coins) || 0),
+        resources: {
+          wood: Math.max(0, Number(R.state.resources && R.state.resources.wood) || 0),
+          iron: Math.max(0, Number(R.state.resources && R.state.resources.iron) || 0),
+          gold: Math.max(0, Number(R.state.resources && R.state.resources.gold) || 0),
+        },
         inventory: R.state.inventory || {},
         activeEffects: R.state.activeEffects || {},
         activeSkillState: R.state.activeSkillState || {},

@@ -20,9 +20,10 @@
     if (R.incrementHourlyGoalProgress) {
       R.incrementHourlyGoalProgress('gain_xp', gain);
     }
-    while (R.state.xp >= R.CONFIG.XP_PER_LEVEL) {
+    let xpReq = R.getXpRequiredForLevel ? R.getXpRequiredForLevel(R.state.level) : R.CONFIG.XP_PER_LEVEL;
+    while (R.state.xp >= xpReq) {
       const prevEvolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
-      R.state.xp -= R.CONFIG.XP_PER_LEVEL;
+      R.state.xp -= xpReq;
       R.state.level += 1;
       if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
       R.showLevelUp();
@@ -30,7 +31,11 @@
       if (prevEvolution && nextEvolution && prevEvolution.id !== nextEvolution.id && R.showMessage) {
         R.showMessage(`✨ Ewolucja! ${nextEvolution.name}`, 3600);
       }
+      xpReq = R.getXpRequiredForLevel ? R.getXpRequiredForLevel(R.state.level) : R.CONFIG.XP_PER_LEVEL;
     }
+    const currentReq = R.getXpRequiredForLevel ? R.getXpRequiredForLevel(R.state.level) : R.CONFIG.XP_PER_LEVEL;
+    R.state.currentXpRequired = currentReq;
+    R.CONFIG.XP_PER_LEVEL = currentReq;
   };
 
   R.claimDailyReward = function claimDailyReward() {
@@ -115,49 +120,114 @@
     }
   };
 
-  R.trySpawnFood = function trySpawnFood() {
-    if (!R.state || !R.state.alive || R.activeFood) return;
-    if (Math.random() > R.CONFIG.HUNGER_FOOD_SPAWN_CHANCE) return;
-    const food = R.FOODS[Math.floor(Math.random() * R.FOODS.length)];
+  R.trySpawnLoot = function trySpawnLoot() {
+    if (!R.state || !R.state.alive) return;
+    const activeLoot = document.querySelectorAll('.__ts_loot_item__').length;
+    if (activeLoot >= R.CONFIG.MAX_ACTIVE_LOOT) return;
+
+    const roll = Math.random() * 100;
+    let lootType = 'food';
+    if (roll >= 40 && roll < 70) lootType = 'coin';
+    else if (roll >= 70 && roll < 85) lootType = 'wood';
+    else if (roll >= 85 && roll < 95) lootType = 'iron';
+    else if (roll >= 95) lootType = 'gold';
+
+    const food = lootType === 'food'
+      ? R.FOODS[Math.floor(Math.random() * R.FOODS.length)]
+      : null;
+
+    const emojiMap = {
+      coin: '🪙',
+      wood: '🪵',
+      iron: '⛓️',
+      gold: '🥇',
+    };
 
     const el = document.createElement('div');
-    el.className = 'ts_food_item';
-    el.id = R.ids.FOOD_PREFIX + Date.now();
-    el.textContent = food.emoji;
-    el.title = food.name;
+    el.className = '__ts_loot_item__';
+    el.id = (R.ids.FOOD_PREFIX || '__tamaskrypt_food_') + Date.now();
+    el.textContent = lootType === 'food' ? (food && food.emoji ? food.emoji : '🍬') : emojiMap[lootType];
+    el.title = lootType === 'food' ? (food && food.name ? food.name : 'Jedzenie') : lootType;
+    el.style.position = 'fixed';
+    el.style.fontSize = '28px';
+    el.style.zIndex = '2147483646';
+    el.style.cursor = 'pointer';
     el.style.left = Math.floor(Math.random() * (window.innerWidth - 120) + 60) + 'px';
     el.style.top = Math.floor(Math.random() * (window.innerHeight - 120) + 60) + 'px';
 
-    const eat = () => {
+    const collectLoot = () => {
       if (!R.state || !R.state.alive) return;
       if (el.parentNode) el.remove();
-      if (R.activeFood === el) R.activeFood = null;
 
-      R.state.hunger = R.clamp(R.state.hunger + food.hunger, 0, 100);
-      R.state.foodCollected += 1;
-      if (R.incrementHourlyGoalProgress) {
-        R.incrementHourlyGoalProgress('feed', 1);
-        R.incrementHourlyGoalProgress('eat_specific_food', 1, { foodName: food.name });
+      if (!R.state.resources || typeof R.state.resources !== 'object') {
+        R.state.resources = { wood: 0, iron: 0, gold: 0 };
       }
 
-      const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;
-      const baseFoodXp = R.getEffectiveFoodXp ? R.getEffectiveFoodXp(food.xp) : food.xp;
-      const gainedXp = Math.round(baseFoodXp * xpBoost);
-      R.gainXP(gainedXp);
-      R.showMessage(`${food.emoji} Mniam! +${food.hunger} sytości, +${gainedXp} XP`);
+      const widget = R.getElById ? R.getElById('__tamaskrypt_widget__') : document.getElementById('__tamaskrypt_widget__');
+      const widgetRect = widget && widget.getBoundingClientRect ? widget.getBoundingClientRect() : { left: 0, top: 0 };
+      const lootRect = el.getBoundingClientRect ? el.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
+      const particleX = (lootRect.left + (lootRect.width / 2)) - widgetRect.left;
+      const particleY = lootRect.top - widgetRect.top;
+
+      const levelMultiplier = Math.pow(1.25, Math.max(0, (R.state.level || 1) - 1));
+      const resourceMultiplier = Math.pow(1.1, Math.max(0, (R.state.level || 1) - 1));
+
+      if (lootType === 'food' && food) {
+        R.state.hunger = R.clamp(R.state.hunger + (Number(food.hunger) || 0), 0, 100);
+        R.state.foodCollected += 1;
+        if (R.incrementHourlyGoalProgress) {
+          R.incrementHourlyGoalProgress('feed', 1);
+          R.incrementHourlyGoalProgress('eat_specific_food', 1, { foodName: food.name });
+        }
+
+        const xpBoost = R.getActiveEffect && R.getActiveEffect('xp_boost') ? 1.5 : 1;
+        const baseFoodXp = R.getEffectiveFoodXp ? R.getEffectiveFoodXp(food.xp) : (Number(food.xp) || 0);
+        const gainedXp = Math.max(1, Math.floor(baseFoodXp * xpBoost * levelMultiplier));
+        R.gainXP(gainedXp);
+        if (R.spawnParticle) R.spawnParticle(particleX, particleY, `+${R.formatNum ? R.formatNum(gainedXp) : gainedXp} XP`, 'xp');
+        R.showMessage(`${food.emoji} Mniam! +${food.hunger} sytości, +${R.formatNum ? R.formatNum(gainedXp) : gainedXp} XP`);
+      } else if (lootType === 'coin') {
+        const base = R.randomInt ? R.randomInt(5, 15) : (5 + Math.floor(Math.random() * 11));
+        const amount = Math.max(1, Math.floor(base * levelMultiplier));
+        R.state.coins = Math.max(0, Number(R.state.coins) || 0) + amount;
+        if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && shouldReportHostileTax()) {
+          R.multiplayer.reportEarnings({ coins: amount }).catch(() => {});
+        }
+        if (R.spawnParticle) R.spawnParticle(particleX, particleY, `+ ${R.formatNum ? R.formatNum(amount) : amount} 🪙`, 'gold');
+        R.showMessage(`🪙 +${R.formatNum ? R.formatNum(amount) : amount} monet`);
+      } else {
+        const key = lootType;
+        const baseMap = {
+          wood: [1, 3],
+          iron: [1, 2],
+          gold: [1, 1],
+        };
+        const range = baseMap[key] || [1, 1];
+        const base = R.randomInt ? R.randomInt(range[0], range[1]) : range[0];
+        const amount = Math.max(1, Math.floor(base * resourceMultiplier));
+        R.state.resources[key] = Math.max(0, Number(R.state.resources[key]) || 0) + amount;
+        const icon = emojiMap[key] || '📦';
+        if (R.spawnParticle) R.spawnParticle(particleX, particleY, `+ ${R.formatNum ? R.formatNum(amount) : amount} ${icon}`, key);
+        R.showMessage(`${icon} +${R.formatNum ? R.formatNum(amount) : amount} ${key}`);
+      }
+
       R.persistState();
       R.updateUI();
     };
 
-    el.addEventListener('click', eat);
-    el.addEventListener('touchstart', eat, { passive: true });
+    el.addEventListener('click', collectLoot);
+    el.addEventListener('touchstart', collectLoot, { passive: true });
     (document.body || document.documentElement).appendChild(el);
-    R.activeFood = el;
 
     setTimeout(() => {
       if (el.parentNode) el.remove();
-      if (R.activeFood === el) R.activeFood = null;
     }, R.CONFIG.FOOD_DURATION);
+  };
+
+  R.trySpawnFood = function trySpawnFood() {
+    if (R.trySpawnLoot) {
+      R.trySpawnLoot();
+    }
   };
 
   R.bindUIEvents = function bindUIEvents() {
@@ -378,6 +448,10 @@
   R.mainLoop = function mainLoop() {
     R.updateDailyQuestProgress();
     R.hungerTick();
+    if (R.state && R.getXpRequiredForLevel) {
+      R.state.currentXpRequired = R.getXpRequiredForLevel(R.state.level);
+      R.CONFIG.XP_PER_LEVEL = R.state.currentXpRequired;
+    }
     R.updateUI();
   };
 
@@ -392,6 +466,10 @@
       });
     } else {
       if (R.recalculateEvolutionStats) R.recalculateEvolutionStats();
+    }
+    if (R.state && R.getXpRequiredForLevel) {
+      R.state.currentXpRequired = R.getXpRequiredForLevel(R.state.level);
+      R.CONFIG.XP_PER_LEVEL = R.state.currentXpRequired;
     }
     R.updateUI();
     if (R.fetchLeaderboard) {
@@ -410,7 +488,7 @@
       }
     }, 60000);
     setInterval(R.hpRegenTick, R.CONFIG.HP_REGEN_INTERVAL);
-    setInterval(R.trySpawnFood, R.CONFIG.FOOD_SPAWN_INTERVAL);
+    setInterval(R.trySpawnLoot, R.CONFIG.LOOT_SPAWN_INTERVAL);
     setInterval(R.persistState, 30000);
     if (R.fetchLeaderboard) {
       setInterval(() => {
@@ -436,7 +514,7 @@
       if (document.visibilityState === 'hidden') R.persistState();
     });
 
-    setTimeout(R.trySpawnFood, 5000);
+    setTimeout(R.trySpawnLoot, 5000);
   };
 
   R.startGame = async function startGame(username, uid) {

@@ -9,6 +9,8 @@
     HUNGER_FOOD_SPAWN_CHANCE: 0.35,
     FOOD_DURATION: 15000,
     FOOD_SPAWN_INTERVAL: 30000,
+    LOOT_SPAWN_INTERVAL: 8000,
+    MAX_ACTIVE_LOOT: 5,
     HP_MAX: 100,
     XP_PER_LEVEL: 100,
     HP_REGEN_INTERVAL: 120000,
@@ -900,6 +902,21 @@
     if (h > 0) return `${h}g ${m}m`;
     if (m > 0) return `${m}m ${s}s`;
     return `${s}s`;
+  };
+
+  runtime.formatNum = function formatNum(num) {
+    const value = Number(num) || 0;
+    if (value < 1000) return Math.floor(value).toString();
+    const suffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+    const suffixNum = Math.floor(Math.log10(value) / 3);
+    const safeSuffixNum = runtime.clamp(suffixNum, 0, suffixes.length - 1);
+    const shortValue = (value / Math.pow(1000, safeSuffixNum)).toFixed(1);
+    return shortValue.replace(/\.0$/, '') + suffixes[safeSuffixNum];
+  };
+
+  runtime.getXpRequiredForLevel = function getXpRequiredForLevel(level) {
+    const safeLevel = Math.max(1, Math.floor(Number(level) || 1));
+    return Math.floor(100 * Math.pow(1.35, safeLevel - 1));
   };
 
   runtime.getMood = function getMood() {

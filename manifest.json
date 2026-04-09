@@ -1,7 +1,7 @@
 {
-  "version": "3.34.8",
+  "version": "3.35.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.8: Krytyczny hotfix Misji — przywrócono stopkę (suma nagród + przycisk odbioru) i delegację claim-hourly-quest z odświeżeniem modala.",
+  "changelog": "Release 3.35.0: Incremental/Idle Pakiet 1+2 — formatNum, potęgowa krzywa XP, dynamiczny próg levelu, wieloobiektowy spawner lootu, resources (wood/iron/gold) oraz persist zasobów.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.28.3",
-      "hash": "b85e2fa07b2d2b4db8e838e7e32fa3ba8d1e865dc7b17b462513da3f7827ed58",
+      "version": "3.35.0",
+      "hash": "cb976434feeb38ffbffb5e08dfd24524b0130c1fe51cb510748ce7ed9f7497ae",
       "execute": "raw",
       "required": true
     },
@@ -41,8 +41,8 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.28.3",
-      "hash": "f575a4fde05b2973798a46829d736e9a779874e60e4033ffccdff0f3edbddde3",
+      "version": "3.35.0",
+      "hash": "6597d032922834c4e3c5931dbc3c7cf6293bf563349a7ed268650bae11d78ae1",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.28.5",
-      "hash": "cc9d737499ff6a4d27414aeeec7be3925e97bf7d15335ba08a9cf30e4f613376",
+      "version": "3.35.0",
+      "hash": "87b3dff22b4d9f0e31f9019d5edad3b7f1572fb73033f548e74c49650217de9a",
       "execute": "raw",
       "required": true
     },
