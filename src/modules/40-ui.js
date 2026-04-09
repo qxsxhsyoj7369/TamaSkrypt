@@ -358,6 +358,36 @@
           return;
         }
 
+        if (action === 'buy-item') {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const itemId = String(actionEl.getAttribute('data-id') || target.getAttribute('data-id') || '');
+          if (!itemId) return;
+
+          (async () => {
+            try {
+              if (typeof R.buyShopItem === 'function') {
+                await R.buyShopItem(itemId);
+              }
+              if (typeof R.updateUI === 'function') R.updateUI();
+
+              if (R.renderShopPanel) R.renderShopPanel();
+              const panelShop = R.getElById('__ts_panel_shop__');
+              const modalContent = panelShop && panelShop.innerHTML
+                ? panelShop.innerHTML
+                : '<div class="__ts_card__">Sklep chwilowo pusty.</div>';
+              if (R.ui && R.ui.openSeamlessModal) {
+                R.ui.openSeamlessModal('Sklep', modalContent);
+              }
+            } catch (error) {
+              const errorMessage = error && error.message ? String(error.message) : 'Zakup nieudany';
+              if (R.showMessage) R.showMessage(`⚠️ ${errorMessage}`, 2800);
+            }
+          })();
+          return;
+        }
+
         if (action === 'occupy-domain' || action === 'fortify-domain' || action === 'sabotage-domain') {
           event.preventDefault();
           event.stopPropagation();
@@ -2297,6 +2327,17 @@
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 10px;
         padding-bottom: 10px;
+      }
+      .__ts_shop_section_title__ {
+        font-size: 11px;
+        font-weight: bold;
+        color: #a651ff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(166, 81, 255, 0.3);
+        margin: 15px 0 10px 0;
+        padding-bottom: 4px;
+        width: 100%;
       }
       .__ts_shop_item_card__ {
         background: rgba(255, 255, 255, 0.03);

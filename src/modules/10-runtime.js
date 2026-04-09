@@ -221,6 +221,30 @@
     { emoji: '🍰', name: 'Ciasto', xp: 25, hunger: 40 },
   ];
 
+  runtime.SHOP_ITEMS = [
+    { id: 'xp_boost', category: 'personal', name: 'Mądrość Gelka', icon: '🧠', desc: 'Podwaja zdobywane XP przez 5 minut.', basePrice: 150, priceMult: 1.15 },
+    { id: 'magnet_loot', category: 'personal', name: 'Magnes Neodymowy', icon: '🧲', desc: 'Przyciąga surowce! Skraca czas spawnu lootu o 20% (Pasywne).', basePrice: 500, priceMult: 1.25 },
+    { id: 'gold_fever', category: 'personal', name: 'Złota Gorączka', icon: '✨', desc: '+50% więcej monet z każdego kliknięcia w loot (Pasywne).', basePrice: 1000, priceMult: 1.30 },
+    { id: 'snack_box_plus', category: 'personal', name: 'Snack Box+', icon: '🍱', desc: 'Natychmiastowo leczy 100% Głodu i daje duży zastrzyk XP.', basePrice: 50, priceMult: 1.05 },
+
+    { id: 'domain_shield', category: 'faction', name: 'Żelazna Kurtyna', icon: '🛡️', desc: 'Natychmiast dodaje +50 DEF do obecnej domeny (Wymaga zajętej strony).', basePrice: 800, priceMult: 1.10 },
+    { id: 'domain_nuke', category: 'faction', name: 'Wirus Sabotażowy', icon: '☣️', desc: 'Niszczy 50 DEF wrogiej domeny! (Szybki atak bez złota).', basePrice: 1500, priceMult: 1.12 },
+  ];
+
+  runtime.getShopItemPrice = function getShopItemPrice(itemId) {
+    const item = Array.isArray(runtime.SHOP_ITEMS)
+      ? runtime.SHOP_ITEMS.find(entry => entry && entry.id === itemId)
+      : null;
+    if (!item) return 0;
+    const purchases = runtime.state && runtime.state.purchases && typeof runtime.state.purchases === 'object'
+      ? runtime.state.purchases
+      : {};
+    const owned = Math.max(0, Number(purchases[itemId]) || 0);
+    const basePrice = Math.max(1, Number(item.basePrice) || 1);
+    const priceMult = Math.max(1, Number(item.priceMult) || 1);
+    return Math.floor(basePrice * Math.pow(priceMult, owned));
+  };
+
   runtime.MOOD = {
     HAPPY: { emoji: '😄', label: 'Szczęśliwy' },
     NEUTRAL: { emoji: '😐', label: 'Normalny' },

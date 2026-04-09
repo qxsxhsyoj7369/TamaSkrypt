@@ -244,7 +244,9 @@
         R.showMessage(`${food.emoji} Mniam! +${food.hunger} sytości, +${R.formatNum ? R.formatNum(gainedXp) : gainedXp} XP`);
       } else if (lootType === 'coin') {
         const base = R.randomInt ? R.randomInt(5, 15) : (5 + Math.floor(Math.random() * 11));
-        const amount = Math.max(1, Math.floor(base * levelMultiplier));
+        const feverLvl = Math.max(0, Number(R.state && R.state.purchases && R.state.purchases.gold_fever) || 0);
+        const feverMultiplier = 1 + (feverLvl * 0.5);
+        const amount = Math.max(1, Math.floor(base * levelMultiplier * feverMultiplier));
         R.state.coins = Math.max(0, Number(R.state.coins) || 0) + amount;
         if (R.multiplayer && typeof R.multiplayer.reportEarnings === 'function' && shouldReportHostileTax()) {
           R.multiplayer.reportEarnings({ coins: amount }).catch(() => {});

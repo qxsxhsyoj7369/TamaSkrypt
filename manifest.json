@@ -1,7 +1,7 @@
 {
-  "version": "3.37.0",
+  "version": "3.38.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.37.0: Game Design + Bugfix Terytorium — naprawiona delegacja akcji w Seamless Modal, nowe akcje Zajmij/Fortyfikuj/Sabotuj, koszty surowców/monet i logika DEF domeny.",
+  "changelog": "Release 3.38.0: Sklep 2.0 — ceny skalowane po liczbie zakupów, nowy asortyment personalny i domenowy, aktywne efekty zakupów, pasywka Gold Fever oraz butik z kategoriami i dynamicznymi cenami.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -25,8 +25,8 @@
     {
       "name": "runtime",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/10-runtime.js",
-      "version": "3.35.0",
-      "hash": "cb976434feeb38ffbffb5e08dfd24524b0130c1fe51cb510748ce7ed9f7497ae",
+      "version": "3.38.0",
+      "hash": "4fec2f41ad62eb50d31e2e03d694cb9315ef062473d30e97be0d3736b73e3f06",
       "execute": "raw",
       "required": true
     },
@@ -41,16 +41,16 @@
     {
       "name": "state-sync",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/30-state-sync.js",
-      "version": "3.35.0",
-      "hash": "6597d032922834c4e3c5931dbc3c7cf6293bf563349a7ed268650bae11d78ae1",
+      "version": "3.38.0",
+      "hash": "dc88033acd43efebd163e77e56a908a2a8c296800933bd012a0c076629c4ed75",
       "execute": "raw",
       "required": true
     },
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.37.0",
-      "hash": "4ea662c1edc09c5dbed028aab831682185fbb5757a3c5274329799889ba04780",
+      "version": "3.38.0",
+      "hash": "33283d17100d7cae38b8aa2bde58a5300c4e4497dac4745c7bb21dabd3d01cab",
       "execute": "raw",
       "required": true
     },
@@ -65,8 +65,8 @@
     {
       "name": "shop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/60-shop.js",
-      "version": "3.34.1",
-      "hash": "c3d5d8d4b5c59f6f7815126f028cbbbcf88a75227a910bc333a8e40b331aa4f1",
+      "version": "3.38.0",
+      "hash": "59d8711a767b0ba03328b93dda9c20213440b8ec95b2529044bfff04a435b15f",
       "execute": "raw",
       "required": true
     },
@@ -89,8 +89,8 @@
     {
       "name": "game-loop",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/80-game-loop.js",
-      "version": "3.36.0",
-      "hash": "6ab4756121092df677e8fc492f93c1e7384aa3f23c8875319b53c977bd927130",
+      "version": "3.38.0",
+      "hash": "35fdb3417426ab1a4d83dce320159734d2a8ac745ac41a1cb0b872208a6bc937",
       "execute": "raw",
       "required": true
     },
