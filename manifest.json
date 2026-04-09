@@ -1,7 +1,7 @@
 {
-  "version": "3.34.6",
+  "version": "3.34.7",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.6: Pakiet 3 — Naprawiono modal Rankingu: async loader ze spinnerem, R.generateRankingHTML z podium z&#322;oto/srebro/br&#261;z, __ts_spinner__ CSS.",
+  "changelog": "Release 3.34.7: Hotfix Misji — usunięto scrollbar w modalu (contentStyles), przebudowano karty misji i naprawiono flex/no-wrap.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.6",
-      "hash": "fe87701f71d086cac65211fd500562b356d48310f35ded27aee6011baa125561",
+      "version": "3.34.7",
+      "hash": "d5a7a98f17d9ef5f76d28e4ab4da3a533bbb3df9da51ff312a6535112fa7e734",
       "execute": "raw",
       "required": true
     },
