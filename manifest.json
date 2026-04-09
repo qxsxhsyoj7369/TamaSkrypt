@@ -1,7 +1,7 @@
 {
-  "version": "3.31.10",
+  "version": "3.31.11",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.31.10: Shadow DOM modal fix — modal osadzony bezpośrednia w ShadowRoot (dostęp do CSS), position: fixed !important, closeModal szuka w ShadowRoot.",
+  "changelog": "Release 3.31.11: dual-injection CSS (head + ShadowRoot) — pager button w Shadow DOM, modal w Light DOM (document.body), fix clipping/stacking context.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -97,8 +97,8 @@
     {
       "name": "mini-forum",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/82-mini-forum.js",
-      "version": "3.31.10",
-      "hash": "6f3113573f5b9a473730f06a5bdfa638386e6be3f14d4fad81759fc988c58f9e",
+      "version": "3.31.11",
+      "hash": "a45178e5e139b7788a6c778846cee2b8c19059c2e05030cfa53c6b3bb56047e2",
       "execute": "raw",
       "required": true
     },

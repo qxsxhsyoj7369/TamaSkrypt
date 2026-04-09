@@ -85,20 +85,22 @@
   }
 
   function ensureCybercoreCss() {
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.head;
-    const target = root instanceof ShadowRoot ? root : document.head;
-    if (target && typeof target.querySelector === 'function' && target.querySelector(`#${CYBERCORE_CSS_ID}`)) return;
     const link = document.createElement('link');
     link.id = CYBERCORE_CSS_ID;
     link.rel = 'stylesheet';
     link.href = CYBERCORE_CSS_URL;
-    (target || document.head || document.documentElement).appendChild(link);
+
+    if (!document.head.querySelector(`#${CYBERCORE_CSS_ID}`)) {
+      document.head.appendChild(link.cloneNode(true));
+    }
+
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (root instanceof ShadowRoot && !root.querySelector(`#${CYBERCORE_CSS_ID}`)) {
+      root.appendChild(link.cloneNode(true));
+    }
   }
 
   function ensureForumStyles() {
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.head;
-    const target = root instanceof ShadowRoot ? root : document.head;
-    if (target && typeof target.querySelector === 'function' && target.querySelector(`#${FORUM_STYLE_ID}`)) return;
     const style = document.createElement('style');
     style.id = FORUM_STYLE_ID;
     style.textContent = `
@@ -226,16 +228,14 @@
       }
       #${MODAL_ID} .text-glow { text-shadow: 0 0 9px currentColor; }
     `;
-    (target || document.head || document.documentElement).appendChild(style);
-    
-    // Wstrzykiwanie linku Cybercore do document.head (globalnie dla modala)
-    if (!document.head.querySelector(`link[href*="cybercore"]`) && 
-        !document.head.querySelector(`#${CYBERCORE_CSS_ID}`)) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = CYBERCORE_CSS_URL;
-      link.id = CYBERCORE_CSS_ID;
-      document.head.appendChild(link);
+
+    if (!document.head.querySelector(`#${FORUM_STYLE_ID}`)) {
+      document.head.appendChild(style.cloneNode(true));
+    }
+
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (root instanceof ShadowRoot && !root.querySelector(`#${FORUM_STYLE_ID}`)) {
+      root.appendChild(style.cloneNode(true));
     }
   }
   function generateId() {
@@ -378,8 +378,7 @@
   }
 
   function closeModal() {
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : document;
-    const modal = root.querySelector('#' + MODAL_ID);
+    const modal = document.getElementById(MODAL_ID);
     if (modal) modal.remove();
   }
 
@@ -434,14 +433,10 @@
       if (event.target === modal) closeModal();
     });
 
-    const root = R.getWidgetRoot ? R.getWidgetRoot() : document.body;
-    
-    // Usuń stary modal, jeśli istnieje (aby się nie dublowały)
-    const existingModal = root.querySelector('#' + MODAL_ID);
+    const existingModal = document.getElementById(MODAL_ID);
     if (existingModal) existingModal.remove();
 
-    // Doczep nowy modal BEZPOŚREDNIO do ShadowRoot
-    root.appendChild(modal);
+    document.body.appendChild(modal);
 
     const root2 = modal.querySelector('#__ts_forum_root__');
     if (!root2) return;
