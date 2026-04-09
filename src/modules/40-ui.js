@@ -210,7 +210,7 @@
   };
 
   R.ui = R.ui || {};
-  R.ui.openSeamlessModal = function openSeamlessModal(title, contentHTML) {
+  R.ui.openSeamlessModal = function openSeamlessModal(title, contentHTML, customStyles) {
     const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
     if (!root) return;
 
@@ -220,12 +220,13 @@
     const existing = widgetShell.querySelector('#__ts_forum_overlay__');
     if (existing) existing.remove();
 
+    const windowStyle = customStyles ? ` style="width:100%;max-height:90vh;display:flex;flex-direction:column;${customStyles}"` : '';
     const overlay = document.createElement('div');
     overlay.id = '__ts_forum_overlay__';
     overlay.className = '__ts_forum_overlay__';
     overlay.innerHTML = `
       <div class="__ts_forum_backdrop__"></div>
-      <div class="__ts_forum_window__" role="dialog" aria-modal="true" aria-labelledby="__ts_forum_title__">
+      <div class="__ts_forum_window__" role="dialog" aria-modal="true" aria-labelledby="__ts_forum_title__"${windowStyle}>
         <div class="__ts_forum_head__">
           <div class="__ts_forum_title__" id="__ts_forum_title__">${title || 'Panel'}</div>
           <button type="button" class="__ts_forum_close__" aria-label="Zamknij">✕</button>
@@ -435,7 +436,7 @@
             <button class="__ts_forum_btn__" id="__ts_claim_daily_modal__" ${canClaimDaily ? '' : 'disabled'}>${claimedAlready ? '✅ Odebrane' : '🎁 Odbierz nagrodę'}</button>
           </div>
         `;
-        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('⏱️ Misje Godzinowe', missionsContent);
+        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('⏱️ Misje Godzinowe', missionsContent, 'overflow:visible;height:auto;max-height:none;');
         if (canClaimDaily) {
           setTimeout(() => {
             const claimBtn = R.getElById('__ts_claim_daily_modal__');
@@ -557,10 +558,11 @@
       const rarity = String(goal.rarity || 'common').toLowerCase();
       const rarityLabel = goal.rarityLabel || 'Pospolite';
       const rarityClass = R.getGoalRarityClass(rarity);
+      const missionRarityClass = rarity === 'epic' || rarity === 'legendary' ? '__ts_mission_epic__' : rarity === 'rare' ? '__ts_mission_rare__' : '__ts_mission_common__';
       return `
-        <div class="__ts_goal_block__">
+        <div class="__ts_goal_block__ __ts_mission_card__ ${missionRarityClass}">
           <div class="__ts_stat_row__"><span class="__ts_label__">${goal.icon || '🎯'} ${goalLabel}</span><div class="__ts_bar_wrap__"><div class="__ts_bar__ ${barClass}" id="__ts_goal_bar_${goal.id}__" style="width:${R.clamp(pct,0,100)}%"></div></div><span class="__ts_val__" id="__ts_goal_val_${goal.id}__">${progressLabel}</span></div>
-          <div class="__ts_goal_reward__"><span class="__ts_goal_badge__ ${rarityClass}">${rarityLabel}</span>Nagroda: +${goal.rewardCoins || 0} 🪙, +${goal.rewardXp || 0} XP</div>
+          <div class="__ts_goal_reward__"><span class="__ts_goal_badge__ ${rarityClass}">${rarityLabel}</span>Nagroda: +${goal.rewardCoins || 0} &#127890;, +${goal.rewardXp || 0} XP</div>
         </div>
       `;
     }).join('');
@@ -1415,6 +1417,19 @@
       .__ts_goal_badge_uncommon__ { background:oklch(61% 0.11 154 / 0.34); color:oklch(95% 0.02 150); border-color:oklch(80% 0.15 154 / 0.5); }
       .__ts_goal_badge_rare__ { background:oklch(63% 0.12 242 / 0.34); color:oklch(95% 0.02 240); border-color:oklch(80% 0.15 230 / 0.5); }
       .__ts_goal_badge_epic__ { background:oklch(66% 0.18 306 / 0.32); color:oklch(96% 0.02 306); border-color:oklch(79% 0.2 306 / 0.56); }
+
+      .__ts_mission_card__ {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        position: relative;
+        overflow: hidden;
+      }
+      .__ts_mission_epic__ { border-left: 3px solid #a651ff; box-shadow: inset 15px 0 20px -15px rgba(166,81,255,0.4); }
+      .__ts_mission_rare__ { border-left: 3px solid #37e9ff; box-shadow: inset 15px 0 20px -15px rgba(55,233,255,0.4); }
+      .__ts_mission_common__ { border-left: 3px solid rgba(170,170,170,0.5); }
 
       .__ts_skill_card__ { margin-top:8px; padding:8px; }
       .__ts_skill_card__.__ts_skill_spark__ {

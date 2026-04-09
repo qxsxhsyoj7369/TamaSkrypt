@@ -1,7 +1,7 @@
 {
-  "version": "3.34.4",
+  "version": "3.34.5",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.4: Pakiet 1 — żelazny Smart Banner (flex fix + ellipsis), __ts_skill_active_glow__ (fioletowy puls przy efekcie), Terytorium: cyber-grid + bezpieczne znaki.",
+  "changelog": "Release 3.34.5: Pakiet 2 — brak suwaka w modalu Misji, customStyles w openSeamlessModal, poswiate rzadkości kart misji.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.4",
-      "hash": "892406c2b11d2e8522ea6bdb17decabb7c13493a072df036ca8578d30e7b4a92",
+      "version": "3.34.5",
+      "hash": "f368044dc71ef429e44628add6bfe3404ef0edb81227dbe6f1cb84c4b84adf1a",
       "execute": "raw",
       "required": true
     },
