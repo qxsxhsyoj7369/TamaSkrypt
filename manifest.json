@@ -1,7 +1,7 @@
 {
-  "version": "3.32.0",
+  "version": "3.33.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.32.0: premium draggable widget UI — kompaktowy glassmorphism widget, custom cyberpunk scrollbary, header grab-handle, mouse/touch drag z viewport bounds, mobile scaling.",
+  "changelog": "Release 3.33.0: Karta Postępu Ewolucji — nowy renderEvolutionSummary z paskiem postępu, nazwą następnej formy i kolorem frakcji.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.30.1",
-      "hash": "bbc2ce0835ddff9bd4b4530586a05c7fdf6fcd24d124ae36db3500ea520e1d22",
+      "version": "3.33.0",
+      "hash": "9c24a0646e8eacd695744d0fd373ac4487334bb7c1029f84f04cef97c82f6ded",
       "execute": "raw",
       "required": true
     },

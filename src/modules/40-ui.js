@@ -57,48 +57,75 @@
 
   R.renderEvolutionSummary = function renderEvolutionSummary() {
     const evolution = R.getCurrentEvolution ? R.getCurrentEvolution() : null;
-    const level = Math.max(1, Number(R.state && R.state.level) || 1);
-    const bonuses = R.getEvolutionBonuses && R.state ? R.getEvolutionBonuses(level, R.state.profileFaction) : null;
-    if (!evolution || !bonuses) return '<span>Forma: podstawowa</span>';
+    if (!evolution) return '<span>Forma: podstawowa</span>';
 
+    const level = Math.max(1, Number(R.state && R.state.level) || 1);
     const factionId = (R.normalizeFactionId && R.state)
       ? R.normalizeFactionId(R.state.profileFaction)
       : String((R.state && R.state.profileFaction) || 'neutral').toLowerCase();
+
     const accentMap = {
-      neon: '#ff00ff',
-      toxic: '#00ff00',
-      plasma: '#00ffff',
-      neutral: 'rgba(255,255,255,.5)',
+      neon: '#ff3fbf',
+      toxic: '#8dff4f',
+      plasma: '#37e9ff',
+      neutral: 'rgba(200,200,220,0.6)',
     };
-
-    const hpBonus = Math.round(bonuses.hpMax || 0);
-    const regenBonusPct = Math.round(((bonuses.regenMultiplier || 1) - 1) * 100);
-    const foodBonusPct = Math.round(((bonuses.foodXpMultiplier || 1) - 1) * 100);
-    const drainReductionPct = Math.round((1 - (bonuses.hungerDrainMultiplier || 1)) * 100);
-
-    const perkParts = [];
-    if (hpBonus > 0) perkParts.push(`+${hpBonus} HP`);
-    if (regenBonusPct > 0) perkParts.push(`+${regenBonusPct}% Regen`);
-    if (foodBonusPct > 0) perkParts.push(`+${foodBonusPct}% XP jedzenia`);
-    if (drainReductionPct > 0) perkParts.push(`-${drainReductionPct}% głodu`);
-
-    const hasPerks = level >= 10 && perkParts.length > 0;
+    const factionLabelMap = {
+      neon: 'Neon',
+      toxic: 'Toxic',
+      plasma: 'Plasma',
+      neutral: 'Neutral',
+    };
     const accentColor = accentMap[factionId] || accentMap.neutral;
+    const factionLabel = factionLabelMap[factionId] || 'Neutral';
+
+    // Determine phase label based on level tier
+    let phaseLabel = 'Faza Larwalna';
+    if (level >= 20) phaseLabel = 'Forma Ostateczna';
+    else if (level >= 10) phaseLabel = 'Forma Zaawansowana';
+
+    // Build progress section: next form info and bar
+    let progressHTML = '';
+    if (level >= 20) {
+      progressHTML = `<div class="__ts_evo_max__">✦ Osiągnięto Formę Ostateczną</div>`;
+    } else {
+      const nextThreshold = level < 10 ? 10 : 20;
+      const prevThreshold = level < 10 ? 1 : 10;
+      const progressInTier = level - prevThreshold;
+      const tierSize = nextThreshold - prevThreshold;
+      const progressPct = Math.min(100, Math.round((progressInTier / tierSize) * 100));
+
+      // Get next form name from EVOLUTION_LIBRARY
+      let nextFormName = '???';
+      if (R.EVOLUTION_LIBRARY) {
+        const pool = R.EVOLUTION_LIBRARY[factionId] || [];
+        for (let i = 0; i < pool.length; i++) {
+          if (pool[i].minLevel === nextThreshold) {
+            nextFormName = pool[i].name;
+            break;
+          }
+        }
+      }
+
+      progressHTML = `
+        <div class="__ts_evo_progress_wrap__">
+          <div class="__ts_evo_next_info__">Cel: ${nextFormName} (poz. ${nextThreshold})</div>
+          <div class="__ts_bar_bg__">
+            <div class="__ts_bar_fill__" style="width:${progressPct}%;background:${accentColor};box-shadow:0 0 8px ${accentColor};"></div>
+          </div>
+          <div class="__ts_evo_progress_label__">${level}/${nextThreshold}</div>
+        </div>
+      `;
+    }
 
     return `
-      <div class="__ts_class_badge__" style="--ts-class-accent:${accentColor}">
-        <span class="__ts_class_icon__" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 4C11 6 13 10 17 12C13 14 11 18 7 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M17 4C13 6 11 10 7 12C11 14 13 18 17 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="8.2" cy="8" r="1.25" fill="currentColor"/>
-            <circle cx="15.8" cy="16" r="1.25" fill="currentColor"/>
-          </svg>
-        </span>
-        <div class="__ts_class_text__">
-          <span class="__ts_class_name__">Klasa: ${evolution.name}</span>
-          ${hasPerks ? `<span class="__ts_class_perks__">${perkParts.join(' • ')}</span>` : ''}
+      <div class="__ts_evo_card__">
+        <div class="__ts_evo_header__">
+          <span class="__ts_faction_dot__" style="background:${accentColor};box-shadow:0 0 8px ${accentColor};"></span>
+          <span class="__ts_evo_faction_name__">[${factionLabel.toUpperCase()}] ${phaseLabel}</span>
         </div>
+        <div class="__ts_evo_class_name__">${evolution.name}</div>
+        ${progressHTML}
       </div>
     `;
   };
@@ -1501,6 +1528,84 @@
       @media (max-width: 560px) {
         #__ts_faction_cards__ { flex-direction: column; }
         .__ts_faction_card { min-height: 130px; }
+      }
+
+      .__ts_evo_card__ {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .__ts_evo_header__ {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        opacity: 0.72;
+        text-transform: uppercase;
+      }
+      .__ts_evo_faction_name__ {
+        color: rgba(255,255,255,0.85);
+        letter-spacing: 0.06em;
+      }
+      .__ts_evo_class_name__ {
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .__ts_evo_progress_wrap__ {
+        background: rgba(0,0,0,0.28);
+        border-radius: 8px;
+        padding: 7px 8px 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 2px;
+      }
+      .__ts_evo_next_info__ {
+        font-size: 9px;
+        color: rgba(200,200,220,0.72);
+        text-align: center;
+        letter-spacing: 0.01em;
+      }
+      .__ts_bar_bg__ {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        overflow: hidden;
+      }
+      .__ts_bar_fill__ {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.5s cubic-bezier(.2,.8,.2,1);
+      }
+      .__ts_evo_progress_label__ {
+        font-size: 9px;
+        color: rgba(200,200,220,0.5);
+        text-align: right;
+        margin-top: -1px;
+      }
+      .__ts_evo_max__ {
+        font-size: 10px;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ffd700, #ffaa00);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        text-align: center;
+        padding: 4px 0;
+        letter-spacing: 0.02em;
       }
     `;
     styleHost.appendChild(style);
