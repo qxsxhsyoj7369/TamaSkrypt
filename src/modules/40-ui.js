@@ -338,6 +338,24 @@
         return;
       }
 
+      const actionEl = target.closest('[data-action]');
+      if (actionEl) {
+        const action = String(actionEl.getAttribute('data-action') || '').toLowerCase();
+        if (action === 'claim-hourly-quest') {
+          event.preventDefault();
+          event.stopPropagation();
+          const claimFn = (typeof R.claimHourlyQuest === 'function')
+            ? R.claimHourlyQuest
+            : (typeof R.claimDailyReward === 'function' ? R.claimDailyReward : null);
+          if (claimFn) claimFn();
+          if (typeof R.updateUI === 'function') R.updateUI();
+          if (R.ui && R.ui.openSeamlessModal) {
+            R.ui.openSeamlessModal('⏱️ Misje Godzinowe', R.renderHourlyGoalRows ? R.renderHourlyGoalRows() : '<div>Brak misji.</div>', '', 'overflow: visible; height: auto;');
+          }
+          return;
+        }
+      }
+
       // Territory trigger
       if (target.closest('#__ts_territory_trigger')) {
         event.preventDefault();
@@ -523,7 +541,7 @@
       return '<div class="__ts_card__">Brak aktywnych celów godzinowych.</div>';
     }
 
-    return goals.map((goal) => {
+    const missionsHTML = goals.map((goal) => {
       const pct = R.clamp(R.getHourlyGoalPercent ? R.getHourlyGoalPercent(goal) : 0, 0, 100);
       const progressLabel = R.formatGoalProgress ? R.formatGoalProgress(goal) : '0/0';
       const goalLabel = goal.displayLabel || goal.label || goal.id;
@@ -551,6 +569,18 @@
         </div>
       `;
     }).join('');
+
+    const rewards = R.getHourlyQuestRewards ? R.getHourlyQuestRewards(quest) : { coins: 0, xp: 0 };
+    const isCompleted = R.isDailyQuestCompleted ? R.isDailyQuestCompleted() : goals.every((goal) => Number(goal.current || 0) >= Number(goal.required || 0));
+    const canClaim = Boolean(isCompleted && !(quest && quest.claimed));
+
+    return `
+      ${missionsHTML}
+      <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; text-align: center;">
+        <div id="__ts_hourly_reward_total__" style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Suma nagrody: +${rewards.coins} 🪙, +${rewards.xp} XP</div>
+        ${canClaim ? '<button class="__ts_forum_btn__" data-action="claim-hourly-quest" style="width: 100%; font-size: 14px; padding: 10px; background: linear-gradient(135deg, #a651ff, #ff3fbf);">🎁 Odbierz nagrodę</button>' : ''}
+      </div>
+    `;
   };
 
   R.buildZelekSVG = function buildZelekSVG() {

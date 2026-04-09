@@ -1,7 +1,7 @@
 {
-  "version": "3.34.7",
+  "version": "3.34.8",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.34.7: Hotfix Misji — usunięto scrollbar w modalu (contentStyles), przebudowano karty misji i naprawiono flex/no-wrap.",
+  "changelog": "Release 3.34.8: Krytyczny hotfix Misji — przywrócono stopkę (suma nagród + przycisk odbioru) i delegację claim-hourly-quest z odświeżeniem modala.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.34.7",
-      "hash": "d5a7a98f17d9ef5f76d28e4ab4da3a533bbb3df9da51ff312a6535112fa7e734",
+      "version": "3.34.8",
+      "hash": "e889304445d4b3ad8a05b39ccf5c3823b4ac209034b7ebe61ab972951173bb13",
       "execute": "raw",
       "required": true
     },
