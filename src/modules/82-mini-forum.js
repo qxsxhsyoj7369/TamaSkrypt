@@ -202,21 +202,24 @@
       .__ts_pager_btn__ {
         position: absolute;
         right: 15px;
-        top: 75px;
+        top: 140px;
         font-family: Consolas, 'Courier New', monospace;
         font-size: 11px;
-        padding: 6px 10px;
+        padding: 6px 12px;
         cursor: pointer;
         z-index: 9999;
-        background: rgba(10, 20, 30, 0.7);
+        background: rgba(8, 14, 28, 0.85);
         border: 1px solid #37e9ff;
-        border-radius: 6px;
-        box-shadow: 0 0 10px rgba(55, 233, 255, 0.4);
+        border-radius: 8px;
+        box-shadow: 0 0 12px rgba(55, 233, 255, 0.3);
         transition: all 0.2s ease-in-out;
+        pointer-events: auto !important;
+        backdrop-filter: blur(10px);
       }
       .__ts_pager_btn__:hover {
-        background: rgba(55, 233, 255, 0.2);
-        box-shadow: 0 0 15px rgba(55, 233, 255, 0.8);
+        background: rgba(55, 233, 255, 0.15);
+        box-shadow: 0 0 18px rgba(55, 233, 255, 0.6);
+        transform: scale(1.05);
       }
       #${MODAL_ID} .text-glow { text-shadow: 0 0 9px currentColor; }
     `;
