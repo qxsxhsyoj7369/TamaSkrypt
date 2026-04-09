@@ -117,6 +117,7 @@
       #${MODAL_ID} .__ts_forum_window__ {
         width: min(700px, 96vw);
         max-height: min(84vh, 760px);
+        min-height: 300px;
         overflow: auto;
         border-radius: 14px;
         background: linear-gradient(180deg, rgba(8, 14, 28, 0.96), rgba(8, 14, 28, 0.9));
@@ -229,18 +230,21 @@
   }
 
   function getDb() {
-    const db = R.firestoreDb
-      || (window.firebase && typeof window.firebase.firestore === 'function' ? window.firebase.firestore() : null);
-    if (!db || typeof db.collection !== 'function') return null;
+    const db = R.db || R.firestore || R.firestoreDb || 
+               (R.app && typeof R.app.firestore === 'function' ? R.app.firestore() : null) ||
+               (window.firebase && typeof window.firebase.firestore === 'function' ? window.firebase.firestore() : null);
+    if (!db || typeof db.collection !== 'function') {
+      console.error('[Holo-Pager] BŁĄD KRYTYCZNY: Nie znaleziono obiektu bazy danych! Dostępne klucze R:', Object.keys(R));
+      return null;
+    }
     return db;
   }
 
   function getServerTimestamp() {
-    const fs = window.firebase && window.firebase.firestore;
-    if (fs && fs.FieldValue && typeof fs.FieldValue.serverTimestamp === 'function') {
-      return fs.FieldValue.serverTimestamp();
+    if (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue) {
+      return window.firebase.firestore.FieldValue.serverTimestamp();
     }
-    return nowMs();
+    return Date.now();
   }
 
   async function listThreads() {
