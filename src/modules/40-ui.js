@@ -103,6 +103,115 @@
     `;
   };
 
+  R.renderEvolutionTreeModal = function renderEvolutionTreeModal() {
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : null;
+    if (!root) return;
+
+    const widgetShell = root.getElementById('__tamaskrypt_widget__');
+    if (!widgetShell) return;
+
+    const existing = widgetShell.querySelector('#__ts_evo_tree_overlay__');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    const factionId = (R.normalizeFactionId && R.state)
+      ? R.normalizeFactionId(R.state.profileFaction)
+      : String((R.state && R.state.profileFaction) || 'neon').toLowerCase();
+    const factionLabelMap = {
+      neon: 'Neon',
+      toxic: 'Toxic',
+      plasma: 'Plasma',
+      neutral: 'Neutral',
+    };
+    const lvl = Math.max(1, Number(R.state && R.state.level) || 1);
+
+    const neutralForm = R.EVOLUTION_LIBRARY && R.EVOLUTION_LIBRARY.neutral
+      ? R.EVOLUTION_LIBRARY.neutral[0]
+      : null;
+    const factionForms = (R.EVOLUTION_LIBRARY && R.EVOLUTION_LIBRARY[factionId]) || [];
+    const phaseOneForm = factionForms.find((item) => item && item.minLevel === 10) || null;
+    const finalForm = factionForms.find((item) => item && item.minLevel === 20) || null;
+
+    const baseStateClass = lvl < 10 ? '__ts_evo_active__' : '__ts_evo_unlocked__';
+    const phaseOneStateClass = lvl < 10
+      ? '__ts_evo_locked__'
+      : (lvl < 20 ? '__ts_evo_active__' : '__ts_evo_unlocked__');
+    const finalStateClass = lvl < 20 ? '__ts_evo_locked__' : '__ts_evo_active__';
+
+    const describeBonuses = function describeBonuses(form) {
+      if (!form || !form.bonuses) return 'Bonusy w przygotowaniu';
+      const parts = [];
+      if (Number(form.bonuses.hpMax) > 0) parts.push('HP Max ↑');
+      if (Number(form.bonuses.regenMultiplier) > 1) parts.push('Regeneracja ↑');
+      if (Number(form.bonuses.foodXpMultiplier) > 1) parts.push('XP jedzenia ↑');
+      if (Number(form.bonuses.hungerDrainMultiplier) < 1) parts.push('Głód ↓');
+      return parts.join(' • ') || 'Bonusy w przygotowaniu';
+    };
+
+    const overlay = document.createElement('div');
+    overlay.id = '__ts_evo_tree_overlay__';
+    overlay.className = '__ts_evo_tree_overlay__';
+    overlay.innerHTML = `
+      <div class="__ts_evo_tree_backdrop__"></div>
+      <div class="__ts_evo_tree_modal__" role="dialog" aria-modal="true" aria-labelledby="__ts_evo_tree_title__">
+        <div class="__ts_evo_tree_title__" id="__ts_evo_tree_title__">🧬 Ścieżka Ewolucji: ${factionLabelMap[factionId] || 'Neon'}</div>
+        <div class="__ts_evo_tree_flow__">
+          <div class="__ts_evo_tree_node__ __ts_evo_tree_node_base__ ${baseStateClass}">
+            <div class="__ts_evo_tree_stage__">Faza Larwalna · Poz. 1</div>
+            <div class="__ts_evo_tree_name__">${neutralForm ? neutralForm.name : 'Żelkowy Pąk'}</div>
+            <div class="__ts_evo_tree_meta__">Punkt startowy każdej ścieżki ewolucji.</div>
+          </div>
+          <div class="__ts_evo_tree_arrow__">↓</div>
+          <div class="__ts_evo_tree_node__ ${phaseOneStateClass}">
+            <div class="__ts_evo_tree_stage__">Faza I · Poz. 10</div>
+            <div class="__ts_evo_tree_name__">${phaseOneForm ? phaseOneForm.name : 'Nieznana forma'}</div>
+            <div class="__ts_evo_tree_meta__">${describeBonuses(phaseOneForm)}</div>
+          </div>
+          <div class="__ts_evo_tree_arrow__">↓</div>
+          <div class="__ts_evo_tree_node__ __ts_evo_tree_node_final__ ${finalStateClass}">
+            <div class="__ts_evo_tree_stage__">Forma Ostateczna · Poz. 20</div>
+            <div class="__ts_evo_tree_name__">${finalForm ? finalForm.name : 'Nieznana forma'}</div>
+            <div class="__ts_evo_tree_meta__">${describeBonuses(finalForm)}</div>
+          </div>
+        </div>
+        <button type="button" class="__ts_btn__ __ts_evo_tree_close__">Zamknij</button>
+      </div>
+    `;
+
+    const closeModal = function closeModal() {
+      overlay.remove();
+    };
+
+    overlay.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!target) return;
+      if (target.classList.contains('__ts_evo_tree_overlay__') || target.classList.contains('__ts_evo_tree_backdrop__') || target.classList.contains('__ts_evo_tree_close__')) {
+        closeModal();
+      }
+    });
+
+    widgetShell.appendChild(overlay);
+  };
+
+  R.bindWidgetDelegatedEvents = function bindWidgetDelegatedEvents() {
+    const root = R.getWidgetRoot ? R.getWidgetRoot() : document;
+    if (!root || root.__tsEvoDelegationBound__) return;
+    root.__tsEvoDelegationBound__ = true;
+
+    root.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!target || typeof target.closest !== 'function') return;
+
+      const banner = target.closest('.__ts_evo_banner__');
+      if (banner) {
+        event.stopPropagation();
+        if (R.renderEvolutionTreeModal) R.renderEvolutionTreeModal();
+      }
+    });
+  };
+
   R.renderActiveSkillCard = function renderActiveSkillCard() {
     return `
       <div id="__ts_skill_card__" class="__ts_skill_card__">
@@ -1535,7 +1644,7 @@
         align-items: center;
         width: 100%;
         height: 100%;
-        padding: 0 10px;
+        padding: 0 12px;
         box-sizing: border-box;
         font-size: 11px;
         color: #eee;
@@ -1544,6 +1653,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        flex: 1;
         min-width: 0;
       }
       .__ts_faction_dot__ {
@@ -1569,6 +1679,107 @@
         font-size: 10px;
         opacity: 0.8;
         flex-shrink: 0;
+        margin-left: 10px;
+      }
+      .__ts_evo_tree_overlay__ {
+        position: absolute;
+        inset: 0;
+        z-index: 2147483646;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        box-sizing: border-box;
+      }
+      .__ts_evo_tree_backdrop__ {
+        position: absolute;
+        inset: 0;
+        background: rgba(5, 7, 14, 0.62);
+        backdrop-filter: blur(12px) saturate(1.08);
+      }
+      .__ts_evo_tree_modal__ {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 252px);
+        padding: 14px 12px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background:
+          radial-gradient(120% 120% at 10% 0%, rgba(166, 81, 255, 0.18), transparent 58%),
+          radial-gradient(90% 120% at 100% 100%, rgba(55, 233, 255, 0.12), transparent 56%),
+          rgba(12, 15, 26, 0.78);
+        box-shadow: 0 22px 52px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+        backdrop-filter: blur(28px) saturate(1.3);
+      }
+      .__ts_evo_tree_title__ {
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 10px;
+        letter-spacing: -0.02em;
+      }
+      .__ts_evo_tree_flow__ {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+      }
+      .__ts_evo_tree_node__ {
+        padding: 9px 10px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      }
+      .__ts_evo_tree_node_base__ {
+        border-color: rgba(255,255,255,0.08);
+      }
+      .__ts_evo_tree_node_final__ {
+        border-color: rgba(255, 215, 0, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px rgba(255, 190, 40, 0.1);
+      }
+      .__ts_evo_locked__ {
+        opacity: 0.4;
+        filter: grayscale(100%);
+        border: 1px dashed rgba(255,255,255,0.2) !important;
+      }
+      .__ts_evo_unlocked__ {
+        opacity: 0.8;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+      }
+      .__ts_evo_active__ {
+        opacity: 1;
+        border: 1px solid #37e9ff !important;
+        box-shadow: 0 0 15px rgba(55, 233, 255, 0.3), inset 0 0 10px rgba(55, 233, 255, 0.1);
+        transform: scale(1.02);
+      }
+      .__ts_evo_tree_stage__ {
+        font-size: 10px;
+        color: rgba(255,255,255,0.68);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 3px;
+      }
+      .__ts_evo_tree_name__ {
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.2;
+      }
+      .__ts_evo_tree_meta__ {
+        font-size: 10px;
+        color: rgba(220, 224, 236, 0.72);
+        margin-top: 4px;
+      }
+      .__ts_evo_tree_arrow__ {
+        text-align: center;
+        font-size: 16px;
+        line-height: 1;
+        color: rgba(255,255,255,0.5);
+      }
+      .__ts_evo_tree_close__ {
+        width: 100%;
+        margin-top: 12px;
       }
     `;
     styleHost.appendChild(style);
@@ -1941,6 +2152,7 @@
     R.widgetShadowRoot = shadowRoot;
     shadowRoot.innerHTML = R.buildWidgetHTML();
     R.applyWidgetStyles();
+    if (R.bindWidgetDelegatedEvents) R.bindWidgetDelegatedEvents();
     target.appendChild(widget);
     R.widgetEl = widget;
     requestAnimationFrame(() => {

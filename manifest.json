@@ -1,7 +1,7 @@
 {
-  "version": "3.33.1",
+  "version": "3.33.2",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.33.1: Smart Banner Ewolucji — ultra-kompaktowy banner postępu w `40-ui.js`, mniej scrollowania i smuklejszy widżet.",
+  "changelog": "Release 3.33.2: Smart Evolution Tree Modal — dynamiczne stany active/locked/unlocked dla etapów ewolucji w `40-ui.js`.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.33.1",
-      "hash": "ce7e354283f2a1a688ee69b8511fa47a4cc4cd6e86951d19b862884541f61597",
+      "version": "3.33.2",
+      "hash": "7afe3a3257521a5a33001f1badb81cfc4e9c01e673fdf26411a8c76ada437971",
       "execute": "raw",
       "required": true
     },
