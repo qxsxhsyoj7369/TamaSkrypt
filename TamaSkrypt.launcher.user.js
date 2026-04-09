@@ -21,6 +21,10 @@
 (function () {
   'use strict';
 
+  // POLICY: NO-TOUCH LAUNCHER
+  // Ten plik jest warstwą infrastruktury. Nie edytuj go przy hotfixach UI/gameplay.
+  // Zmiany launchera wykonuj wyłącznie w dedykowanym tasku infra i osobnym release.
+
   const GITHUB_OWNER = 'qxsxhsyoj7369';
   const GITHUB_REPO = 'TamaSkrypt';
   const GITHUB_BRANCH = 'main';

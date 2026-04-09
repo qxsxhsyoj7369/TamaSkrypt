@@ -109,6 +109,21 @@ Przycisk **⏏** w nagłówku widgetu pozwala się wylogować lub przełączyć 
 
 ---
 
+## Zasada stabilności launchera (NO-TOUCH)
+
+Launcher `TamaSkrypt.launcher.user.js` jest traktowany jako warstwa infrastruktury i **nie jest edytowany** przy zmianach gameplay/UI (np. `src/modules/40-ui.js`, `80-game-loop.js`, itd.).
+
+### Kiedy wolno ruszać launcher?
+- tylko przy dedykowanym tasku infrastrukturalnym (np. mechanizm aktualizacji, kompatybilność Tampermonkey/GM API),
+- z osobnym hotfixem i osobnym komunikatem release,
+- bez mieszania zmian launchera z poprawkami wizualnymi/logiką gry.
+
+### Domyślny workflow hotfixów
+- gameplay/UI: zmieniaj wyłącznie moduły w `src/modules/*` + `manifest.json`,
+- launcher: pozostaje bez zmian.
+
+---
+
 ## Licencja
 
 [MIT](LICENSE)
