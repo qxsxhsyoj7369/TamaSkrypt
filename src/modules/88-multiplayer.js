@@ -12,6 +12,12 @@
   const MULTIPLAYER_FLUSH_INTERVAL_MS = 60 * 1000;
   const CONQUEST_POINTS_PER_MINUTE = 6;
   const TAX_RATE = 0.05;
+  const FORTIFY_WOOD_COST = 10;
+  const FORTIFY_IRON_COST = 5;
+  const FORTIFY_DEF_GAIN = 10;
+  const SABOTAGE_COIN_COST = 100;
+  const SABOTAGE_GOLD_COST = 1;
+  const SABOTAGE_DEF_LOSS = 10;
 
   const FACTIONS = Object.freeze({
     neon: {
@@ -77,6 +83,17 @@
     const num = Number(value);
     if (!Number.isFinite(num)) return fallback;
     return Math.max(0, num);
+  }
+
+  function ensureResourcesState() {
+    if (!R.state || typeof R.state !== 'object') return { wood: 0, iron: 0, gold: 0 };
+    if (!R.state.resources || typeof R.state.resources !== 'object') {
+      R.state.resources = { wood: 0, iron: 0, gold: 0 };
+    }
+    R.state.resources.wood = Math.max(0, Number(R.state.resources.wood) || 0);
+    R.state.resources.iron = Math.max(0, Number(R.state.resources.iron) || 0);
+    R.state.resources.gold = Math.max(0, Number(R.state.resources.gold) || 0);
+    return R.state.resources;
   }
 
   function getCurrentUrlNoQuery() {
@@ -642,6 +659,116 @@
     return nextState;
   };
 
+  multiplayer.occupyDomain = async function occupyDomain() {
+    if (!isAuthenticated()) throw new Error('User not authenticated');
+
+    const hostname = getCurrentDomain();
+    if (!hostname) throw new Error('Brak hosta domeny');
+
+    const domainState = multiplayer.currentDomainState || await multiplayer.getDomainControl({ force: true });
+    if (!domainState) throw new Error('Brak danych domeny');
+
+    if (domainState.kingUid === String(R.currentUid || '')) {
+      throw new Error('Ta domena już należy do Ciebie');
+    }
+
+    if (!domainState.kingUid) {
+      const claimedNeutral = await multiplayer.claimNeutralDomain();
+      if (R.showMessage) R.showMessage('🌐 Domena przejęta!', 2400);
+      return claimedNeutral;
+    }
+
+    const currentDefense = normalizePositive(domainState.defensePoints, 0);
+    if (currentDefense > 0) {
+      throw new Error('Najpierw zbij DEF domeny do 0');
+    }
+
+    const playerFaction = await resolvePlayerFactionId();
+    const kingUid = String(R.currentUid || '');
+    const kingName = String(R.currentUser || kingUid);
+
+    let claimed;
+    const db = getFirestoreDb();
+    if (db && typeof db.collection === 'function') {
+      claimed = await db.runTransaction(async (tx) => {
+        const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+        const snap = await tx.get(ref);
+        const current = snap.exists ? (snap.data() || {}) : {};
+        const defense = normalizePositive(current.defensePoints, 0);
+
+        if (String(current.kingUid || '') === kingUid) {
+          throw new Error('Ta domena już należy do Ciebie');
+        }
+        if (String(current.kingUid || '') && defense > 0) {
+          throw new Error('Najpierw zbij DEF domeny do 0');
+        }
+
+        const payload = {
+          hostname,
+          kingUid,
+          kingName,
+          faction: playerFaction,
+          defensePoints: 100,
+          collectedTax: normalizePositive(current.collectedTax, 0),
+          conquestPoints: 0,
+          timeSpent: normalizePositive(current.timeSpent, 0),
+          timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
+          conquestByUid: {},
+          updatedAt: getServerTimestamp(),
+        };
+
+        tx.set(ref, payload, { merge: true });
+        return payload;
+      });
+    } else if (hasRtdbApi()) {
+      const current = await readDomainFromRtdb(hostname) || {};
+      const defense = normalizePositive(current.defensePoints, 0);
+      if (String(current.kingUid || '') === kingUid) {
+        throw new Error('Ta domena już należy do Ciebie');
+      }
+      if (String(current.kingUid || '') && defense > 0) {
+        throw new Error('Najpierw zbij DEF domeny do 0');
+      }
+
+      claimed = {
+        hostname,
+        kingUid,
+        kingName,
+        faction: playerFaction,
+        defensePoints: 100,
+        collectedTax: normalizePositive(current.collectedTax, 0),
+        conquestPoints: 0,
+        timeSpent: normalizePositive(current.timeSpent, 0),
+        timeByUid: current.timeByUid && typeof current.timeByUid === 'object' ? current.timeByUid : {},
+        conquestByUid: {},
+        updatedAt: Date.now(),
+      };
+      await writeDomainToRtdb(hostname, claimed);
+    } else {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
+
+    const nextState = {
+      ...claimed,
+      factionName: getFactionOrDefault(claimed.faction).name,
+      factionColor: getFactionOrDefault(claimed.faction).color,
+    };
+
+    clearDomainCache(hostname);
+    multiplayer.currentDomainState = nextState;
+    writeDomainCache(hostname, nextState);
+
+    if (R.state) {
+      R.state.profileFaction = nextState.faction;
+    }
+
+    emitEvent('multiplayer:domain_updated', nextState);
+    emitEvent('multiplayer:domain_conquered', nextState);
+    if (typeof R.updateUI === 'function') R.updateUI();
+    if (R.showMessage) R.showMessage('🌐 Domena przejęta!', 2400);
+    return nextState;
+  };
+
   multiplayer.reportEarnings = async function reportEarnings(payload) {
     if (!isAuthenticated()) return null;
 
@@ -931,12 +1058,12 @@
     return domainState;
   };
 
-  multiplayer.fortifyDomain = async function fortifyDomain(amount = 10) {
+  multiplayer.fortifyDomain = async function fortifyDomain() {
     if (!isAuthenticated() || !R.state) return null;
 
-    const fortifyCost = normalizeAmount(amount, 10);
-    if ((Number(R.state.coins) || 0) < fortifyCost) {
-      throw new Error('Za mało monet na fortyfikację');
+    const resources = ensureResourcesState();
+    if ((resources.wood || 0) < FORTIFY_WOOD_COST || (resources.iron || 0) < FORTIFY_IRON_COST) {
+      throw new Error(`Brak surowców! (Potrzeba ${FORTIFY_WOOD_COST}🪵, ${FORTIFY_IRON_COST}⛓️)`);
     }
 
     const domainState = multiplayer.currentDomainState || await multiplayer.getDomainControl({ force: true });
@@ -945,31 +1072,53 @@
       throw new Error('Możesz fortyfikować tylko własną domenę');
     }
 
-    const db = ensureFirestoreReady('fortifyDomain');
     const hostname = getCurrentDomain();
-
-    await db.runTransaction(async (tx) => {
-      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
-      const snap = await tx.get(ref);
-      const current = snap.exists ? (snap.data() || {}) : {};
+    const db = getFirestoreDb();
+    if (db && typeof db.collection === 'function') {
+      await db.runTransaction(async (tx) => {
+        const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+        const snap = await tx.get(ref);
+        const current = snap.exists ? (snap.data() || {}) : {};
+        if (String(current.kingUid || '') !== String(R.currentUid || '')) {
+          throw new Error('Możesz fortyfikować tylko własną domenę');
+        }
+        const currentDefense = normalizePositive(current.defensePoints, 30);
+        tx.set(ref, {
+          defensePoints: currentDefense + FORTIFY_DEF_GAIN,
+          updatedAt: getServerTimestamp(),
+        }, { merge: true });
+      });
+    } else if (hasRtdbApi()) {
+      const current = await readDomainFromRtdb(hostname);
+      if (!current || String(current.kingUid || '') !== String(R.currentUid || '')) {
+        throw new Error('Możesz fortyfikować tylko własną domenę');
+      }
       const currentDefense = normalizePositive(current.defensePoints, 30);
+      await writeDomainToRtdb(hostname, {
+        ...current,
+        defensePoints: currentDefense + FORTIFY_DEF_GAIN,
+        updatedAt: Date.now(),
+      });
+    } else {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
 
-      tx.set(ref, {
-        defensePoints: currentDefense + fortifyCost,
-        updatedAt: getServerTimestamp(),
-      }, { merge: true });
-    });
+    resources.wood = Math.max(0, (resources.wood || 0) - FORTIFY_WOOD_COST);
+    resources.iron = Math.max(0, (resources.iron || 0) - FORTIFY_IRON_COST);
 
-    R.state.coins -= fortifyCost;
     if (typeof R.persistState === 'function') R.persistState();
     if (typeof R.updateUI === 'function') R.updateUI();
 
     const refreshed = await multiplayer.getDomainControl({ force: true });
     emitEvent('multiplayer:fortified', {
       hostname,
-      spent: fortifyCost,
+      spent: {
+        wood: FORTIFY_WOOD_COST,
+        iron: FORTIFY_IRON_COST,
+      },
       domain: refreshed,
     });
+    if (R.showMessage) R.showMessage('🛡️ Fortyfikacja ulepszona!', 2400);
     return refreshed;
   };
 
@@ -982,32 +1131,50 @@
       throw new Error('Sabotaż działa tylko na wrogiej domenie');
     }
 
-    const inventory = (R.state.inventory && typeof R.state.inventory === 'object') ? R.state.inventory : {};
-    const kits = normalizePositive(inventory.sabotage_kit, 0);
-    if (kits < 1) {
-      throw new Error('Brak itemu sabotage_kit');
+    const resources = ensureResourcesState();
+    const coins = Math.max(0, Number(R.state.coins) || 0);
+    if (coins < SABOTAGE_COIN_COST || (resources.gold || 0) < SABOTAGE_GOLD_COST) {
+      throw new Error(`Brak środków na sabotaż! (${SABOTAGE_COIN_COST}🪙, ${SABOTAGE_GOLD_COST}👑)`);
     }
 
-    const sabotagePower = 18;
-    const db = ensureFirestoreReady('sabotageDomain');
     const hostname = getCurrentDomain();
 
-    await db.runTransaction(async (tx) => {
-      const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
-      const snap = await tx.get(ref);
-      if (!snap.exists) return;
+    const db = getFirestoreDb();
+    if (db && typeof db.collection === 'function') {
+      await db.runTransaction(async (tx) => {
+        const ref = db.collection(DOMAINS_COLLECTION).doc(hostname);
+        const snap = await tx.get(ref);
+        if (!snap.exists) throw new Error('Brak danych domeny');
 
-      const current = snap.data() || {};
-      const currentDefense = normalizePositive(current.defensePoints, 20);
-      const nextDefense = Math.max(8, currentDefense - sabotagePower);
-      tx.set(ref, {
+        const current = snap.data() || {};
+        if (!current.kingUid || String(current.kingUid || '') === String(R.currentUid || '')) {
+          throw new Error('Sabotaż działa tylko na wrogiej domenie');
+        }
+        const currentDefense = normalizePositive(current.defensePoints, 0);
+        const nextDefense = Math.max(0, currentDefense - SABOTAGE_DEF_LOSS);
+        tx.set(ref, {
+          defensePoints: nextDefense,
+          updatedAt: getServerTimestamp(),
+        }, { merge: true });
+      });
+    } else if (hasRtdbApi()) {
+      const current = await readDomainFromRtdb(hostname);
+      if (!current || !current.kingUid || String(current.kingUid || '') === String(R.currentUid || '')) {
+        throw new Error('Sabotaż działa tylko na wrogiej domenie');
+      }
+      const currentDefense = normalizePositive(current.defensePoints, 0);
+      const nextDefense = Math.max(0, currentDefense - SABOTAGE_DEF_LOSS);
+      await writeDomainToRtdb(hostname, {
+        ...current,
         defensePoints: nextDefense,
-        updatedAt: getServerTimestamp(),
-      }, { merge: true });
-    });
+        updatedAt: Date.now(),
+      });
+    } else {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
 
-    inventory.sabotage_kit = Math.max(0, kits - 1);
-    R.state.inventory = inventory;
+    R.state.coins = Math.max(0, coins - SABOTAGE_COIN_COST);
+    resources.gold = Math.max(0, (resources.gold || 0) - SABOTAGE_GOLD_COST);
 
     if (typeof R.persistState === 'function') R.persistState();
     if (typeof R.updateUI === 'function') R.updateUI();
@@ -1015,10 +1182,35 @@
     const refreshed = await multiplayer.getDomainControl({ force: true });
     emitEvent('multiplayer:sabotaged', {
       hostname,
-      used: 1,
+      spent: {
+        coins: SABOTAGE_COIN_COST,
+        gold: SABOTAGE_GOLD_COST,
+      },
       domain: refreshed,
     });
+    if (R.showMessage) R.showMessage('🧨 Sabotaż udany! Obrona wroga spada.', 2400);
     return refreshed;
+  };
+
+  R.occupyDomain = async function occupyDomain() {
+    if (!R.multiplayer || typeof R.multiplayer.occupyDomain !== 'function') {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
+    return R.multiplayer.occupyDomain();
+  };
+
+  R.fortifyDomain = async function fortifyDomain() {
+    if (!R.multiplayer || typeof R.multiplayer.fortifyDomain !== 'function') {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
+    return R.multiplayer.fortifyDomain();
+  };
+
+  R.sabotageDomain = async function sabotageDomain() {
+    if (!R.multiplayer || typeof R.multiplayer.sabotageDomain !== 'function') {
+      throw new Error('Multiplayer chwilowo niedostępny');
+    }
+    return R.multiplayer.sabotageDomain();
   };
 
   multiplayer.getFactionDominance = async function getFactionDominance(force = false) {

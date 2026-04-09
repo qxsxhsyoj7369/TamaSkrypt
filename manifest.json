@@ -1,7 +1,7 @@
 {
-  "version": "3.36.0",
+  "version": "3.37.0",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Release 3.36.0: UX/UI + Game Design — formatowanie dużych liczb na XP/misjach/statusie, surowce w modalu Ekwipunku oraz skalowanie targetów i monet w misjach godzinowych.",
+  "changelog": "Release 3.37.0: Game Design + Bugfix Terytorium — naprawiona delegacja akcji w Seamless Modal, nowe akcje Zajmij/Fortyfikuj/Sabotuj, koszty surowców/monet i logika DEF domeny.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.36.0",
-      "hash": "5a628ed2bc4bf1a9d35092ca767e5b82eaf56bd229aeb44122d086bc89762b5a",
+      "version": "3.37.0",
+      "hash": "4ea662c1edc09c5dbed028aab831682185fbb5757a3c5274329799889ba04780",
       "execute": "raw",
       "required": true
     },
@@ -113,8 +113,8 @@
     {
       "name": "multiplayer",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/88-multiplayer.js",
-      "version": "3.28.1",
-      "hash": "7c3c0be61eb49146305bf8fe19da97d29833322b967f492f0d82bc783cab2fdf",
+      "version": "3.37.0",
+      "hash": "437dcea874490dbb80e710404cab37b6e0c6b5032c04f192ba8902c1d2a82152",
       "execute": "raw",
       "required": true
     },

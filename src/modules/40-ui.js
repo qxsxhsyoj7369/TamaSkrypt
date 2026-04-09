@@ -343,7 +343,7 @@
 
       const actionEl = target.closest('[data-action]');
       if (actionEl) {
-        const action = String(actionEl.getAttribute('data-action') || '').toLowerCase();
+        const action = String((target.getAttribute('data-action') || target.closest('[data-action]')?.getAttribute('data-action') || '')).toLowerCase();
         if (action === 'claim-hourly-quest') {
           event.preventDefault();
           event.stopPropagation();
@@ -357,39 +357,62 @@
           }
           return;
         }
+
+        if (action === 'occupy-domain' || action === 'fortify-domain' || action === 'sabotage-domain') {
+          event.preventDefault();
+          event.stopPropagation();
+
+          (async () => {
+            try {
+              if (action === 'occupy-domain') {
+                if (R.occupyDomain) {
+                  await R.occupyDomain();
+                } else if (R.multiplayer && typeof R.multiplayer.occupyDomain === 'function') {
+                  await R.multiplayer.occupyDomain();
+                }
+              } else if (action === 'fortify-domain') {
+                if (R.fortifyDomain) {
+                  await R.fortifyDomain();
+                } else if (R.multiplayer && typeof R.multiplayer.fortifyDomain === 'function') {
+                  await R.multiplayer.fortifyDomain();
+                }
+              } else if (action === 'sabotage-domain') {
+                if (R.sabotageDomain) {
+                  await R.sabotageDomain();
+                } else if (R.multiplayer && typeof R.multiplayer.sabotageDomain === 'function') {
+                  await R.multiplayer.sabotageDomain();
+                }
+              }
+
+              if (R.multiplayer && typeof R.multiplayer.getDomainControl === 'function') {
+                await R.multiplayer.getDomainControl({ force: true });
+              }
+              if (typeof R.updateUI === 'function') R.updateUI();
+              if (typeof R.openTerritoryModal === 'function') {
+                await R.openTerritoryModal({ force: false });
+              }
+            } catch (error) {
+              const errorMessage = error && error.message ? String(error.message) : 'Akcja nieudana';
+              if (R.showMessage) {
+                if (/firestore not initialized/i.test(errorMessage) || /multiplayer chwilowo niedostępny/i.test(errorMessage)) {
+                  R.showMessage('🌐 Multiplayer chwilowo niedostępny', 2800);
+                } else {
+                  R.showMessage(`⚠️ ${errorMessage}`, 2800);
+                }
+              }
+            }
+          })();
+          return;
+        }
       }
 
       // Territory trigger
       if (target.closest('#__ts_territory_trigger')) {
         event.preventDefault();
         event.stopPropagation();
-        const hostname = (window.location && window.location.hostname) ? window.location.hostname : 'unknown';
-        const kingEl = R.getElById('__ts_territory_king__');
-        const statusEl = R.getElById('__ts_territory_status__');
-        const actionsEl = R.getElById('__ts_territory_actions__');
-        const king = kingEl ? kingEl.textContent : 'Władca: —';
-        const status = statusEl ? statusEl.textContent : 'Status: skanowanie...';
-        const actionBtn = actionsEl ? actionsEl.querySelector('#__ts_territory_action_btn__') : null;
-        const claimBtn = actionsEl ? actionsEl.querySelector('#__ts_btn_claim_neutral__') : null;
-        const actionBtnHTML = actionBtn
-          ? `<button class="__ts_forum_btn__" id="__ts_territory_action_btn__" data-action="${actionBtn.getAttribute('data-action') || ''}" ${actionBtn.disabled ? 'disabled' : ''}>${actionBtn.textContent}</button>`
-          : '';
-        const claimBtnHTML = claimBtn && claimBtn.style.display !== 'none'
-          ? `<button class="__ts_forum_btn__" id="__ts_btn_claim_neutral__">🌐 Zajmij (Darmowe)</button>`
-          : '';
-        const territoryContent = `
-          <div style="position:relative;padding:14px;border-radius:10px;
-            background:linear-gradient(180deg,rgba(3,8,18,0.9),rgba(12,15,26,0.9)),
-            repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px),
-            repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px);
-            display:flex;flex-direction:column;gap:10px;">
-            <div style="font-size:10px;color:#37e9ff;letter-spacing:0.5px;opacity:0.8;">&#9711; ${hostname}</div>
-            <div style="font-size:11px;"><span style="color:#a651ff;font-weight:bold;">[W&#321;ADCA]</span> ${king.replace(/W\u0142adca:\s*/i,'')}</div>
-            <div style="font-size:11px;"><span style="color:#37e9ff;font-weight:bold;">[STATUS]</span> ${status.replace(/Status:\s*/i,'')}</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">${actionBtnHTML}${claimBtnHTML}</div>
-          </div>
-        `;
-        if (R.ui && R.ui.openSeamlessModal) R.ui.openSeamlessModal('🌍 Terytorium', territoryContent);
+        if (typeof R.openTerritoryModal === 'function') {
+          R.openTerritoryModal({ force: false });
+        }
         return;
       }
 
@@ -448,6 +471,97 @@
         return;
       }
     }, true);
+  };
+
+  R.getTerritoryActionCosts = function getTerritoryActionCosts() {
+    return {
+      fortify: { wood: 10, iron: 5, defenseGain: 10 },
+      sabotage: { coins: 100, gold: 1, defenseLoss: 10 },
+    };
+  };
+
+  R.renderTerritoryModalContent = function renderTerritoryModalContent() {
+    const hostname = (window.location && window.location.hostname) ? String(window.location.hostname) : 'unknown';
+    const state = (R.multiplayer && typeof R.multiplayer.getCurrentDomainState === 'function')
+      ? R.multiplayer.getCurrentDomainState()
+      : null;
+    const domainState = state && state.hostname ? state : { hostname };
+    const format = R.formatNum ? R.formatNum : (value) => String(Math.floor(Number(value) || 0));
+    const costs = R.getTerritoryActionCosts ? R.getTerritoryActionCosts() : {
+      fortify: { wood: 10, iron: 5, defenseGain: 10 },
+      sabotage: { coins: 100, gold: 1, defenseLoss: 10 },
+    };
+
+    const kingName = domainState && domainState.kingUid
+      ? (domainState.kingName || domainState.kingUid)
+      : 'brak (Ziemia Niczyja)';
+    const defensePoints = Math.max(0, Math.round(Number(domainState && domainState.defensePoints) || 0));
+
+    const domainStatus = (R.multiplayer && typeof R.multiplayer.getDomainStatus === 'function')
+      ? R.multiplayer.getDomainStatus(domainState)
+      : { status: domainState && domainState.kingUid ? 'hostile' : 'neutral', message: 'Status nieznany' };
+
+    const isOwnedByPlayer = Boolean(domainState && domainState.kingUid && String(domainState.kingUid) === String(R.currentUid || ''));
+    const isNeutral = domainStatus.status === 'neutral' || !domainState || !domainState.kingUid;
+    const isHostile = !isNeutral && !isOwnedByPlayer;
+    const canOccupyHostile = isHostile && defensePoints <= 0;
+
+    const resources = (R.state && R.state.resources && typeof R.state.resources === 'object')
+      ? R.state.resources
+      : { wood: 0, iron: 0, gold: 0 };
+    const coins = Math.max(0, Number(R.state && R.state.coins) || 0);
+
+    let actionHtml = '';
+    if (isNeutral) {
+      actionHtml = `
+        <button class="__ts_forum_btn__" data-action="occupy-domain" style="width:100%;">🌐 Zajmij (Darmowe)</button>
+      `;
+    } else if (isOwnedByPlayer) {
+      actionHtml = `
+        <button class="__ts_forum_btn__" data-action="fortify-domain" style="width:100%;">🛡️ Rozbuduj Fortyfikację</button>
+        <div style="font-size:11px;opacity:0.8;">Koszt: ${format(costs.fortify.wood)} 🪵, ${format(costs.fortify.iron)} ⛓️ | Efekt: +${format(costs.fortify.defenseGain)} DEF</div>
+      `;
+    } else {
+      actionHtml = `
+        <button class="__ts_forum_btn__" data-action="sabotage-domain" style="width:100%;">🧨 Sabotuj</button>
+        <div style="font-size:11px;opacity:0.8;">Koszt: ${format(costs.sabotage.coins)} 🪙, ${format(costs.sabotage.gold)} 👑 | Efekt: -${format(costs.sabotage.defenseLoss)} DEF</div>
+        ${canOccupyHostile ? '<button class="__ts_forum_btn__" data-action="occupy-domain" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#37e9ff,#7b4dff);">🌐 Zajmij (DEF 0)</button>' : ''}
+      `;
+    }
+
+    return `
+      <div style="position:relative;padding:14px;border-radius:10px;
+        background:linear-gradient(180deg,rgba(3,8,18,0.9),rgba(12,15,26,0.9)),
+        repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px),
+        repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(55,233,255,0.05) 20px);
+        display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:10px;color:#37e9ff;letter-spacing:0.5px;opacity:0.8;">◉ ${hostname}</div>
+        <div style="font-size:11px;"><span style="color:#a651ff;font-weight:bold;">[WŁADCA]</span> ${kingName}</div>
+        <div style="font-size:11px;"><span style="color:#37e9ff;font-weight:bold;">[STATUS]</span> ${domainStatus && domainStatus.message ? domainStatus.message : 'Status nieznany'} • DEF ${format(defensePoints)}</div>
+        <div style="display:flex;justify-content:space-between;gap:6px;font-size:11px;opacity:0.88;">
+          <span>🪵 ${format(resources.wood || 0)}</span>
+          <span>⛓️ ${format(resources.iron || 0)}</span>
+          <span>👑 ${format(resources.gold || 0)}</span>
+          <span>🪙 ${format(coins)}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">${actionHtml}</div>
+      </div>
+    `;
+  };
+
+  R.openTerritoryModal = async function openTerritoryModal(options = {}) {
+    const force = Boolean(options && options.force);
+    if (R.multiplayer && typeof R.multiplayer.getDomainControl === 'function') {
+      try {
+        await R.multiplayer.getDomainControl({ force });
+      } catch (_) {}
+    }
+    const html = R.renderTerritoryModalContent
+      ? R.renderTerritoryModalContent()
+      : '<div class="__ts_card__">Brak danych terytorium.</div>';
+    if (R.ui && R.ui.openSeamlessModal) {
+      R.ui.openSeamlessModal('🌍 Terytorium', html);
+    }
   };
 
   R.renderActiveSkillCard = function renderActiveSkillCard() {
@@ -2588,28 +2702,15 @@
       if (domainStatus.status === 'neutral' && multiplayerAvailable) {
         claimNeutralBtn.style.display = '';
         claimNeutralBtn.disabled = false;
-        claimNeutralBtn.onclick = async () => {
-          claimNeutralBtn.disabled = true;
-          claimNeutralBtn.textContent = '⏳ Zajmowanie...';
-          try {
-            await R.multiplayer.claimNeutralDomain();
-            if (R.multiplayer.forceRefreshCache) R.multiplayer.forceRefreshCache();
-            if (R.showMessage) R.showMessage('🌐 Domena przejęta!', 2400);
-            if (typeof R.updateUI === 'function') R.updateUI();
-          } catch (err) {
-            const msg = err && err.message ? err.message : 'Błąd zajmowania';
-            if (R.showMessage) R.showMessage(`⚠️ ${msg}`, 2800);
-            claimNeutralBtn.disabled = false;
-            claimNeutralBtn.textContent = '🌐 Zajmij (Darmowe)';
-          }
-        };
+        claimNeutralBtn.setAttribute('data-action', 'occupy-domain');
       } else {
         claimNeutralBtn.style.display = 'none';
-        claimNeutralBtn.onclick = null;
+        claimNeutralBtn.setAttribute('data-action', '');
       }
     }
 
     if (territoryActionBtn) {
+      const enemyDefense = Math.max(0, Math.round(Number(domainState && domainState.defensePoints) || 0));
       if (domainStatus.status === 'neutral') {
         territoryActionBtn.style.display = 'none';
         territoryActionBtn.disabled = true;
@@ -2617,13 +2718,18 @@
       } else if (domainState && domainState.kingUid === String(R.currentUid || '')) {
         territoryActionBtn.style.display = '';
         territoryActionBtn.disabled = false;
-        territoryActionBtn.setAttribute('data-action', 'fortify');
-        territoryActionBtn.textContent = 'Fortyfikuj';
+        territoryActionBtn.setAttribute('data-action', 'fortify-domain');
+        territoryActionBtn.textContent = 'Rozbuduj Fortyfikację';
       } else if (domainState && domainState.kingUid) {
         territoryActionBtn.style.display = '';
         territoryActionBtn.disabled = false;
-        territoryActionBtn.setAttribute('data-action', 'sabotage');
-        territoryActionBtn.textContent = 'Sabotuj';
+        if (enemyDefense <= 0) {
+          territoryActionBtn.setAttribute('data-action', 'occupy-domain');
+          territoryActionBtn.textContent = 'Zajmij';
+        } else {
+          territoryActionBtn.setAttribute('data-action', 'sabotage-domain');
+          territoryActionBtn.textContent = 'Sabotuj';
+        }
       } else {
         territoryActionBtn.style.display = 'none';
         territoryActionBtn.disabled = true;
