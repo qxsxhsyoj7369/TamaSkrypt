@@ -1,7 +1,7 @@
 {
-  "version": "3.28.5",
+  "version": "3.30.1",
   "minLauncherVersion": "3.0.0",
-  "changelog": "Hotfix UI 3.28.5: poprawiony wygląd przycisku umiejętności i pewny binding kliknięcia po odświeżeniach widgetu.",
+  "changelog": "Hotfix UI 3.30.1: perfekcyjne wyśrodkowanie Gelka na kry i usunięcie blur z obszaru Gelka bez naruszenia pettingu.",
   "strictHashes": false,
   "entryModule": "gelek-main-entry",
   "scriptUrl": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/TamaSkrypt.user.js",
@@ -49,8 +49,8 @@
     {
       "name": "ui",
       "url": "https://raw.githubusercontent.com/qxsxhsyoj7369/TamaSkrypt/main/src/modules/40-ui.js",
-      "version": "3.28.5",
-      "hash": "fb01008b8f4e20f7c308a87682e7d592ecfb51ba165b6e81bbd2b692a9711eae",
+      "version": "3.30.1",
+      "hash": "bbc2ce0835ddff9bd4b4530586a05c7fdf6fcd24d124ae36db3500ea520e1d22",
       "execute": "raw",
       "required": true
     },

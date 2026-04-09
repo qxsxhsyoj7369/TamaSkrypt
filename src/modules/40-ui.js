@@ -462,25 +462,24 @@
         background:
           radial-gradient(95% 58% at 50% -14%, oklch(72% 0.2 292 / 0.2), transparent 68%),
           linear-gradient(180deg, oklch(24% 0.06 286 / 0.56), oklch(19% 0.04 278 / 0.34));
-        backdrop-filter: blur(14px) saturate(1.22);
         z-index: 3;
       }
 
       #__ts_zelek_floe_container__ {
         position: relative;
-        width: 130px;
-        height: 96px;
+        width: 120px;
+        height: 120px;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
       }
 
       #__ts_zelek_shadow__ {
         position: absolute;
         left: 50%;
-        bottom: 6px;
-        width: 84px;
-        height: 17px;
+        bottom: 7px;
+        width: 88px;
+        height: 18px;
         transform: translateX(-50%);
         border-radius: 999px;
         background: radial-gradient(ellipse at center, rgba(4, 10, 18, 0.5) 0%, rgba(8, 14, 24, 0.32) 52%, rgba(8, 14, 24, 0) 100%);
@@ -493,17 +492,40 @@
       #__ts_zelek_floe__ {
         position: absolute;
         left: 50%;
-        bottom: 10px;
-        width: 102px;
-        height: 24px;
+        bottom: 4px;
+        width: 120px;
+        height: 120px;
         transform: translateX(-50%);
-        border-radius: 999px;
+        border-radius: 58% 42% 60% 40% / 40% 54% 46% 60%;
         border: 1px solid oklch(100% 0 0 / 0.34);
+        background-color: rgba(255,255,255,0);
         background:
-          radial-gradient(120% 130% at 50% 0%, oklch(100% 0 0 / 0.55), oklch(92% 0.03 232 / 0.2) 45%, transparent 85%),
-          linear-gradient(180deg, oklch(98% 0.02 242 / 0.38), oklch(90% 0.02 232 / 0.16));
-        box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.42), 0 8px 22px oklch(5% 0.01 250 / 0.22);
+          radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.0) 80%),
+          radial-gradient(86% 92% at 32% 22%, oklch(100% 0 0 / 0.24), transparent 48%),
+          linear-gradient(180deg, oklch(98% 0.02 242 / 0.28), oklch(90% 0.02 232 / 0.08));
+        box-shadow: inset 0 2px 2px rgba(255,255,255,0.6), inset 0 -10px 16px rgba(122, 191, 255, 0.08), 0 8px 22px oklch(5% 0.01 250 / 0.16);
+        overflow: visible;
         z-index: 2;
+      }
+
+      #__ts_zelek_content_wrapper__ {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      #__ts_mood_emoji__ {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 13px;
+        line-height: 1;
+        filter: drop-shadow(0 2px 8px rgba(4, 10, 18, 0.28));
+        opacity: 0.94;
       }
 
       #__ts_body__,
@@ -666,10 +688,10 @@
       }
 
       #__ts_body_svg__ {
-        width: 108px;
+        width: 94px;
         height: 86px;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
         position: relative;
         z-index: 3;
@@ -1508,8 +1530,12 @@
         <div id="__ts_zelek__" title="${mood.label}">
           <div id="__ts_zelek_floe_container__">
             <div id="__ts_zelek_shadow__"></div>
-            <div id="__ts_zelek_floe__"></div>
-            <div id="__ts_body_svg__">${R.buildZelekSVG()}</div>
+            <div id="__ts_zelek_floe__">
+              <div id="__ts_zelek_content_wrapper__">
+                <span id="__ts_mood_emoji__" aria-hidden="true">${mood.emoji || '😐'}</span>
+                <div id="__ts_body_svg__">${R.buildZelekSVG()}</div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="__ts_body__">
@@ -1614,10 +1640,12 @@
     const onlineEl = R.getElById('__ts_online__');
     const svgEl = R.getElById('__ts_body_svg__');
     const zelekEl = R.getElById('__ts_zelek__');
+    const moodEmojiEl = R.getElById('__ts_mood_emoji__');
 
     if (onlineEl) onlineEl.textContent = R.formatTime(state.totalOnline + (R.now() - state.sessionStart));
     if (svgEl) svgEl.innerHTML = R.buildZelekSVG();
     if (zelekEl) zelekEl.title = mood.label;
+    if (moodEmojiEl) moodEmojiEl.textContent = mood.emoji || '😐';
 
     const hpDisplay = Number.isInteger(state.hp) ? String(state.hp) : state.hp.toFixed(1);
     const hpMax = R.getEffectiveHpMax ? R.getEffectiveHpMax() : R.CONFIG.HP_MAX;
