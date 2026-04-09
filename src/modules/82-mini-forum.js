@@ -227,167 +227,110 @@
       #${MODAL_ID} .text-glow { text-shadow: 0 0 9px currentColor; }
     `;
     (target || document.head || document.documentElement).appendChild(style);
-  }
-
-  function getDb() {
-    const db = R.db || R.firestore || R.firestoreDb || 
-               (R.app && typeof R.app.firestore === 'function' ? R.app.firestore() : null) ||
-               (window.firebase && typeof window.firebase.firestore === 'function' ? window.firebase.firestore() : null);
-    if (!db || typeof db.collection !== 'function') {
-      console.error('[Holo-Pager] BŁĄD KRYTYCZNY: Nie znaleziono obiektu bazy danych! Dostępne klucze R:', Object.keys(R));
-      return null;
+    
+    // Wstrzykiwanie linku Cybercore do document.head (globalnie dla modala)
+    if (!document.head.querySelector(`link[href*="cybercore"]`) && 
+        !document.head.querySelector(`#${CYBERCORE_CSS_ID}`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = CYBERCORE_CSS_URL;
+      link.id = CYBERCORE_CSS_ID;
+      document.head.appendChild(link);
     }
-    return db;
   }
-
-  function getServerTimestamp() {
-    if (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue) {
-      return window.firebase.firestore.FieldValue.serverTimestamp();
-    }
-    return Date.now();
+  function generateId() {
+    return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
   }
 
   async function listThreads() {
-    const db = getDb();
-    if (!db) return [];
-    const snap = await db.collection('pager_threads').orderBy('timestamp', 'desc').limit(50).get();
-    const rows = [];
-    snap.forEach((docSnap) => {
-      const item = docSnap.data() || {};
-      rows.push({
-        id: docSnap.id,
-        title: String(item.title || ''),
-        content: String(item.content || ''),
-        authorUid: String(item.authorUid || ''),
-        authorName: String(item.authorName || 'unknown'),
-        authorFaction: String(item.authorFaction || 'neon'),
-        timestamp: item.timestamp || null,
-      });
-    });
-    return rows;
+    const data = await R.firebaseRead('pager_threads');
+    if (!data) return [];
+    const rows = Object.values(data).map(item => ({
+      id: item.id,
+      title: String(item.title || ''),
+      content: String(item.content || ''),
+      authorUid: String(item.authorUid || ''),
+      authorName: String(item.authorName || 'unknown'),
+      authorFaction: String(item.authorFaction || 'neon'),
+      timestamp: Number(item.timestamp) || 0,
+    }));
+    return rows.sort((a, b) => b.timestamp - a.timestamp).slice(0, 50);
   }
 
   async function createThread(title, content) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
-
     const cleanTitle = normalizeText(title, LIMITS.title);
     const cleanContent = normalizeText(content, LIMITS.thread);
-    if (!cleanTitle) throw new Error('Tytuł jest wymagany');
-    if (!cleanContent) throw new Error('Treść jest wymagana');
-
-    const authorUid = getCurrentUid();
-    if (!authorUid) throw new Error('Brak uid sesji');
-
-    const ref = db.collection('pager_threads').doc();
-    await ref.set({
-      id: ref.id,
-      title: cleanTitle,
-      content: cleanContent,
-      authorUid,
-      authorName: String(R.currentUser || 'unknown'),
-      authorFaction: getFaction(),
-      timestamp: getServerTimestamp(),
-    });
+    if (!cleanTitle || !cleanContent) throw new Error('Tytuł i treść są wymagane');
+    
+    const id = generateId();
+    const payload = {
+      id, title: cleanTitle, content: cleanContent,
+      authorUid: getCurrentUid(), authorName: String(R.currentUser || 'unknown'),
+      authorFaction: getFaction(), timestamp: Date.now()
+    };
+    await R.firebaseWrite(`pager_threads/${id}`, payload);
   }
 
   async function updateThread(threadId, payload) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
-    const ref = db.collection('pager_threads').doc(String(threadId || ''));
-    const snap = await ref.get();
-    if (!snap.exists) throw new Error('Wątek nie istnieje');
-    const current = snap.data() || {};
+    const current = await R.firebaseRead(`pager_threads/${threadId}`);
+    if (!current) throw new Error('Wątek nie istnieje');
     if (!isOwner(current.authorUid)) throw new Error('Brak uprawnień');
-
-    const next = {};
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'title')) {
-      const cleanTitle = normalizeText(payload.title, LIMITS.title);
-      if (!cleanTitle) throw new Error('Tytuł jest wymagany');
-      next.title = cleanTitle;
-    }
-    if (Object.prototype.hasOwnProperty.call(payload || {}, 'content')) {
-      const cleanContent = normalizeText(payload.content, LIMITS.thread);
-      if (!cleanContent) throw new Error('Treść jest wymagana');
-      next.content = cleanContent;
-    }
-
-    if (Object.keys(next).length) {
-      next.editedAt = getServerTimestamp();
-      await ref.update(next);
-    }
+    
+    const next = { ...current };
+    if (payload.title) next.title = normalizeText(payload.title, LIMITS.title);
+    if (payload.content) next.content = normalizeText(payload.content, LIMITS.thread);
+    next.editedAt = Date.now();
+    
+    await R.firebaseWrite(`pager_threads/${threadId}`, next);
   }
 
   async function deleteThread(threadId) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
-    const ref = db.collection('pager_threads').doc(String(threadId || ''));
-    const snap = await ref.get();
-    if (!snap.exists) throw new Error('Wątek nie istnieje');
-    const current = snap.data() || {};
+    const current = await R.firebaseRead(`pager_threads/${threadId}`);
+    if (!current) return;
     if (!isOwner(current.authorUid)) throw new Error('Brak uprawnień');
-    await ref.delete();
+    await R.firebaseWrite(`pager_threads/${threadId}`, null);
   }
 
   async function listComments(threadId) {
-    const db = getDb();
-    if (!db) return [];
-    const snap = await db.collection('pager_threads').doc(String(threadId || '')).collection('comments').orderBy('timestamp', 'asc').limit(100).get();
-    const rows = [];
-    snap.forEach((docSnap) => {
-      const item = docSnap.data() || {};
-      rows.push({
-        id: docSnap.id,
-        content: String(item.content || ''),
-        authorUid: String(item.authorUid || ''),
-        authorName: String(item.authorName || 'unknown'),
-        authorFaction: String(item.authorFaction || 'neon'),
-        timestamp: item.timestamp || null,
-      });
-    });
-    return rows;
+    const data = await R.firebaseRead(`pager_comments/${threadId}`);
+    if (!data) return [];
+    const rows = Object.values(data).map(item => ({
+      id: item.id, content: String(item.content || ''),
+      authorUid: String(item.authorUid || ''), authorName: String(item.authorName || 'unknown'),
+      authorFaction: String(item.authorFaction || 'neon'), timestamp: Number(item.timestamp) || 0,
+    }));
+    return rows.sort((a, b) => a.timestamp - b.timestamp).slice(0, 100);
   }
 
   async function createComment(threadId, content) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
     const cleanContent = normalizeText(content, LIMITS.comment);
-    if (!cleanContent) throw new Error('Komentarz jest wymagany');
-
-    const ref = db.collection('pager_threads').doc(String(threadId || '')).collection('comments').doc();
-    await ref.set({
-      id: ref.id,
-      content: cleanContent,
-      authorUid: getCurrentUid(),
-      authorName: String(R.currentUser || 'unknown'),
-      authorFaction: getFaction(),
-      timestamp: getServerTimestamp(),
-    });
+    if (!cleanContent) throw new Error('Komentarz wymagany');
+    
+    const id = generateId();
+    const payload = {
+      id, content: cleanContent, authorUid: getCurrentUid(),
+      authorName: String(R.currentUser || 'unknown'), authorFaction: getFaction(), timestamp: Date.now()
+    };
+    await R.firebaseWrite(`pager_comments/${threadId}/${id}`, payload);
   }
 
   async function updateComment(threadId, commentId, content) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
-    const ref = db.collection('pager_threads').doc(String(threadId || '')).collection('comments').doc(String(commentId || ''));
-    const snap = await ref.get();
-    if (!snap.exists) throw new Error('Komentarz nie istnieje');
-    const current = snap.data() || {};
+    const current = await R.firebaseRead(`pager_comments/${threadId}/${commentId}`);
+    if (!current) throw new Error('Komentarz nie istnieje');
     if (!isOwner(current.authorUid)) throw new Error('Brak uprawnień');
-
+    
     const cleanContent = normalizeText(content, LIMITS.comment);
     if (!cleanContent) throw new Error('Komentarz jest wymagany');
-    await ref.update({ content: cleanContent, editedAt: getServerTimestamp() });
+    
+    const next = { ...current, content: cleanContent, editedAt: Date.now() };
+    await R.firebaseWrite(`pager_comments/${threadId}/${commentId}`, next);
   }
 
   async function deleteComment(threadId, commentId) {
-    const db = getDb();
-    if (!db) throw new Error('Forum offline (Firestore unavailable)');
-    const ref = db.collection('pager_threads').doc(String(threadId || '')).collection('comments').doc(String(commentId || ''));
-    const snap = await ref.get();
-    if (!snap.exists) throw new Error('Komentarz nie istnieje');
-    const current = snap.data() || {};
+    const current = await R.firebaseRead(`pager_comments/${threadId}/${commentId}`);
+    if (!current) return;
     if (!isOwner(current.authorUid)) throw new Error('Brak uprawnień');
-    await ref.delete();
+    await R.firebaseWrite(`pager_comments/${threadId}/${commentId}`, null);
   }
 
   function findTriggerInShadow() {
@@ -490,18 +433,10 @@
       if (event.target === modal) closeModal();
     });
 
-    const widgetRoot = R.getWidgetRoot ? R.getWidgetRoot() : document.body;
-    const wrapper = widgetRoot.querySelector('#__tamaskrypt_widget__') || widgetRoot;
-    wrapper.appendChild(modal);
+    document.body.appendChild(modal);
 
     const root = modal.querySelector('#__ts_forum_root__');
     if (!root) return;
-
-    const db = getDb();
-    if (!db) {
-      root.innerHTML = '<div class="__ts_forum_empty__">[SYSTEM: Firestore offline. Brak łącza pagera]</div>';
-      return;
-    }
 
     const threads = await listThreads();
     const activeThread = threads.find((item) => item.id === activeThreadId) || null;
